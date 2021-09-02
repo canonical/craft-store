@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class HTTPClient:
     """Generic HTTP Client to communicate with Canonical's Developer Gateway.
 
-    This client has a request's like interface, it creates a requess.Session
+    This client has a requests like interface, it creates a requests.Session
     on initialization to handle retries over HTTP and HTTPS requests.
 
     The default number of retries is set to 5 and can be overridden through
@@ -40,7 +40,7 @@ class HTTPClient:
     The backoff factor has a default of 2 and can be overridden with the
     ``CRAFT_STORE_BACKOFF`` environment variable.
 
-    Retires are done for the following return codes: ``104``, ``500``, ``502``,
+    Retries are done for the following return codes: ``104``, ``500``, ``502``,
     ``503`` and ``504``.
 
     :ivar user_agent: User-Agent header to identify the client.
@@ -59,7 +59,7 @@ class HTTPClient:
         except ValueError:
             total = 10
             logger.debug(
-                "CRAFT_STORE_RETRIES is not se to an integer, using default of %r.",
+                "CRAFT_STORE_RETRIES is not set to an integer, using default of %r.",
                 total,
             )
 
@@ -68,7 +68,7 @@ class HTTPClient:
         except ValueError:
             backoff = 2
             logger.debug(
-                "CRAFT_STORE_BACKOFF is not se to an integer, using default of %r.",
+                "CRAFT_STORE_BACKOFF is not set to an integer, using default of %r.",
                 backoff,
             )
 
