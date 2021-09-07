@@ -40,8 +40,8 @@ class HTTPClient:
     The backoff factor has a default of 2 and can be overridden with the
     ``CRAFT_STORE_BACKOFF`` environment variable.
 
-    Retries are done for the following return codes: ``104``, ``500``, ``502``,
-    ``503`` and ``504``.
+    Retries are done for the following return codes: ``500``, ``502``, ``503``
+    and ``504``.
 
     :ivar user_agent: User-Agent header to identify the client.
     """
@@ -76,7 +76,7 @@ class HTTPClient:
         retries = Retry(
             total=total,
             backoff_factor=backoff,
-            status_forcelist=[104, 500, 502, 503, 504],
+            status_forcelist=[500, 502, 503, 504],
         )
         http_adapter = HTTPAdapter(max_retries=retries)
         self._session.mount("http://", http_adapter)

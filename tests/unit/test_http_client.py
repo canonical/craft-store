@@ -55,7 +55,7 @@ def test_session_defaults(session_mock, retry_mock):
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[104, 500, 502, 503, 504]
+        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
     )
 
 
@@ -70,7 +70,7 @@ def test_session_environment_values(monkeypatch, session_mock, retry_mock):
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=20, backoff_factor=10, status_forcelist=[104, 500, 502, 503, 504]
+        total=20, backoff_factor=10, status_forcelist=[500, 502, 503, 504]
     )
 
 
@@ -85,7 +85,7 @@ def test_session_bad_total_environment(monkeypatch, caplog, session_mock, retry_
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[104, 500, 502, 503, 504]
+        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
     )
     assert ["CRAFT_STORE_RETRIES is not set to an integer, using default of 10."] == [
         rec.message for rec in caplog.records
@@ -103,7 +103,7 @@ def test_session_bad_backoff_environment(monkeypatch, caplog, session_mock, retr
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[104, 500, 502, 503, 504]
+        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
     )
     assert ["CRAFT_STORE_BACKOFF is not set to an integer, using default of 2."] == [
         rec.message for rec in caplog.records
