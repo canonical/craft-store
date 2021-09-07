@@ -204,6 +204,15 @@ def test_request_retry_error(session_mock):
         assert network_error.exception == retry_error  # type: ignore
 
 
+@pytest.mark.parametrize("environment_value", ("0", "10", "20000"))
+def test_get_retry_value_environment_override(monkeypatch, caplog, environment_value):
+    monkeypatch.setenv("FAKE_ENV", environment_value)
+    caplog.set_level(logging.DEBUG)
+
+    assert _get_retry_value("FAKE_ENV", 0) == int(environment_value)
+    assert len(caplog.records) == 0
+
+
 @pytest.mark.parametrize(
     "environment_value,default", [("NaN", 10), ("NaN", 0.4), ("foo", 1)]
 )
@@ -219,8 +228,8 @@ def test_get_retry_value_not_a_number_returns_default(
     ] == [rec.message for rec in caplog.records]
 
 
-@pytest.mark.parametrize("environment_value,default", [("-1", 10), ("0", 0.4)])
-def test_get_retry_value_negative_or_zero_number_returns_default(
+@pytest.mark.parametrize("environment_value,default", [("-1", 10), ("-1000", 0.4)])
+def test_get_retry_value_negative_number_returns_default(
     monkeypatch, caplog, environment_value, default
 ):
     monkeypatch.setenv("FAKE_ENV", environment_value)

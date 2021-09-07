@@ -53,7 +53,7 @@ def _get_retry_value(
         )
         return default_value
 
-    if value <= 0:
+    if value < 0:
         logger.debug(
             "%r set to non positive value %r, setting to %r.",
             environment_var,
