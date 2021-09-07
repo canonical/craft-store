@@ -201,6 +201,7 @@ def test_request_retry_error(session_mock):
             "https://foo.bar",
         )
         assert network_error.__cause__ == retry_error  # type: ignore
+        assert network_error.exception == retry_error  # type: ignore
 
 
 @pytest.mark.parametrize(

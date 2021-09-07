@@ -16,7 +16,6 @@
 
 """Craft Store errors."""
 
-import dataclasses
 import logging
 
 import requests
@@ -26,10 +25,21 @@ logger = logging.getLogger(__name__)
 
 
 class CraftStoreError(Exception):
-    """Base class error for craft-store."""
+    """Base class error for craft-store.
+
+    :param brief: Brief description of error.
+
+    :ivar brief: Brief description of error.
+    """
+
+    def __init__(self, brief: str) -> None:
+        super().__init__()
+        self.brief = brief
+
+    def __str__(self) -> str:
+        return self.brief
 
 
-@dataclasses.dataclass(repr=True)
 class NetworkError(CraftStoreError):
     """Error to raise on network or infrastructure issues.
 
@@ -38,28 +48,22 @@ class NetworkError(CraftStoreError):
 
     :param exception: original exception raised.
 
+    :ivar exception: original exception raised.
     :ivar brief: Brief description of error.
     """
 
-    brief: str = dataclasses.field(init=False)
-    exception: Exception
-
-    def __post_init__(self) -> None:
+    def __init__(self, exception: Exception) -> None:
         try:
-            if isinstance(self.exception.args[0], urllib3.exceptions.MaxRetryError):
+            if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):
                 brief = "Maximum retries exceeded trying to reach the store."
             else:
-                brief = str(self.exception)
+                brief = str(exception)
         except IndexError:
-            brief = str(self.exception)
+            brief = str(exception)
 
-        self.brief = brief
-
-    def __str__(self) -> str:
-        return self.brief
+        super().__init__(brief=brief)
 
 
-@dataclasses.dataclass(repr=True)
 class StoreServerError(CraftStoreError):
     """Error to raise on infrastructure issues from error codes above ``500``.
 
@@ -69,14 +73,10 @@ class StoreServerError(CraftStoreError):
     :ivar response: the response from a :class:`requests.Request`.
     """
 
-    brief: str = dataclasses.field(init=False)
-    response: requests.Response
+    def __init__(self, response: requests.Response) -> None:
+        self.response = response
 
-    def __post_init__(self) -> None:
-        self.brief = (
+        super().__init__(
             "Issue encountered while processing your request: "
-            f"[{self.response.status_code}] {self.response.reason}."
+            f"[{response.status_code}] {response.reason}."
         )
-
-    def __str__(self) -> str:
-        return self.brief
