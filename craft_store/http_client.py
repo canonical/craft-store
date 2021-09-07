@@ -84,7 +84,7 @@ class HTTPClient:
     """
 
     def __init__(self, *, user_agent: str) -> None:
-        """Initialize and HTTPClient with a given user_agent.
+        """Initialize an HTTPClient with a given user_agent.
 
         :param user_agent: User-Agent header to identify the client.
         """
