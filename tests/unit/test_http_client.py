@@ -22,6 +22,7 @@ import requests
 import urllib3  # type: ignore
 
 from craft_store import HTTPClient, errors
+from craft_store.http_client import _get_retry_value
 
 
 def _fake_error_response(status_code, reason):
@@ -55,7 +56,7 @@ def test_session_defaults(session_mock, retry_mock):
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
+        total=8, backoff_factor=0.2, status_forcelist=[500, 502, 503, 504]
     )
 
 
@@ -72,42 +73,6 @@ def test_session_environment_values(monkeypatch, session_mock, retry_mock):
     retry_mock.assert_called_once_with(
         total=20, backoff_factor=10, status_forcelist=[500, 502, 503, 504]
     )
-
-
-def test_session_bad_total_environment(monkeypatch, caplog, session_mock, retry_mock):
-    monkeypatch.setenv("CRAFT_STORE_RETRIES", "NaN")
-    caplog.set_level(logging.DEBUG)
-
-    HTTPClient(user_agent="Secret Agent")
-
-    assert [
-        call("http://", ANY),
-        call("https://", ANY),
-    ] in session_mock().mount.mock_calls
-    retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
-    )
-    assert ["CRAFT_STORE_RETRIES is not set to an integer, using default of 10."] == [
-        rec.message for rec in caplog.records
-    ]
-
-
-def test_session_bad_backoff_environment(monkeypatch, caplog, session_mock, retry_mock):
-    monkeypatch.setenv("CRAFT_STORE_BACKOFF", "NaN")
-    caplog.set_level(logging.DEBUG)
-
-    HTTPClient(user_agent="Secret Agent")
-
-    assert [
-        call("http://", ANY),
-        call("https://", ANY),
-    ] in session_mock().mount.mock_calls
-    retry_mock.assert_called_once_with(
-        total=10, backoff_factor=2, status_forcelist=[500, 502, 503, 504]
-    )
-    assert ["CRAFT_STORE_BACKOFF is not set to an integer, using default of 2."] == [
-        rec.message for rec in caplog.records
-    ]
 
 
 @pytest.mark.parametrize("method", ("get", "post", "put"))
@@ -236,3 +201,32 @@ def test_request_retry_error(session_mock):
             "https://foo.bar",
         )
         assert network_error.__cause__ == retry_error  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "environment_value,default", [("NaN", 10), ("NaN", 0.4), ("foo", 1)]
+)
+def test_get_retry_value_not_a_number_returns_default(
+    monkeypatch, caplog, environment_value, default
+):
+    monkeypatch.setenv("FAKE_ENV", environment_value)
+    caplog.set_level(logging.DEBUG)
+
+    assert _get_retry_value("FAKE_ENV", default) == default
+    assert [
+        f"'FAKE_ENV' set to invalid value {environment_value!r}, setting to {default}."
+    ] == [rec.message for rec in caplog.records]
+
+
+@pytest.mark.parametrize("environment_value,default", [("-1", 10), ("0", 0.4)])
+def test_get_retry_value_negative_or_zero_number_returns_default(
+    monkeypatch, caplog, environment_value, default
+):
+    monkeypatch.setenv("FAKE_ENV", environment_value)
+    caplog.set_level(logging.DEBUG)
+
+    assert _get_retry_value("FAKE_ENV", default) == default
+    int_value = int(environment_value)
+    assert [
+        f"'FAKE_ENV' set to non positive value {int_value!r}, setting to {default}."
+    ] == [rec.message for rec in caplog.records]

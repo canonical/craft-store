@@ -18,7 +18,7 @@
 
 import logging
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -28,17 +28,54 @@ from . import errors
 logger = logging.getLogger(__name__)
 
 
+REQUEST_TOTAL_RETRIES = 8
+"""Amount of retries for a request."""
+REQUEST_BACKOFF = 0.2
+"""Backoff before retrying a request."""
+
+
+def _get_retry_value(
+    environment_var: str, default_value: Union[int, float]
+) -> Union[int, float]:
+    """Return the backoff to use in HTTPClient."""
+    environment_value = os.getenv(environment_var)
+    if environment_value is None:
+        return default_value
+
+    try:
+        value = int(environment_value)
+    except ValueError:
+        logger.debug(
+            "%r set to invalid value %r, setting to %r.",
+            environment_var,
+            environment_value,
+            default_value,
+        )
+        return default_value
+
+    if value <= 0:
+        logger.debug(
+            "%r set to non positive value %r, setting to %r.",
+            environment_var,
+            value,
+            default_value,
+        )
+        return default_value
+
+    return value
+
+
 class HTTPClient:
     """Generic HTTP Client to communicate with Canonical's Developer Gateway.
 
     This client has a requests like interface, it creates a requests.Session
     on initialization to handle retries over HTTP and HTTPS requests.
 
-    The default number of retries is set to 5 and can be overridden through
-    the ``CRAFT_STORE_RETRIES`` environment variable.
+    The default number of retries is set in :data:`.REQUEST_TOTAL_RETRIES` and can
+    be overridden with the ``CRAFT_STORE_RETRIES`` environment variable.
 
-    The backoff factor has a default of 2 and can be overridden with the
-    ``CRAFT_STORE_BACKOFF`` environment variable.
+    The backoff factor has a default set in :data:`.REQUEST_BACKOFF` and can be
+    overridden with the ``CRAFT_STORE_BACKOFF`` environment variable.
 
     Retries are done for the following return codes: ``500``, ``502``, ``503``
     and ``504``.
@@ -54,28 +91,10 @@ class HTTPClient:
         self._session = requests.Session()
         self.user_agent = user_agent
 
-        try:
-            total = int(os.environ.get("CRAFT_STORE_RETRIES", 10))
-        except ValueError:
-            total = 10
-            logger.debug(
-                "CRAFT_STORE_RETRIES is not set to an integer, using default of %r.",
-                total,
-            )
-
-        try:
-            backoff = int(os.environ.get("CRAFT_STORE_BACKOFF", 2))
-        except ValueError:
-            backoff = 2
-            logger.debug(
-                "CRAFT_STORE_BACKOFF is not set to an integer, using default of %r.",
-                backoff,
-            )
-
         # Setup max retries for all store URLs and the CDN
         retries = Retry(
-            total=total,
-            backoff_factor=backoff,
+            total=_get_retry_value("CRAFT_STORE_RETRIES", REQUEST_TOTAL_RETRIES),
+            backoff_factor=_get_retry_value("CRAFT_STORE_BACKOFF", REQUEST_BACKOFF),
             status_forcelist=[500, 502, 503, 504],
         )
         http_adapter = HTTPAdapter(max_retries=retries)
