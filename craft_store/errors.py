@@ -16,6 +16,7 @@
 
 """Craft Store errors."""
 
+import contextlib
 import logging
 
 import requests
@@ -25,19 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class CraftStoreError(Exception):
-    """Base class error for craft-store.
-
-    :param brief: Brief description of error.
-
-    :ivar brief: Brief description of error.
-    """
-
-    def __init__(self, brief: str) -> None:
-        super().__init__()
-        self.brief = brief
-
-    def __str__(self) -> str:
-        return self.brief
+    """Base class error for craft-store."""
 
 
 class NetworkError(CraftStoreError):
@@ -49,19 +38,15 @@ class NetworkError(CraftStoreError):
     :param exception: original exception raised.
 
     :ivar exception: original exception raised.
-    :ivar brief: Brief description of error.
     """
 
     def __init__(self, exception: Exception) -> None:
-        try:
+        message = str(exception)
+        with contextlib.suppress(IndexError):
             if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):
-                brief = "Maximum retries exceeded trying to reach the store."
-            else:
-                brief = str(exception)
-        except IndexError:
-            brief = str(exception)
+                message = "Maximum retries exceeded trying to reach the store."
 
-        super().__init__(brief=brief)
+        super().__init__(message)
 
 
 class StoreServerError(CraftStoreError):
@@ -69,7 +54,6 @@ class StoreServerError(CraftStoreError):
 
     :param response: the response from a :class:`requests.Request`.
 
-    :ivar brief: Brief description of error.
     :ivar response: the response from a :class:`requests.Request`.
     """
 
