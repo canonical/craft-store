@@ -60,7 +60,7 @@ package-view-* permissions.
 """
 
 PACKAGE_VIEW_ACL = "package-view-acl"
-"""list the collaborators for a package and privacy settings."""
+"""List the collaborators for a package and privacy settings."""
 
 PACKAGE_VIEW_METADATA = "package-view-metadata"
 """View the metadata for a package, including media."""
@@ -75,4 +75,4 @@ history of a package.
 """
 
 PACKAGE_VIEW_REVISIONS = "package-view-revisions"
-"""list the existing revisions for a package, along with status information."""
+"""List the existing revisions for a package, along with status information."""
