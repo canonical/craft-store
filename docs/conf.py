@@ -28,7 +28,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-import craft_store
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path("..").absolute()))
+
+import craft_store  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
