@@ -18,6 +18,7 @@
 
 import contextlib
 import logging
+from typing import Optional
 
 import requests
 import urllib3  # type: ignore
@@ -27,6 +28,10 @@ logger = logging.getLogger(__name__)
 
 class CraftStoreError(Exception):
     """Base class error for craft-store."""
+
+    def __init__(self, message: str, resolution: Optional[str] = None) -> None:
+        super().__init__(message)
+        self.resolution = resolution
 
 
 class NetworkError(CraftStoreError):
@@ -64,3 +69,10 @@ class StoreServerError(CraftStoreError):
             "Issue encountered while processing your request: "
             f"[{response.status_code}] {response.reason}."
         )
+
+
+class NotLoggedIn(CraftStoreError):
+    """Error raised when credentials are not found in the keyring."""
+
+    def __init__(self):
+        super().__init__("Not logged in.")
