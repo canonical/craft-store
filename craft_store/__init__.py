@@ -21,3 +21,4 @@ __version__ = "0.0.1.dev1"
 
 from . import errors  # noqa: F401
 from .http_client import HTTPClient  # noqa: F401
+from .store_client import StoreClient  # noqa: F401

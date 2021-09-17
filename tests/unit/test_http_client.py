@@ -28,6 +28,7 @@ from craft_store.http_client import _get_retry_value
 def _fake_error_response(status_code, reason):
     response = Mock(spec="requests.Response")
     response.status_code = status_code
+    response.ok = status_code == 200
     response.reason = reason
     return response
 

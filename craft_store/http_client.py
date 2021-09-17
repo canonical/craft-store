@@ -132,7 +132,8 @@ class HTTPClient:
         :param params: Query parameters to be sent along with the request.
         :param headers: Headers to be sent along with the request.
 
-        :raises errors.StoreNetworkError: for responses above error code ``500``.
+        :raises errors.StoreServerError: for error responses.
+        :raises errors.NetworkError: for lower level network issues.
 
         :return: Response from the request.
         """
@@ -163,9 +164,7 @@ class HTTPClient:
         ) as error:
             raise errors.NetworkError(error) from error
 
-        # Handle 5XX responses generically right here, so the callers don't
-        # need to worry about it.
-        if response.status_code >= 500:
+        if not response.ok:
             raise errors.StoreServerError(response)
 
         return response
