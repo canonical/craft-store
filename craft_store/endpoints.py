@@ -34,9 +34,17 @@ class Endpoints:
     tokens_exchange: str
 
     @staticmethod
-    def _get_token_request(
+    def get_token_request(
         *, permissions: Sequence[str], description: str, ttl: str
     ) -> Dict[str, Any]:
+        """Return a properly formatted request for a token request.
+
+        Permissions can be selected from :data:`craft_store.attenuations`
+
+        :param permissions: a list of permissions to use.
+        :param description: description that identifies the client.
+        :param ttl: time to live for the requested token.
+        """
         return {
             "permissions": permissions,
             "description": description,
@@ -49,7 +57,7 @@ class _SnapStoreEndpoints(Endpoints):
     """Snap Store endpoints used to make requests to a store."""
 
     @staticmethod
-    def _get_token_request(
+    def get_token_request(
         *, permissions: Sequence[str], description: str, ttl: str
     ) -> Dict[str, Any]:
         return {

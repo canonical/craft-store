@@ -24,7 +24,7 @@ def test_charmhub():
     assert charmhub.tokens == "/v1/tokens"
     assert charmhub.tokens_exchange == "/v1/tokens/exchange"
     assert charmhub.whoami == "/v1/whoami"
-    assert charmhub._get_token_request(  # pylint: disable=W0212
+    assert charmhub.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
         ttl="1000",
@@ -41,7 +41,7 @@ def test_snap_store():
     assert snap_store.tokens == "/api/v2/tokens"
     assert snap_store.tokens_exchange == "/api/v2/tokens/exchange"
     assert snap_store.whoami == "/api/v2/tokens/whoami"
-    assert snap_store._get_token_request(  # pylint: disable=W0212
+    assert snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
         ttl="1000",
