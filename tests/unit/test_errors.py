@@ -57,8 +57,8 @@ scenarios = (
     },
     {
         "exception_class": errors.NotLoggedIn,
-        "args": [],
-        "expected_message": "Not logged in.",
+        "args": ["no credentials"],
+        "expected_message": "Not logged in: no credentials.",
     },
 )
 

@@ -74,7 +74,10 @@ class Auth:
             self.application_name, self.host
         )
         if encoded_credentials_string is None:
-            raise errors.NotLoggedIn()
+            keyring_name = keyring.get_keyring().name
+            raise errors.NotLoggedIn(
+                f"credentials not found in the keyring {keyring_name!s}"
+            )
         credentials = base64.b64decode(encoded_credentials_string).decode()
         return credentials
 
@@ -88,4 +91,7 @@ class Auth:
         try:
             keyring.delete_password(self.application_name, self.host)
         except keyring.errors.PasswordDeleteError as delete_error:
-            raise errors.NotLoggedIn() from delete_error
+            keyring_name = keyring.get_keyring().name
+            raise errors.NotLoggedIn(
+                f"credentials not found in the keyring {keyring_name!s}"
+            ) from delete_error

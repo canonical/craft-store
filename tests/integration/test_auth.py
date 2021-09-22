@@ -68,8 +68,16 @@ def test_auth():
     assert auth.get_credentials() == "foo"
     auth.del_credentials()
 
-    with pytest.raises(errors.NotLoggedIn):
-        assert auth.get_credentials()
+    with pytest.raises(errors.NotLoggedIn) as error:
+        auth.get_credentials()
 
-    with pytest.raises(errors.NotLoggedIn):
-        assert auth.del_credentials()
+    assert str(error.value) == (
+        "Not logged in: credentials not found in the keyring test auth MemoryKeyring."
+    )
+
+    with pytest.raises(errors.NotLoggedIn) as error:
+        auth.del_credentials()
+
+    assert str(error.value) == (
+        "Not logged in: credentials not found in the keyring test auth MemoryKeyring."
+    )

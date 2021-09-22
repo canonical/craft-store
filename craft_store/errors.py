@@ -74,5 +74,5 @@ class StoreServerError(CraftStoreError):
 class NotLoggedIn(CraftStoreError):
     """Error raised when credentials are not found in the keyring."""
 
-    def __init__(self):
-        super().__init__("Not logged in.")
+    def __init__(self, message: str) -> None:
+        super().__init__(f"Not logged in: {message}.")
