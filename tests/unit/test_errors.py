@@ -55,6 +55,11 @@ scenarios = (
         "args": [_fake_error_response(501, "not implemented")],
         "expected_message": "Issue encountered while processing your request: [501] not implemented.",
     },
+    {
+        "exception_class": errors.NotLoggedIn,
+        "args": ["no credentials"],
+        "expected_message": "Not logged in: no credentials.",
+    },
 )
 
 
