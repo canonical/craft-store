@@ -64,12 +64,12 @@ def test_keyring():
 def test_auth():
     auth = Auth("fakecraft", "fakestore.com")
 
-    auth.set_auth("foo")
-    assert auth.get_auth() == "foo"
-    auth.del_auth()
+    auth.set_credentials("foo")
+    assert auth.get_credentials() == "foo"
+    auth.del_credentials()
 
     with pytest.raises(errors.NotLoggedIn):
-        assert auth.get_auth()
+        assert auth.get_credentials()
 
     with pytest.raises(errors.NotLoggedIn):
-        assert auth.del_auth()
+        assert auth.del_credentials()

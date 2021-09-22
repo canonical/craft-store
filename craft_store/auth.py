@@ -48,33 +48,37 @@ class Auth:
         self.application_name = application_name
         self.host = host
 
-    def set_auth(self, auth: str) -> None:
+    def set_credentials(self, credentials: str) -> None:
         """Store credentials in the keyring.
 
-        :param auth: token to store.
+        :param credentials: token to store.
         """
         logger.debug(
             "Storing credentials for %r on %r in keyring.",
             self.application_name,
             self.host,
         )
-        encoded_auth = base64.b64encode(auth.encode())
-        keyring.set_password(self.application_name, self.host, encoded_auth.decode())
+        encoded_credentials = base64.b64encode(credentials.encode())
+        keyring.set_password(
+            self.application_name, self.host, encoded_credentials.decode()
+        )
 
-    def get_auth(self) -> str:
+    def get_credentials(self) -> str:
         """Retrieve credentials from the keyring."""
         logger.debug(
             "Retrieving credentials for %r on %r from keyring.",
             self.application_name,
             self.host,
         )
-        encoded_auth_string = keyring.get_password(self.application_name, self.host)
-        if encoded_auth_string is None:
+        encoded_credentials_string = keyring.get_password(
+            self.application_name, self.host
+        )
+        if encoded_credentials_string is None:
             raise errors.NotLoggedIn()
-        auth = base64.b64decode(encoded_auth_string).decode()
-        return auth
+        credentials = base64.b64decode(encoded_credentials_string).decode()
+        return credentials
 
-    def del_auth(self) -> None:
+    def del_credentials(self) -> None:
         """Delete credentials from the keyring."""
         logger.debug(
             "Deleting credentials for %r on %r from keyring.",
