@@ -58,7 +58,7 @@ class StoreClient(HTTPClient):
         self._endpoints = endpoints
         self._auth = Auth(application_name, base_url)
 
-    def _get_token(self, token_request: Dict[str, Any]) -> str:
+    def _get_macaroon(self, token_request: Dict[str, Any]) -> str:
         token_response = super().request(
             "POST",
             self._base_url + self._endpoints.tokens,
@@ -115,8 +115,8 @@ class StoreClient(HTTPClient):
             permissions=permissions, description=description, ttl=ttl
         )
 
-        token = self._get_token(token_request)
-        candid_discharged_macaroon = self._candid_discharge(token)
+        macaroon = self._get_macaroon(token_request)
+        candid_discharged_macaroon = self._candid_discharge(macaroon)
         store_authorized_macaroon = self._authorize_token(candid_discharged_macaroon)
 
         # Save the authorization token.
