@@ -119,7 +119,7 @@ def test_store_client_login(
     )
 
     store_client.login(
-        permissions=["perm-1", "perm-2"], description="fakecraft@foo", ttl="60"
+        permissions=["perm-1", "perm-2"], description="fakecraft@foo", ttl=60
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -130,7 +130,7 @@ def test_store_client_login(
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
-                "ttl": "60",
+                "ttl": 60,
             },
         ),
         call(

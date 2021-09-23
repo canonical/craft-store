@@ -98,7 +98,7 @@ class StoreClient(HTTPClient):
         *,
         permissions: Sequence[str],
         description: str,
-        ttl: str,
+        ttl: int,
     ) -> None:
         """Obtain credentials to perform authenticated requests.
 
