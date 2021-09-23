@@ -27,11 +27,11 @@ def test_charmhub():
     assert charmhub.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
-        ttl="1000",
+        ttl=1000,
     ) == {
         "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "ttl": "1000",
+        "ttl": 1000,
     }
 
 
@@ -44,9 +44,9 @@ def test_snap_store():
     assert snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
-        ttl="1000",
+        ttl=1000,
     ) == {
         "attenuations": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "expiry": "1000",
+        "expiry": 1000,
     }

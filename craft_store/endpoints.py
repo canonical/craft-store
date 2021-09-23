@@ -35,7 +35,7 @@ class Endpoints:
 
     @staticmethod
     def get_token_request(
-        *, permissions: Sequence[str], description: str, ttl: str
+        *, permissions: Sequence[str], description: str, ttl: int
     ) -> Dict[str, Any]:
         """Return a properly formatted request for a token request.
 
@@ -58,7 +58,7 @@ class _SnapStoreEndpoints(Endpoints):
 
     @staticmethod
     def get_token_request(
-        *, permissions: Sequence[str], description: str, ttl: str
+        *, permissions: Sequence[str], description: str, ttl: int
     ) -> Dict[str, Any]:
         return {
             "attenuations": permissions,
