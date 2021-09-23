@@ -21,15 +21,19 @@ import json
 from typing import TYPE_CHECKING, Any, Dict, Sequence
 from urllib.parse import urlparse
 
-import macaroonbakery._utils as utils
 import requests
 from macaroonbakery import bakery, httpbakery
+from pymacaroons.serializers import json_serializer
 
 from .auth import Auth
 from .http_client import HTTPClient
 
 if TYPE_CHECKING:
     from . import endpoints
+
+
+def _macaroon_to_json_string(macaroon) -> str:
+    return macaroon.serialize(json_serializer.JsonSerializer())
 
 
 class StoreClient(HTTPClient):
@@ -75,12 +79,10 @@ class StoreClient(HTTPClient):
 
         # serialize macaroons the bakery-way
         discharged_macaroons = (
-            "[" + ",".join(map(utils.macaroon_to_json_string, discharges)) + "]"
+            "[" + ",".join(map(_macaroon_to_json_string, discharges)) + "]"
         )
 
-        return base64.urlsafe_b64encode(utils.to_bytes(discharged_macaroons)).decode(
-            "ascii"
-        )
+        return base64.urlsafe_b64encode(discharged_macaroons.encode()).decode("ascii")
 
     def _authorize_token(self, candid_discharged_macaroon: str) -> str:
         token_exchange_response = super().request(
