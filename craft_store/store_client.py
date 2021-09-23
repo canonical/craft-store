@@ -108,10 +108,21 @@ class StoreClient(HTTPClient):
         The list of permissions to select from can be referred to on
         :data:`craft_store.attenuations`.
 
+        The login process requires 3 steps:
+
+        - request an initial macaroon on :attr:`.endpoints.Endpoints.tokens`.
+        - discharge that macaroon using Candid
+        - send the discharge macaroon to :attr:`.endpoints.Endpoints.tokens_exchange`
+          to obtain final authorization of the macaroon
+
+        This last macaroon is stored into the systems keyring to
+        perform authenticated requests.
+
         :param permissions: Set of permissions to grant the login.
         :param description: Client description to refer to from the Store.
         :param ttl: time to live for the credential, in other words, how
                     long until it expires, expressed in seconds.
+
         """
         token_request = self._endpoints.get_token_request(
             permissions=permissions, description=description, ttl=ttl
@@ -160,7 +171,7 @@ class StoreClient(HTTPClient):
         )
 
     def whoami(self) -> Dict[str, Any]:
-        """Return whoami json data queyring :data:`.endpoints.Endpoint.whoami`."""
+        """Return whoami json data queyring :attr:`.endpoints.Endpoints.whoami`."""
         return self.request("GET", self._base_url + self._endpoints.whoami).json()
 
     def logout(self) -> None:
