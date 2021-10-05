@@ -140,6 +140,7 @@ def test_store_client_login(
             headers={
                 "Macaroons": "W3siaWRlbnRpZmllciI6ICIiLCAic2lnbmF0dXJlIjogImQ5NTMzNDYxZDc4MzVlNDg1MWM3ZTNiNjM5MTQ0NDA2Y2Y3Njg1OTdkZWE2ZTEzMzIzMmZiZDIzODVhNWMwNTAiLCAibG9jYXRpb24iOiAiZmFrZS1zZXJ2ZXIuY29tIn1d"
             },
+            json={},
         ),
     ]
 

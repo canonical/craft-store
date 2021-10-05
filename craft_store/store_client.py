@@ -89,6 +89,7 @@ class StoreClient(HTTPClient):
             "POST",
             self._base_url + self._endpoints.tokens_exchange,
             headers={"Macaroons": candid_discharged_macaroon},
+            json={},
         )
 
         return token_exchange_response.json()["macaroon"]
