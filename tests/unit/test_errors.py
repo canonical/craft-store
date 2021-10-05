@@ -60,6 +60,21 @@ scenarios = (
         "args": ["no credentials"],
         "expected_message": "Not logged in: no credentials.",
     },
+    {
+        "exception_class": errors.CandidTokenTimeoutError,
+        "args": ["https://foo.bar"],
+        "expected_message": "Timed out waiting for token response from 'https://foo.bar'.",
+    },
+    {
+        "exception_class": errors.CandidTokenKindError,
+        "args": ["https://foo.bar"],
+        "expected_message": "Empty token kind returned from 'https://foo.bar'.",
+    },
+    {
+        "exception_class": errors.CandidTokenValueError,
+        "args": ["https://foo.bar"],
+        "expected_message": "Empty token value returned from 'https://foo.bar'.",
+    },
 )
 
 

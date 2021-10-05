@@ -76,3 +76,24 @@ class NotLoggedIn(CraftStoreError):
 
     def __init__(self, message: str) -> None:
         super().__init__(f"Not logged in: {message}.")
+
+
+class CandidTokenTimeoutError(CraftStoreError):
+    """Error raised when timeout is reached trying to discharge a macaroon."""
+
+    def __init__(self, url: str) -> None:
+        super().__init__(f"Timed out waiting for token response from {url!r}.")
+
+
+class CandidTokenKindError(CraftStoreError):
+    """Error raised when the token kind is missing from the discharged macaroon."""
+
+    def __init__(self, url: str) -> None:
+        super().__init__(f"Empty token kind returned from {url!r}.")
+
+
+class CandidTokenValueError(CraftStoreError):
+    """Error raised when the token value is missing from the discharged macaroon."""
+
+    def __init__(self, url: str) -> None:
+        super().__init__(f"Empty token value returned from {url!r}.")

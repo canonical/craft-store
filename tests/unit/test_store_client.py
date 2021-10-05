@@ -15,14 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import pytest
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.macaroon import Macaroon
 
-from craft_store import endpoints
-from craft_store.store_client import StoreClient
+from craft_store import endpoints, errors
+from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor
 
 
 def _fake_response(status_code, reason=None, json=None):
@@ -220,3 +220,56 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
         call("fakecraft", "https://fake-server.com"),
         call().get_credentials(),
     ]
+
+
+def test_webinteractore_wait_for_token(http_client_request_mock):
+    http_client_request_mock.side_effect = None
+    http_client_request_mock.return_value = _fake_response(
+        200, json={"kind": "kind", "token": "TOKEN", "token64": b"VE9LRU42NA=="}
+    )
+
+    wbi = WebBrowserWaitingInteractor(user_agent="foobar")
+
+    discharged_token = wbi._wait_for_token(  # pylint: disable=W0212
+        object(), "https://foo.bar/candid"
+    )
+
+    assert discharged_token == httpbakery.DischargeToken(kind="kind", value="TOKEN")
+    assert http_client_request_mock.mock_calls == [
+        call(ANY, "GET", "https://foo.bar/candid")
+    ]
+
+
+def test_webinteractore_wait_for_token_timeout_error(http_client_request_mock):
+    http_client_request_mock.side_effect = None
+    http_client_request_mock.return_value = _fake_response(400, json={})
+
+    wbi = WebBrowserWaitingInteractor(user_agent="foobar")
+
+    with pytest.raises(errors.CandidTokenTimeoutError):
+        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+
+
+def test_webinteractore_wait_for_token_kind_error(http_client_request_mock):
+    http_client_request_mock.side_effect = None
+    http_client_request_mock.return_value = _fake_response(200, json={})
+
+    wbi = WebBrowserWaitingInteractor(user_agent="foobar")
+
+    with pytest.raises(errors.CandidTokenKindError):
+        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+
+
+def test_webinteractore_wait_for_token_value_error(http_client_request_mock):
+    http_client_request_mock.side_effect = None
+    http_client_request_mock.return_value = _fake_response(
+        200,
+        json={
+            "kind": "kind",
+        },
+    )
+
+    wbi = WebBrowserWaitingInteractor(user_agent="foobar")
+
+    with pytest.raises(errors.CandidTokenValueError):
+        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
