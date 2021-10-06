@@ -25,6 +25,7 @@ import requests
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.serializers import json_serializer
 
+from . import errors
 from .auth import Auth
 from .http_client import HTTPClient
 
@@ -34,6 +35,40 @@ if TYPE_CHECKING:
 
 def _macaroon_to_json_string(macaroon) -> str:
     return macaroon.serialize(json_serializer.JsonSerializer())
+
+
+class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):
+    """WebBrowserInteractor implementation using HTTPClient.
+
+    Waiting for a token is implemented using HTTPClient which mounts
+    a session with backoff retries.
+
+    Better exception classes and messages are  provided to handle errors.
+    """
+
+    def __init__(self, user_agent: str) -> None:
+        super().__init__()
+        self.user_agent = user_agent
+
+    # TODO: transfer implementation to macaroonbakery.
+    def _wait_for_token(self, ctx, wait_token_url):
+        request_client = HTTPClient(user_agent=self.user_agent)
+        resp = request_client.request("GET", wait_token_url)
+        if resp.status_code != 200:
+            raise errors.CandidTokenTimeoutError(url=wait_token_url)
+        json_resp = resp.json()
+        kind = json_resp.get("kind")
+        if kind is None:
+            raise errors.CandidTokenKindError(url=wait_token_url)
+        token_val = json_resp.get("token")
+        if token_val is None:
+            token_val = json_resp.get("token64")
+            if token_val is None:
+                raise errors.CandidTokenValueError(url=wait_token_url)
+            token_val = base64.b64decode(token_val)
+        return httpbakery._interactor.DischargeToken(  # pylint: disable=W0212
+            kind=kind, value=token_val
+        )
 
 
 class StoreClient(HTTPClient):
@@ -56,7 +91,9 @@ class StoreClient(HTTPClient):
         """
         super().__init__(user_agent=user_agent)
 
-        self._bakery_client = httpbakery.Client()
+        self._bakery_client = httpbakery.Client(
+            interaction_methods=[WebBrowserWaitingInteractor(user_agent=user_agent)]
+        )
         self._base_url = base_url
         self._store_host = urlparse(base_url).netloc
         self._endpoints = endpoints
@@ -89,6 +126,7 @@ class StoreClient(HTTPClient):
             "POST",
             self._base_url + self._endpoints.tokens_exchange,
             headers={"Macaroons": candid_discharged_macaroon},
+            json={},
         )
 
         return token_exchange_response.json()["macaroon"]
