@@ -70,28 +70,40 @@ class Auth:
             self.application_name,
             self.host,
         )
-        encoded_credentials_string = keyring.get_password(
-            self.application_name, self.host
-        )
-        if encoded_credentials_string is None:
-            keyring_name = keyring.get_keyring().name
-            raise errors.NotLoggedIn(
-                f"credentials not found in the keyring {keyring_name!s}"
+
+        try:
+            encoded_credentials_string = keyring.get_password(
+                self.application_name, self.host
             )
+        except Exception as unknown_error:
+            logger.debug(
+                "Unhandled exception raised when retrieving credentials: %s",
+                unknown_error,
+            )
+            raise errors.NotLoggedIn() from unknown_error
+
+        if encoded_credentials_string is None:
+            logger.debug(
+                "Credentials not found in the keyring %r", keyring.get_keyring().name
+            )
+            raise errors.NotLoggedIn()
         credentials = base64.b64decode(encoded_credentials_string).decode()
         return credentials
 
     def del_credentials(self) -> None:
         """Delete credentials from the keyring."""
+        # Try to get the credentials first to see if there are any,
+        # this is to provide an easier troubleshooting experience.
+        self.get_credentials()
+
         logger.debug(
-            "Deleting credentials for %r on %r from keyring.",
+            "Deleting credentials for %r on %r from keyring: %r.",
             self.application_name,
             self.host,
+            keyring.get_keyring().name,
         )
         try:
             keyring.delete_password(self.application_name, self.host)
         except keyring.errors.PasswordDeleteError as delete_error:
-            keyring_name = keyring.get_keyring().name
-            raise errors.NotLoggedIn(
-                f"credentials not found in the keyring {keyring_name!s}"
-            ) from delete_error
+            logger.debug("Cannot delete credentials: %s", delete_error)
+            raise errors.NotLoggedIn() from delete_error

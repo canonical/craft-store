@@ -57,8 +57,8 @@ scenarios = (
     },
     {
         "exception_class": errors.NotLoggedIn,
-        "args": ["no credentials"],
-        "expected_message": "Not logged in: no credentials.",
+        "args": [],
+        "expected_message": "Not logged in.",
     },
     {
         "exception_class": errors.CandidTokenTimeoutError,

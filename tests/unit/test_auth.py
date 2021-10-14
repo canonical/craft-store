@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from collections import namedtuple
 from unittest.mock import call, patch
 
 import keyring.errors
@@ -22,6 +23,17 @@ import pytest
 
 from craft_store import errors
 from craft_store.auth import Auth
+
+
+@pytest.fixture(autouse=True)
+def keyring_get_keyring_mock():
+    """Mock getting the keyring."""
+
+    patched_keyring = patch("keyring.get_keyring", autospec=True)
+    mocked_keyring = patched_keyring.start()
+    mocked_keyring.return_value = namedtuple("FakeKeyring", ["name"])("Fake Keyring")
+    yield mocked_keyring
+    patched_keyring.stop()
 
 
 @pytest.fixture
@@ -36,7 +48,11 @@ def keyring_set_mock():
 @pytest.fixture
 def keyring_get_mock():
     """Mock for keyring.get_password."""
-    patched_keyring = patch("keyring.get_password", autospec=True, return_value=None)
+    patched_keyring = patch(
+        "keyring.get_password",
+        autospec=True,
+        return_value="eydwYXNzd29yZCc6ICdzZWNyZXQnfQ==",
+    )
     mocked_keyring = patched_keyring.start()
     yield mocked_keyring
     patched_keyring.stop()
@@ -77,8 +93,6 @@ def test_set_credentials_log_debug(caplog, keyring_set_mock):
 
 
 def test_get_credentials(caplog, keyring_get_mock):
-    keyring_get_mock.return_value = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
-
     auth = Auth("fakeclient", "fakestore.com")
 
     assert auth.get_credentials() == "{'password': 'secret'}"
@@ -88,7 +102,6 @@ def test_get_credentials(caplog, keyring_get_mock):
 
 def test_get_credentials_log_debug(caplog, keyring_get_mock):
     caplog.set_level(logging.DEBUG)
-    keyring_get_mock.return_value = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -100,6 +113,8 @@ def test_get_credentials_log_debug(caplog, keyring_get_mock):
 
 
 def test_get_credentials_no_credentials_in_keyring(caplog, keyring_get_mock):
+    keyring_get_mock.return_value = None
+
     auth = Auth("fakeclient", "fakestore.com")
 
     with pytest.raises(errors.NotLoggedIn):
@@ -109,6 +124,7 @@ def test_get_credentials_no_credentials_in_keyring(caplog, keyring_get_mock):
     assert caplog.records == []
 
 
+@pytest.mark.usefixtures("keyring_get_mock")
 def test_del_credentials(caplog, keyring_delete_mock):
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -118,6 +134,7 @@ def test_del_credentials(caplog, keyring_delete_mock):
     assert caplog.records == []
 
 
+@pytest.mark.usefixtures("keyring_get_mock")
 def test_del_credentials_log_debug(caplog, keyring_delete_mock):
     caplog.set_level(logging.DEBUG)
 
@@ -127,11 +144,13 @@ def test_del_credentials_log_debug(caplog, keyring_delete_mock):
 
     assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
     assert [
-        "Deleting credentials for 'fakeclient' on 'fakestore.com' from keyring."
+        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring.",
+        "Deleting credentials for 'fakeclient' on 'fakestore.com' from keyring: 'Fake Keyring'.",
     ] == [rec.message for rec in caplog.records]
 
 
-def test_del_credentials_no_credentials_in_keyring(caplog, keyring_delete_mock):
+@pytest.mark.usefixtures("keyring_get_mock")
+def test_del_credentials_delete_error_in_keyring(caplog, keyring_delete_mock):
     keyring_delete_mock.side_effect = keyring.errors.PasswordDeleteError()
 
     auth = Auth("fakeclient", "fakestore.com")
@@ -141,3 +160,19 @@ def test_del_credentials_no_credentials_in_keyring(caplog, keyring_delete_mock):
 
     assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
     assert caplog.records == []
+
+
+def test_del_credentials_gets_no_credential(caplog, keyring_get_mock):
+    caplog.set_level(logging.DEBUG)
+    keyring_get_mock.return_value = None
+
+    auth = Auth("fakeclient", "fakestore.com")
+
+    with pytest.raises(errors.NotLoggedIn):
+        auth.del_credentials()
+
+    assert keyring_get_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert [
+        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring.",
+        "Credentials not found in the keyring 'Fake Keyring'",
+    ] == [rec.message for rec in caplog.records]
