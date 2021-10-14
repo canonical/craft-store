@@ -18,19 +18,16 @@
 
 import base64
 import json
-from typing import TYPE_CHECKING, Any, Dict, Sequence
+from typing import Any, Dict, Sequence
 from urllib.parse import urlparse
 
 import requests
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.serializers import json_serializer
 
-from . import errors
+from . import endpoints, errors
 from .auth import Auth
 from .http_client import HTTPClient
-
-if TYPE_CHECKING:
-    from . import endpoints
 
 
 def _macaroon_to_json_string(macaroon) -> str:
@@ -78,14 +75,14 @@ class StoreClient(HTTPClient):
         self,
         *,
         base_url: str,
-        endpoints: "endpoints.Endpoints",
+        endpoints: endpoints.Endpoints,
         application_name: str,
         user_agent: str,
     ) -> None:
         """Initialize the Store Client.
 
         :param base_url: the base url of the API endpoint.
-        :param endpoints: :data:`endpoints.CHARMHUB` or :data:`endpoints.SNAP_STORE`.
+        :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
         :param application_name: the name application using this class, used for the keyring.
         :param user_agent: User-Agent header to use for HTTP(s) requests.
         """
