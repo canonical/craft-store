@@ -39,7 +39,6 @@ coverage: ## Run pytest with coverage report.
 docs: ## Generate documentation.
 	rm -f docs/craft_store.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ craft_store --no-toc --ext-githubpages
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
