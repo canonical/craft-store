@@ -77,7 +77,7 @@ class Auth:
             )
         except Exception as unknown_error:
             logger.debug(
-                "Unhandled exception raised when retrieving credentials: %s",
+                "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,
             )
             raise errors.NotLoggedIn() from unknown_error
