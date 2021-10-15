@@ -102,8 +102,4 @@ class Auth:
             self.host,
             keyring.get_keyring().name,
         )
-        try:
-            keyring.delete_password(self.application_name, self.host)
-        except keyring.errors.PasswordDeleteError as delete_error:
-            logger.debug("Cannot delete credentials: %s", delete_error)
-            raise errors.NotLoggedIn() from delete_error
+        keyring.delete_password(self.application_name, self.host)

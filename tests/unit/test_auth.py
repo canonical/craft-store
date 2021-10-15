@@ -155,7 +155,7 @@ def test_del_credentials_delete_error_in_keyring(caplog, keyring_delete_mock):
 
     auth = Auth("fakeclient", "fakestore.com")
 
-    with pytest.raises(errors.NotLoggedIn):
+    with pytest.raises(keyring.errors.PasswordDeleteError):
         auth.del_credentials()
 
     assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
