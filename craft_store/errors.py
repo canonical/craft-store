@@ -18,7 +18,8 @@
 
 import contextlib
 import logging
-from typing import Optional
+from json.decoder import JSONDecodeError
+from typing import Dict, List, Optional
 
 import requests
 import urllib3  # type: ignore
@@ -54,21 +55,82 @@ class NetworkError(CraftStoreError):
         super().__init__(message)
 
 
+class StoreErrorList:
+    """Error List returned from the Store."""
+
+    def __len__(self) -> int:
+        return len(self._error_list)
+
+    def __str__(self) -> str:
+        error_list: List[str] = []
+        for error in self._error_list:
+            error_list.append(f"- {error['code']}: {error['message']}")
+        return "\n".join(error_list).strip()
+
+    def __repr__(self) -> str:
+        code_list = []
+        for error in self._error_list:
+            code = error.get("code")
+            if code:
+                code_list.append(code)
+
+        return "<StoreErrorList: {' '.join(code_list)}>"
+
+    def __contains__(self, error_code: str) -> bool:
+        return any((error.get("code") == error_code for error in self._error_list))
+
+    def __getitem__(self, error_code: str) -> Dict[str, str]:
+        for error in self._error_list:
+            if error.get("code") == error_code:
+                return error
+
+        raise KeyError(error_code)
+
+    def __init__(self, error_list: List[Dict[str, str]]) -> None:
+        self._error_list = error_list
+
+
 class StoreServerError(CraftStoreError):
     """Error to raise on infrastructure issues from error codes above ``500``.
 
     :param response: the response from a :class:`requests.Request`.
 
     :ivar response: the response from a :class:`requests.Request`.
+    :ivar error_list: list of errors returned by the Store :class:`StoreErrorList`.
     """
+
+    def _get_raw_error_list(self) -> List[Dict[str, str]]:
+        response_json = self.response.json()
+        try:
+            # Charmhub uses error-list.
+            error_list = response_json["error-list"]
+        except KeyError:
+            # Snap Store uses error_list.
+            error_list = response_json["error_list"]
+
+        return error_list
 
     def __init__(self, response: requests.Response) -> None:
         self.response = response
 
-        super().__init__(
-            "Issue encountered while processing your request: "
-            f"[{response.status_code}] {response.reason}."
-        )
+        try:
+            raw_error_list: List[Dict[str, str]] = self._get_raw_error_list()
+        except (KeyError, JSONDecodeError):
+            raw_error_list = []
+
+        self.error_list = StoreErrorList(raw_error_list)
+
+        message: Optional[str] = None
+        if self.error_list:
+            with contextlib.suppress(KeyError):
+                message = "Store operation failed:\n" + str(self.error_list)
+        if message is None:
+            message = (
+                "Issue encountered while processing your request: "
+                f"[{response.status_code}] {response.reason}."
+            )
+
+        super().__init__(message)
 
 
 class NotLoggedIn(CraftStoreError):

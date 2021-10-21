@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from json.decoder import JSONDecodeError
+from textwrap import dedent
 from unittest import mock
 
 import pytest
@@ -23,10 +25,15 @@ import urllib3  # type: ignore
 from craft_store import errors
 
 
-def _fake_error_response(status_code, reason):
+def _fake_error_response(status_code, reason, json=None):
     response = mock.Mock()
     response.status_code = status_code
     response.reason = reason
+    if json is None:
+        response.json.side_effect = JSONDecodeError("foo", "doc", 0)
+    else:
+        response.json = mock.Mock(return_value=json)
+
     return response
 
 
@@ -83,4 +90,58 @@ def test_error_formatting(scenario):
     assert (
         str(scenario["exception_class"](*scenario["args"]))
         == scenario["expected_message"]
+    )
+
+
+error_lists = [
+    {
+        "error_list": [
+            {"code": "resource-not-found", "message": "could not find resource"},
+        ],
+        "expected": dedent(
+            """\
+            Store operation failed:
+            - resource-not-found: could not find resource"""
+        ),
+    },
+    {
+        "error_list": [
+            {"code": "resource-not-found", "message": "could not find resource"},
+            {
+                "code": "resource-doubly-not-found",
+                "message": "could not find resource when trying harder",
+            },
+        ],
+        "expected": dedent(
+            """\
+            Store operation failed:
+            - resource-not-found: could not find resource
+            - resource-doubly-not-found: could not find resource when trying harder"""
+        ),
+    },
+]
+
+
+@pytest.mark.parametrize("error_list_key", ("error-list", "error_list"))
+@pytest.mark.parametrize("error_list", error_lists)
+def test_store_error_list(error_list_key, error_list):
+    response = _fake_error_response(
+        404, "resource-not-found", json={error_list_key: error_list["error_list"]}
+    )
+    assert str(errors.StoreServerError(response)) == error_list["expected"]
+
+
+@pytest.mark.parametrize("missing", ("code", "message"))
+@pytest.mark.parametrize("error_list_key", ("error-list", "error_list"))
+def test_store_error_list_missing_element(missing, error_list_key):
+    error_list = [
+        {"code": "resource-not-found", "message": "could not find resource"},
+    ]
+    error_list[0].pop(missing)
+    response = _fake_error_response(
+        404, "resource-not-found", json={error_list_key: error_list}
+    )
+    assert (
+        str(errors.StoreServerError(response))
+        == "Issue encountered while processing your request: [404] resource-not-found."
     )

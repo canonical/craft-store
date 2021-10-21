@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from json.decoder import JSONDecodeError
 from unittest.mock import ANY, Mock, call, patch
 
 import pytest
@@ -25,11 +26,13 @@ from craft_store import HTTPClient, errors
 from craft_store.http_client import _get_retry_value
 
 
-def _fake_error_response(status_code, reason):
-    response = Mock(spec="requests.Response")
+def _fake_error_response(status_code, reason, json_raises=False):
+    response = Mock()
     response.status_code = status_code
     response.ok = status_code == 200
     response.reason = reason
+    if json_raises:
+        response.json.side_effect = JSONDecodeError("foo", "doc", 0)
     return response
 
 
@@ -167,7 +170,7 @@ def test_request(caplog, session_mock, scenario):
 
 
 def test_request_500(session_mock):
-    fake_response = _fake_error_response(503, "cannot reach server")
+    fake_response = _fake_error_response(503, "cannot reach server", json_raises=True)
     session_mock().request.return_value = fake_response
 
     with pytest.raises(errors.StoreServerError) as store_error:
