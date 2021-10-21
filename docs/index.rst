@@ -1,5 +1,6 @@
+=======================================
 Welcome to Craft Store's documentation!
-===========================================
+=======================================
 
 .. toctree::
    :caption: Getting started
@@ -10,6 +11,11 @@ Welcome to Craft Store's documentation!
    :caption: Reference:
 
    craft_store
+
+.. toctree::
+   :caption: About the project
+
+   changelog
 
 Indices and tables
 ==================
