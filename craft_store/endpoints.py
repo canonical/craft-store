@@ -61,9 +61,9 @@ class _SnapStoreEndpoints(Endpoints):
         *, permissions: Sequence[str], description: str, ttl: int
     ) -> Dict[str, Any]:
         return {
-            "attenuations": permissions,
+            "permissions": permissions,
             "description": description,
-            "expiry": ttl,
+            "expires": str(ttl),
         }
 
 
