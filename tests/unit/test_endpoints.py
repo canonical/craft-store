@@ -46,7 +46,7 @@ def test_snap_store():
         description="client description",
         ttl=1000,
     ) == {
-        "attenuations": ["permission-foo", "permission-bar"],
+        "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "expiry": 1000,
+        "expires": "1000",
     }
