@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 
 from craft_store import endpoints
 
@@ -35,6 +36,62 @@ def test_charmhub():
     }
 
 
+def test_charmhub_channels():
+    charmhub = endpoints.CHARMHUB
+
+    assert charmhub.get_token_request(
+        permissions=["permission-foo", "permission-bar"],
+        description="client description",
+        ttl=1000,
+        channels=["stable", "track/edge"],
+    ) == {
+        "permissions": ["permission-foo", "permission-bar"],
+        "description": "client description",
+        "ttl": 1000,
+        "channels": ["stable", "track/edge"],
+    }
+
+
+def test_charmhub_packages():
+    charmhub = endpoints.CHARMHUB
+
+    assert charmhub.get_token_request(
+        permissions=["permission-foo", "permission-bar"],
+        description="client description",
+        ttl=1000,
+        packages=[
+            endpoints.Package("charm1", "charm"),
+            endpoints.Package("bundle1", "bundle"),
+        ],
+    ) == {
+        "permissions": ["permission-foo", "permission-bar"],
+        "description": "client description",
+        "ttl": 1000,
+        "packages": [
+            {"type": "charm", "name": "charm1"},
+            {"type": "bundle", "name": "bundle1"},
+        ],
+    }
+
+
+def test_charmhub_invalid_packages():
+    charmhub = endpoints.CHARMHUB
+
+    with pytest.raises(RuntimeError) as raised:
+        charmhub.get_token_request(
+            permissions=["permission-foo", "permission-bar"],
+            description="client description",
+            ttl=1000,
+            packages=[
+                endpoints.Package("charm1", "snap"),
+                endpoints.Package("bundle1", "rock"),
+            ],
+        )
+    assert (
+        str(raised.value) == "Package types ['snap', 'rock'] not in ['charm', 'bundle']"
+    )
+
+
 def test_snap_store():
     snap_store = endpoints.SNAP_STORE
 
@@ -50,3 +107,57 @@ def test_snap_store():
         "description": "client description",
         "expires": "1000",
     }
+
+
+def test_snap_store_channels():
+    snap_store = endpoints.SNAP_STORE
+
+    assert snap_store.get_token_request(
+        permissions=["permission-foo", "permission-bar"],
+        description="client description",
+        ttl=1000,
+        channels=["stable", "track/edge"],
+    ) == {
+        "permissions": ["permission-foo", "permission-bar"],
+        "description": "client description",
+        "expires": "1000",
+        "channels": ["stable", "track/edge"],
+    }
+
+
+def test_snap_store_packages():
+    snap_store = endpoints.SNAP_STORE
+
+    assert snap_store.get_token_request(
+        permissions=["permission-foo", "permission-bar"],
+        description="client description",
+        ttl=1000,
+        packages=[
+            endpoints.Package("snap1", "snap"),
+            endpoints.Package("snap2", "snap"),
+        ],
+    ) == {
+        "permissions": ["permission-foo", "permission-bar"],
+        "description": "client description",
+        "expires": "1000",
+        "packages": [
+            {"series": "16", "name": "snap1"},
+            {"series": "16", "name": "snap2"},
+        ],
+    }
+
+
+def test_snap_store_invalid_packages():
+    snap_store = endpoints.SNAP_STORE
+
+    with pytest.raises(RuntimeError) as raised:
+        snap_store.get_token_request(
+            permissions=["permission-foo", "permission-bar"],
+            description="client description",
+            ttl=1000,
+            packages=[
+                endpoints.Package("snap1", "charm"),
+                endpoints.Package("snap2", "rock"),
+            ],
+        )
+    assert str(raised.value) == "Package types ['charm', 'rock'] not in ['snap']"
