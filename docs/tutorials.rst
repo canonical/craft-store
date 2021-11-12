@@ -2,7 +2,8 @@
 Tutorials
 *********
 
-.. tutorial-snap_store_login:
+.. _tutorial-snap_store_login:
+
 Login to the Snap Store
 =======================
 
