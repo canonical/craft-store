@@ -89,7 +89,7 @@ class Auth:
 
         environment_auth_value = None
         if environment_auth:
-            environment_auth_value = os.getenv(environment_auth, None)
+            environment_auth_value = os.getenv(environment_auth)
 
         if environment_auth_value:
             keyring.set_keyring(MemoryKeyring())
