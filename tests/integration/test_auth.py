@@ -52,7 +52,7 @@ def test_auth():
 
 
 def test_auth_from_environment(monkeypatch):
-    monkeypatch.setenv("CREDENTIALS", "secret-keys")
+    monkeypatch.setenv("CREDENTIALS", "c2VjcmV0LWtleXM=")
 
     auth = Auth("fakecraft", "fakestore.com", "CREDENTIALS")
 

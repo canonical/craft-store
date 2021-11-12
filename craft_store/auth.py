@@ -93,7 +93,17 @@ class Auth:
 
         if environment_auth_value:
             keyring.set_keyring(MemoryKeyring())
-            self.set_credentials(environment_auth_value)
+            self.set_credentials(self.decode_credentials(environment_auth_value))
+
+    @staticmethod
+    def decode_credentials(encoded_credentials: str) -> str:
+        """Decode base64 encoded credentials."""
+        return base64.b64decode(encoded_credentials).decode()
+
+    @staticmethod
+    def encode_credentials(credentials: str) -> str:
+        """Encode credentials to base64."""
+        return base64.b64encode(credentials.encode()).decode()
 
     def set_credentials(self, credentials: str) -> None:
         """Store credentials in the keyring.
@@ -105,10 +115,8 @@ class Auth:
             self.application_name,
             self.host,
         )
-        encoded_credentials = base64.b64encode(credentials.encode())
-        keyring.set_password(
-            self.application_name, self.host, encoded_credentials.decode()
-        )
+        encoded_credentials = self.encode_credentials(credentials)
+        keyring.set_password(self.application_name, self.host, encoded_credentials)
 
     def get_credentials(self) -> str:
         """Retrieve credentials from the keyring."""
@@ -134,7 +142,7 @@ class Auth:
                 "Credentials not found in the keyring %r", keyring.get_keyring().name
             )
             raise errors.NotLoggedIn()
-        credentials = base64.b64decode(encoded_credentials_string).decode()
+        credentials = self.decode_credentials(encoded_credentials_string)
         return credentials
 
     def del_credentials(self) -> None:

@@ -180,7 +180,7 @@ class StoreClient(HTTPClient):
         # Save the authorization token.
         self._auth.set_credentials(store_authorized_macaroon)
 
-        return store_authorized_macaroon
+        return self._auth.encode_credentials(store_authorized_macaroon)
 
     def request(
         self,

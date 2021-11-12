@@ -189,13 +189,13 @@ def test_del_credentials_gets_no_credential(caplog, keyring_get_mock):
 
 
 def test_environment_set(monkeypatch, keyring_set_keyring_mock, keyring_set_mock):
-    monkeypatch.setenv("FAKE_ENV", "keys-to-the-kingdom")
+    monkeypatch.setenv("FAKE_ENV", "c2VjcmV0LWtleXM=")
 
     Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
 
     assert keyring_set_keyring_mock.mock_calls == [ANY]
     assert keyring_set_mock.mock_calls == [
-        call("fakeclient", "fakestore.com", "a2V5cy10by10aGUta2luZ2RvbQ==")
+        call("fakeclient", "fakestore.com", "c2VjcmV0LWtleXM=")
     ]
 
 
