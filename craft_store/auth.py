@@ -46,10 +46,7 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
 
     def get_password(self, service: str, username: str) -> Optional[str]:
         """Get the service password for username from memory."""
-        try:
-            return self._credentials[service, username]
-        except KeyError:
-            return None
+        return self._credentials.get((service, username))
 
     def delete_password(self, service: str, username: str) -> None:
         """Delete the service password for username from memory."""
