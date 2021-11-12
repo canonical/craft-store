@@ -8,7 +8,9 @@ Welcome to Craft Store's documentation!
 
    tutorials
 
+.. toctree::
    :caption: Reference:
+   :maxdepth: 2
 
    craft_store
 
