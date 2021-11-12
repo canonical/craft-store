@@ -77,7 +77,7 @@ def test_charmhub_packages():
 def test_charmhub_invalid_packages():
     charmhub = endpoints.CHARMHUB
 
-    with pytest.raises(RuntimeError) as raised:
+    with pytest.raises(ValueError) as raised:
         charmhub.get_token_request(
             permissions=["permission-foo", "permission-bar"],
             description="client description",
@@ -150,7 +150,7 @@ def test_snap_store_packages():
 def test_snap_store_invalid_packages():
     snap_store = endpoints.SNAP_STORE
 
-    with pytest.raises(RuntimeError) as raised:
+    with pytest.raises(ValueError) as raised:
         snap_store.get_token_request(
             permissions=["permission-foo", "permission-bar"],
             description="client description",

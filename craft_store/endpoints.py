@@ -48,7 +48,7 @@ class Endpoints:
         ]
         if unknown_packages:
             unknown_package_types = [p.package_type for p in unknown_packages]
-            raise RuntimeError(
+            raise ValueError(
                 f"Package types {unknown_package_types} not in {self.valid_package_types}"
             )
 
