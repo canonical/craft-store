@@ -16,13 +16,13 @@
 
 import logging
 from collections import namedtuple
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 
 import keyring.errors
 import pytest
 
 from craft_store import errors
-from craft_store.auth import Auth
+from craft_store.auth import Auth, MemoryKeyring
 
 
 @pytest.fixture(autouse=True)
@@ -32,6 +32,16 @@ def keyring_get_keyring_mock():
     patched_keyring = patch("keyring.get_keyring", autospec=True)
     mocked_keyring = patched_keyring.start()
     mocked_keyring.return_value = namedtuple("FakeKeyring", ["name"])("Fake Keyring")
+    yield mocked_keyring
+    patched_keyring.stop()
+
+
+@pytest.fixture(autouse=True)
+def keyring_set_keyring_mock():
+    """Mock setting the keyring."""
+
+    patched_keyring = patch("keyring.set_keyring", autospec=True)
+    mocked_keyring = patched_keyring.start()
     yield mocked_keyring
     patched_keyring.stop()
 
@@ -176,3 +186,45 @@ def test_del_credentials_gets_no_credential(caplog, keyring_get_mock):
         "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring.",
         "Credentials not found in the keyring 'Fake Keyring'",
     ] == [rec.message for rec in caplog.records]
+
+
+def test_environment_set(monkeypatch, keyring_set_keyring_mock, keyring_set_mock):
+    monkeypatch.setenv("FAKE_ENV", "keys-to-the-kingdom")
+
+    Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
+
+    assert keyring_set_keyring_mock.mock_calls == [ANY]
+    assert keyring_set_mock.mock_calls == [
+        call("fakeclient", "fakestore.com", "a2V5cy10by10aGUta2luZ2RvbQ==")
+    ]
+
+
+def test_memory_keyring_set_get():
+    k = MemoryKeyring()
+    k.set_password("my-service", "my-user", "my-password")
+
+    assert k.get_password("my-service", "my-user") == "my-password"
+
+
+def test_memory_keyring_get_empty():
+    k = MemoryKeyring()
+
+    assert k.get_password("my-service", "my-user") is None
+
+
+def test_memory_keyring_set_delete():
+    k = MemoryKeyring()
+    k.set_password("my-service", "my-user", "my-password")
+
+    assert k.get_password("my-service", "my-user") == "my-password"
+
+    k.delete_password("my-service", "my-user")
+
+    assert k.get_password("my-service", "my-user") is None
+
+
+def test_memory_keyring_delete_empty():
+    k = MemoryKeyring()
+
+    with pytest.raises(keyring.errors.PasswordDeleteError):
+        k.delete_password("my-service", "my-user")

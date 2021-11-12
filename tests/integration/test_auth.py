@@ -14,41 +14,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Dict, Optional, Tuple
-
 import keyring
 import keyring.backend
 import keyring.errors
 import pytest
 
 from craft_store import errors
-from craft_store.auth import Auth
-
-
-class MemoryKeyring(keyring.backend.KeyringBackend):
-    """A test keyring that stores credentials in a dictionary."""
-
-    priority = 1  # type: ignore
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        self._credentials: Dict[Tuple[str, str], str] = {}
-
-    def set_password(self, service: str, username: str, password: str) -> None:
-        self._credentials[service, username] = password
-
-    def get_password(self, service: str, username: str) -> Optional[str]:
-        try:
-            return self._credentials[service, username]
-        except KeyError:
-            return None
-
-    def delete_password(self, service: str, username: str) -> None:
-        try:
-            del self._credentials[service, username]
-        except KeyError as key_error:
-            raise keyring.errors.PasswordDeleteError() from key_error
+from craft_store.auth import Auth, MemoryKeyring
 
 
 @pytest.fixture
@@ -77,3 +49,11 @@ def test_auth():
         auth.del_credentials()
 
     assert str(error.value) == ("Not logged in.")
+
+
+def test_auth_from_environment(monkeypatch):
+    monkeypatch.setenv("CREDENTIALS", "secret-keys")
+
+    auth = Auth("fakecraft", "fakestore.com", "CREDENTIALS")
+
+    assert auth.get_credentials() == "secret-keys"

@@ -108,14 +108,20 @@ def auth_mock(real_macaroon):
     patched_auth.stop()
 
 
+@pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
 def test_store_client_login(
-    http_client_request_mock, real_macaroon, bakery_discharge_mock, auth_mock
+    http_client_request_mock,
+    real_macaroon,
+    bakery_discharge_mock,
+    auth_mock,
+    environment_auth,
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
+        environment_auth=environment_auth,
     )
 
     store_client.login(
@@ -145,7 +151,7 @@ def test_store_client_login(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=environment_auth),
         call().set_credentials(real_macaroon),
     ]
 
@@ -205,7 +211,7 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().set_credentials(real_macaroon),
     ]
 
@@ -221,7 +227,7 @@ def test_store_client_logout(auth_mock):
     store_client.logout()
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().del_credentials(),
     ]
 
@@ -247,7 +253,7 @@ def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
 
@@ -277,7 +283,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
 

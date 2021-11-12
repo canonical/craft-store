@@ -78,6 +78,7 @@ class StoreClient(HTTPClient):
         endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
+        environment_auth: Optional[str] = None,
     ) -> None:
         """Initialize the Store Client.
 
@@ -85,6 +86,7 @@ class StoreClient(HTTPClient):
         :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
         :param application_name: the name application using this class, used for the keyring.
         :param user_agent: User-Agent header to use for HTTP(s) requests.
+        :param environment_credentials: environment variable to use for credentials.
         """
         super().__init__(user_agent=user_agent)
 
@@ -94,7 +96,8 @@ class StoreClient(HTTPClient):
         self._base_url = base_url
         self._store_host = urlparse(base_url).netloc
         self._endpoints = endpoints
-        self._auth = Auth(application_name, base_url)
+
+        self._auth = Auth(application_name, base_url, environment_auth=environment_auth)
 
     def _get_macaroon(self, token_request: Dict[str, Any]) -> str:
         token_response = super().request(
@@ -136,7 +139,7 @@ class StoreClient(HTTPClient):
         ttl: int,
         packages: Optional[Sequence[endpoints.Package]] = None,
         channels: Optional[Sequence[str]] = None,
-    ) -> None:
+    ) -> str:
         """Obtain credentials to perform authenticated requests.
 
         Credentials are stored on the systems keyring, handled by
@@ -176,6 +179,8 @@ class StoreClient(HTTPClient):
 
         # Save the authorization token.
         self._auth.set_credentials(store_authorized_macaroon)
+
+        return store_authorized_macaroon
 
     def request(
         self,
