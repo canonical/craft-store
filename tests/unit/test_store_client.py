@@ -150,6 +150,66 @@ def test_store_client_login(
     ]
 
 
+def test_store_client_login_with_packages_and_channels(
+    http_client_request_mock, real_macaroon, bakery_discharge_mock, auth_mock
+):
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        endpoints=endpoints.CHARMHUB,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+    )
+
+    store_client.login(
+        permissions=["perm-1", "perm-2"],
+        description="fakecraft@foo",
+        ttl=60,
+        channels=["edge"],
+        packages=[
+            endpoints.Package("my-charm", "charm"),
+            endpoints.Package("my-bundle", "bundle"),
+        ],
+    )
+
+    assert http_client_request_mock.mock_calls == [
+        call(
+            store_client,
+            "POST",
+            "https://fake-server.com/v1/tokens",
+            json={
+                "permissions": ["perm-1", "perm-2"],
+                "description": "fakecraft@foo",
+                "ttl": 60,
+                "packages": [
+                    {
+                        "name": "my-charm",
+                        "type": "charm",
+                    },
+                    {
+                        "name": "my-bundle",
+                        "type": "bundle",
+                    },
+                ],
+                "channels": ["edge"],
+            },
+        ),
+        call(
+            store_client,
+            "POST",
+            "https://fake-server.com/v1/tokens/exchange",
+            headers={
+                "Macaroons": "W3siaWRlbnRpZmllciI6ICIiLCAic2lnbmF0dXJlIjogImQ5NTMzNDYxZDc4MzVlNDg1MWM3ZTNiNjM5MTQ0NDA2Y2Y3Njg1OTdkZWE2ZTEzMzIzMmZiZDIzODVhNWMwNTAiLCAibG9jYXRpb24iOiAiZmFrZS1zZXJ2ZXIuY29tIn1d"
+            },
+            json={},
+        ),
+    ]
+
+    assert auth_mock.mock_calls == [
+        call("fakecraft", "https://fake-server.com"),
+        call().set_credentials(real_macaroon),
+    ]
+
+
 def test_store_client_logout(auth_mock):
     store_client = StoreClient(
         base_url="https://fake-server.com",

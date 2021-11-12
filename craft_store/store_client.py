@@ -18,7 +18,7 @@
 
 import base64
 import json
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Optional, Sequence
 from urllib.parse import urlparse
 
 import requests
@@ -75,7 +75,7 @@ class StoreClient(HTTPClient):
         self,
         *,
         base_url: str,
-        endpoints: endpoints.Endpoints,
+        endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
     ) -> None:
@@ -134,6 +134,8 @@ class StoreClient(HTTPClient):
         permissions: Sequence[str],
         description: str,
         ttl: int,
+        packages: Optional[Sequence[endpoints.Package]] = None,
+        channels: Optional[Sequence[str]] = None,
     ) -> None:
         """Obtain credentials to perform authenticated requests.
 
@@ -157,10 +159,15 @@ class StoreClient(HTTPClient):
         :param description: Client description to refer to from the Store.
         :param ttl: time to live for the credential, in other words, how
                     long until it expires, expressed in seconds.
-
+        :param packages: Sequence of packages to limit the credentials to.
+        :param channels: Sequence of channel names to limit the credentials to.
         """
         token_request = self._endpoints.get_token_request(
-            permissions=permissions, description=description, ttl=ttl
+            permissions=permissions,
+            description=description,
+            ttl=ttl,
+            packages=packages,
+            channels=channels,
         )
 
         macaroon = self._get_macaroon(token_request)
