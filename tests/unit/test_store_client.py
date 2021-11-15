@@ -104,24 +104,32 @@ def auth_mock(real_macaroon):
     patched_auth = patch("craft_store.store_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
     mocked_auth.return_value.get_credentials.return_value = real_macaroon
+    mocked_auth.return_value.encode_credentials.return_value = "c2VjcmV0LWtleXM="
     yield mocked_auth
     patched_auth.stop()
 
 
+@pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
 def test_store_client_login(
-    http_client_request_mock, real_macaroon, bakery_discharge_mock, auth_mock
+    http_client_request_mock,
+    real_macaroon,
+    bakery_discharge_mock,
+    auth_mock,
+    environment_auth,
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
+        environment_auth=environment_auth,
     )
 
-    store_client.login(
+    credentials = store_client.login(
         permissions=["perm-1", "perm-2"], description="fakecraft@foo", ttl=60
     )
 
+    assert credentials == "c2VjcmV0LWtleXM="
     assert http_client_request_mock.mock_calls == [
         call(
             store_client,
@@ -145,8 +153,9 @@ def test_store_client_login(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=environment_auth),
         call().set_credentials(real_macaroon),
+        call().encode_credentials(real_macaroon),
     ]
 
 
@@ -160,7 +169,7 @@ def test_store_client_login_with_packages_and_channels(
         user_agent="FakeCraft Unix X11",
     )
 
-    store_client.login(
+    credentials = store_client.login(
         permissions=["perm-1", "perm-2"],
         description="fakecraft@foo",
         ttl=60,
@@ -171,6 +180,7 @@ def test_store_client_login_with_packages_and_channels(
         ],
     )
 
+    assert credentials == "c2VjcmV0LWtleXM="
     assert http_client_request_mock.mock_calls == [
         call(
             store_client,
@@ -205,8 +215,9 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().set_credentials(real_macaroon),
+        call().encode_credentials(real_macaroon),
     ]
 
 
@@ -221,7 +232,7 @@ def test_store_client_logout(auth_mock):
     store_client.logout()
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().del_credentials(),
     ]
 
@@ -247,7 +258,7 @@ def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
 
@@ -277,7 +288,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com"),
+        call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
 
