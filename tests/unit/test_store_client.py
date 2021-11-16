@@ -109,14 +109,18 @@ def auth_mock(real_macaroon):
     patched_auth.stop()
 
 
+@pytest.mark.usefixtures("bakery_discharge_mock")
 @pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
 def test_store_client_login(
+    monkeypatch,
     http_client_request_mock,
     real_macaroon,
-    bakery_discharge_mock,
     auth_mock,
     environment_auth,
 ):
+    if environment_auth is not None:
+        monkeypatch.setenv(environment_auth, "c2VjcmV0LWtleXM=")
+
     store_client = StoreClient(
         base_url="https://fake-server.com",
         endpoints=endpoints.CHARMHUB,
@@ -125,8 +129,12 @@ def test_store_client_login(
         environment_auth=environment_auth,
     )
 
+    save_credentials = environment_auth is None
     credentials = store_client.login(
-        permissions=["perm-1", "perm-2"], description="fakecraft@foo", ttl=60
+        permissions=["perm-1", "perm-2"],
+        description="fakecraft@foo",
+        ttl=60,
+        save_credentials=save_credentials,
     )
 
     assert credentials == "c2VjcmV0LWtleXM="
@@ -152,11 +160,27 @@ def test_store_client_login(
         ),
     ]
 
-    assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=environment_auth),
-        call().set_credentials(real_macaroon),
-        call().encode_credentials(real_macaroon),
-    ]
+    if save_credentials:
+        expected_auth_calls = [
+            call(
+                "fakecraft",
+                "https://fake-server.com",
+                environment_auth=environment_auth,
+            ),
+            call().set_credentials(real_macaroon),
+            call().encode_credentials(real_macaroon),
+        ]
+    else:
+        expected_auth_calls = [
+            call(
+                "fakecraft",
+                "https://fake-server.com",
+                environment_auth=environment_auth,
+            ),
+            call().encode_credentials(real_macaroon),
+        ]
+
+    assert auth_mock.mock_calls == expected_auth_calls
 
 
 def test_store_client_login_with_packages_and_channels(
@@ -221,6 +245,30 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
 
+def test_store_client_login_store_raises_with_environment_auth(monkeypatch):
+    monkeypatch.setenv("CREDENTIALS", "c2VjcmV0LWtleXM=")
+
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        endpoints=endpoints.CHARMHUB,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+        environment_auth="CREDENTIALS",
+    )
+
+    with pytest.raises(RuntimeError) as error:
+        store_client.login(
+            permissions=["perm-1", "perm-2"],
+            description="fakecraft@foo",
+            ttl=60,
+            save_credentials=True,
+        )
+
+    assert (
+        str(error.value) == "Cannot use save_credentials when environment_auth is set."
+    )
+
+
 def test_store_client_logout(auth_mock):
     store_client = StoreClient(
         base_url="https://fake-server.com",
@@ -235,6 +283,23 @@ def test_store_client_logout(auth_mock):
         call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().del_credentials(),
     ]
+
+
+def test_store_client_logout_raises_with_environment_auth(monkeypatch):
+    monkeypatch.setenv("CREDENTIALS", "c2VjcmV0LWtleXM=")
+
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        endpoints=endpoints.CHARMHUB,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+        environment_auth="CREDENTIALS",
+    )
+
+    with pytest.raises(RuntimeError) as error:
+        store_client.logout()
+
+    assert str(error.value) == "Cannot logout with environment_auth."
 
 
 def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock):

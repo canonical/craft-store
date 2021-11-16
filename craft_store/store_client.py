@@ -18,6 +18,7 @@
 
 import base64
 import json
+import os
 from typing import Any, Dict, Optional, Sequence
 from urllib.parse import urlparse
 
@@ -98,6 +99,9 @@ class StoreClient(HTTPClient):
         self._endpoints = endpoints
 
         self._auth = Auth(application_name, base_url, environment_auth=environment_auth)
+        self._ephemeral_login = (
+            environment_auth is not None and os.getenv(environment_auth) is not None
+        )
 
     def _get_macaroon(self, token_request: Dict[str, Any]) -> str:
         token_response = super().request(
@@ -139,6 +143,7 @@ class StoreClient(HTTPClient):
         ttl: int,
         packages: Optional[Sequence[endpoints.Package]] = None,
         channels: Optional[Sequence[str]] = None,
+        save_credentials=True,
     ) -> str:
         """Obtain credentials to perform authenticated requests.
 
@@ -158,13 +163,24 @@ class StoreClient(HTTPClient):
         This last macaroon is stored into the systems keyring to
         perform authenticated requests.
 
+        It is an error to initialize with environment_auth set and use
+        save_credentials as credentials cannot be set back to an
+        environment variable.
+
         :param permissions: Set of permissions to grant the login.
         :param description: Client description to refer to from the Store.
         :param ttl: time to live for the credential, in other words, how
                     long until it expires, expressed in seconds.
         :param packages: Sequence of packages to limit the credentials to.
         :param channels: Sequence of channel names to limit the credentials to.
+        :param save_credentials: if credentials will be save to the keystore.
+        :raises RuntimeError: when save_credentials is used together with environment_auth.
         """
+        if save_credentials and self._ephemeral_login:
+            raise RuntimeError(
+                "Cannot use save_credentials when environment_auth is set."
+            )
+
         token_request = self._endpoints.get_token_request(
             permissions=permissions,
             description=description,
@@ -178,7 +194,8 @@ class StoreClient(HTTPClient):
         store_authorized_macaroon = self._authorize_token(candid_discharged_macaroon)
 
         # Save the authorization token.
-        self._auth.set_credentials(store_authorized_macaroon)
+        if save_credentials:
+            self._auth.set_credentials(store_authorized_macaroon)
 
         return self._auth.encode_credentials(store_authorized_macaroon)
 
@@ -225,5 +242,9 @@ class StoreClient(HTTPClient):
         """Clear credentials.
 
         :raises errors.NotLoggedIn: if not logged in.
+        :raises RuntimeError: when logout is called and environment_auth is set.
         """
+        if self._ephemeral_login:
+            raise RuntimeError("Cannot logout with environment_auth.")
+
         self._auth.del_credentials()
