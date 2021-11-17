@@ -93,6 +93,10 @@ class Auth:
 
         if environment_auth_value:
             keyring.set_keyring(MemoryKeyring())
+
+        self._keyring = keyring.get_keyring()
+
+        if environment_auth_value:
             self.set_credentials(self.decode_credentials(environment_auth_value))
 
     @staticmethod
@@ -111,23 +115,27 @@ class Auth:
         :param credentials: token to store.
         """
         logger.debug(
-            "Storing credentials for %r on %r in keyring.",
+            "Storing credentials for %r on %r in keyring %r.",
             self.application_name,
             self.host,
+            self._keyring.name,
         )
         encoded_credentials = self.encode_credentials(credentials)
-        keyring.set_password(self.application_name, self.host, encoded_credentials)
+        self._keyring.set_password(
+            self.application_name, self.host, encoded_credentials
+        )
 
     def get_credentials(self) -> str:
         """Retrieve credentials from the keyring."""
         logger.debug(
-            "Retrieving credentials for %r on %r from keyring.",
+            "Retrieving credentials for %r on %r from keyring %r.",
             self.application_name,
             self.host,
+            self._keyring.name,
         )
 
         try:
-            encoded_credentials_string = keyring.get_password(
+            encoded_credentials_string = self._keyring.get_password(
                 self.application_name, self.host
             )
         except Exception as unknown_error:
@@ -138,9 +146,7 @@ class Auth:
             raise errors.NotLoggedIn() from unknown_error
 
         if encoded_credentials_string is None:
-            logger.debug(
-                "Credentials not found in the keyring %r", keyring.get_keyring().name
-            )
+            logger.debug("Credentials not found in the keyring %r", self._keyring.name)
             raise errors.NotLoggedIn()
         credentials = self.decode_credentials(encoded_credentials_string)
         return credentials
@@ -152,9 +158,9 @@ class Auth:
         self.get_credentials()
 
         logger.debug(
-            "Deleting credentials for %r on %r from keyring: %r.",
+            "Deleting credentials for %r on %r from keyring %r.",
             self.application_name,
             self.host,
-            keyring.get_keyring().name,
+            self._keyring.name,
         )
-        keyring.delete_password(self.application_name, self.host)
+        self._keyring.delete_password(self.application_name, self.host)

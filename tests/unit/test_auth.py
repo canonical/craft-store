@@ -15,9 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from collections import namedtuple
-from unittest.mock import ANY, call, patch
+from typing import Any, List, Optional, Tuple
+from unittest.mock import ANY, patch
 
+import keyring
 import keyring.errors
 import pytest
 
@@ -25,18 +26,36 @@ from craft_store import errors
 from craft_store.auth import Auth, MemoryKeyring
 
 
-@pytest.fixture(autouse=True)
-def keyring_get_keyring_mock():
-    """Mock getting the keyring."""
+class FakeKeyring:
+    """Fake Keyring Backend implementation for tests."""
 
-    patched_keyring = patch("keyring.get_keyring", autospec=True)
-    mocked_keyring = patched_keyring.start()
-    mocked_keyring.return_value = namedtuple("FakeKeyring", ["name"])("Fake Keyring")
-    yield mocked_keyring
-    patched_keyring.stop()
+    name = "Fake Keyring"
+
+    def __init__(self) -> None:
+        self.set_password_calls: List[Tuple[Any, ...]] = []
+        self.get_password_calls: List[Tuple[Any, ...]] = []
+        self.delete_password_calls: List[Tuple[Any, ...]] = []
+        self.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+        self.delete_error: Optional[Exception] = None
+
+    def set_password(self, *args) -> None:
+        """Set the service password for username in memory."""
+        self.set_password_calls.append(args)
+
+    def get_password(self, *args):
+        """Get the service password for username from memory."""
+        self.get_password_calls.append(args)
+        return self.password
+
+    def delete_password(self, *args):
+        """Delete the service password for username from memory."""
+        self.delete_password_calls.append(args)
+        if self.delete_error is not None:
+            # https://www.logilab.org/ticket/3207
+            raise self.delete_error  # pylint: disable=raising-bad-type
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def keyring_set_keyring_mock():
     """Mock setting the keyring."""
 
@@ -47,155 +66,137 @@ def keyring_set_keyring_mock():
 
 
 @pytest.fixture
-def keyring_set_mock():
-    """Mock for keyring.set_password."""
-    patched_keyring = patch("keyring.set_password", autospec=True)
+def fake_keyring():
+    return FakeKeyring()
+
+
+@pytest.fixture(autouse=True)
+def fake_keyring_get(fake_keyring):
+    """Mock keyring and return a FakeKeyring."""
+
+    patched_keyring = patch("keyring.get_keyring")
     mocked_keyring = patched_keyring.start()
+    mocked_keyring.return_value = fake_keyring
     yield mocked_keyring
     patched_keyring.stop()
 
 
-@pytest.fixture
-def keyring_get_mock():
-    """Mock for keyring.get_password."""
-    patched_keyring = patch(
-        "keyring.get_password",
-        autospec=True,
-        return_value="eydwYXNzd29yZCc6ICdzZWNyZXQnfQ==",
-    )
-    mocked_keyring = patched_keyring.start()
-    yield mocked_keyring
-    patched_keyring.stop()
-
-
-@pytest.fixture
-def keyring_delete_mock():
-    """Mock for keyring.get_password."""
-    patched_keyring = patch("keyring.delete_password", autospec=True, return_value=None)
-    mocked_keyring = patched_keyring.start()
-    yield mocked_keyring
-    patched_keyring.stop()
-
-
-def test_set_credentials(caplog, keyring_set_mock):
+def test_set_credentials(caplog, fake_keyring):
     auth = Auth("fakeclient", "fakestore.com")
 
     auth.set_credentials("{'password': 'secret'}")
 
-    assert keyring_set_mock.mock_calls == [
-        call("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ==")
+    assert fake_keyring.set_password_calls == [
+        ("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="),
     ]
     assert caplog.records == []
 
 
-def test_set_credentials_log_debug(caplog, keyring_set_mock):
+def test_set_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
     auth = Auth("fakeclient", "fakestore.com")
 
     auth.set_credentials("{'password': 'secret'}")
 
-    assert keyring_set_mock.mock_calls == [
-        call("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ==")
+    assert fake_keyring.set_password_calls == [
+        ("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="),
     ]
-    assert ["Storing credentials for 'fakeclient' on 'fakestore.com' in keyring."] == [
-        rec.message for rec in caplog.records
-    ]
-
-
-def test_get_credentials(caplog, keyring_get_mock):
-    auth = Auth("fakeclient", "fakestore.com")
-
-    assert auth.get_credentials() == "{'password': 'secret'}"
-    assert keyring_get_mock.mock_calls == [call("fakeclient", "fakestore.com")]
-    assert caplog.records == []
-
-
-def test_get_credentials_log_debug(caplog, keyring_get_mock):
-    caplog.set_level(logging.DEBUG)
-
-    auth = Auth("fakeclient", "fakestore.com")
-
-    assert auth.get_credentials() == "{'password': 'secret'}"
-    assert keyring_get_mock.mock_calls == [call("fakeclient", "fakestore.com")]
     assert [
-        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring."
+        "Storing credentials for 'fakeclient' on 'fakestore.com' in keyring 'Fake Keyring'."
     ] == [rec.message for rec in caplog.records]
 
 
-def test_get_credentials_no_credentials_in_keyring(caplog, keyring_get_mock):
-    keyring_get_mock.return_value = None
+def test_get_credentials(caplog, fake_keyring):
+    auth = Auth("fakeclient", "fakestore.com")
+
+    assert auth.get_credentials() == "{'password': 'secret'}"
+    assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
+    assert caplog.records == []
+
+
+def test_get_credentials_log_debug(caplog, fake_keyring):
+    caplog.set_level(logging.DEBUG)
+
+    auth = Auth("fakeclient", "fakestore.com")
+
+    assert auth.get_credentials() == "{'password': 'secret'}"
+    assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
+    assert [
+        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'."
+    ] == [rec.message for rec in caplog.records]
+
+
+def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
+    fake_keyring.password = None
 
     auth = Auth("fakeclient", "fakestore.com")
 
     with pytest.raises(errors.NotLoggedIn):
         auth.get_credentials()
 
-    assert keyring_get_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
     assert caplog.records == []
 
 
-@pytest.mark.usefixtures("keyring_get_mock")
-def test_del_credentials(caplog, keyring_delete_mock):
+def test_del_credentials(caplog, fake_keyring):
     auth = Auth("fakeclient", "fakestore.com")
 
     auth.del_credentials()
 
-    assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert fake_keyring.delete_password_calls == [("fakeclient", "fakestore.com")]
     assert caplog.records == []
 
 
-@pytest.mark.usefixtures("keyring_get_mock")
-def test_del_credentials_log_debug(caplog, keyring_delete_mock):
+def test_del_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
 
     auth = Auth("fakeclient", "fakestore.com")
 
     auth.del_credentials()
 
-    assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert fake_keyring.delete_password_calls == [("fakeclient", "fakestore.com")]
     assert [
-        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring.",
-        "Deleting credentials for 'fakeclient' on 'fakestore.com' from keyring: 'Fake Keyring'.",
+        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
+        "Deleting credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
     ] == [rec.message for rec in caplog.records]
 
 
-@pytest.mark.usefixtures("keyring_get_mock")
-def test_del_credentials_delete_error_in_keyring(caplog, keyring_delete_mock):
-    keyring_delete_mock.side_effect = keyring.errors.PasswordDeleteError()
+def test_del_credentials_delete_error_in_keyring(caplog, fake_keyring):
+    fake_keyring.delete_error = keyring.errors.PasswordDeleteError()
 
     auth = Auth("fakeclient", "fakestore.com")
 
     with pytest.raises(keyring.errors.PasswordDeleteError):
         auth.del_credentials()
 
-    assert keyring_delete_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert fake_keyring.delete_password_calls == [("fakeclient", "fakestore.com")]
     assert caplog.records == []
 
 
-def test_del_credentials_gets_no_credential(caplog, keyring_get_mock):
+def test_del_credentials_gets_no_credential(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
-    keyring_get_mock.return_value = None
+    fake_keyring.password = None
 
     auth = Auth("fakeclient", "fakestore.com")
 
     with pytest.raises(errors.NotLoggedIn):
         auth.del_credentials()
 
-    assert keyring_get_mock.mock_calls == [call("fakeclient", "fakestore.com")]
+    assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
     assert [
-        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring.",
+        "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
         "Credentials not found in the keyring 'Fake Keyring'",
     ] == [rec.message for rec in caplog.records]
 
 
-def test_environment_set(monkeypatch, keyring_set_keyring_mock, keyring_set_mock):
+def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     monkeypatch.setenv("FAKE_ENV", "c2VjcmV0LWtleXM=")
 
     Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
 
     assert keyring_set_keyring_mock.mock_calls == [ANY]
-    assert keyring_set_mock.mock_calls == [
-        call("fakeclient", "fakestore.com", "c2VjcmV0LWtleXM=")
+    assert fake_keyring.set_password_calls == [
+        ("fakeclient", "fakestore.com", "c2VjcmV0LWtleXM=")
     ]
 
 
