@@ -8,6 +8,8 @@ Welcome to Craft Store's documentation!
 
    tutorials
 
+   howtos
+
 .. toctree::
    :caption: Reference:
    :maxdepth: 2

@@ -86,7 +86,7 @@ class StoreClient(HTTPClient):
         :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
         :param application_name: the name application using this class, used for the keyring.
         :param user_agent: User-Agent header to use for HTTP(s) requests.
-        :param environment_credentials: environment variable to use for credentials.
+        :param environment_auth: environment variable to use for credentials.
         """
         super().__init__(user_agent=user_agent)
 
