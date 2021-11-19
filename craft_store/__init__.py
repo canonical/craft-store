@@ -16,7 +16,7 @@
 
 """Interact with Canonical services such as Charmhub and the Snap Store."""
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 from . import errors  # noqa: F401
