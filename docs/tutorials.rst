@@ -90,4 +90,4 @@ Run
 
 Run the saved python module to retrieved the account information for the login::
 
-  $ python snap_store_login.py
+  $ python snap_store_whoami.py
