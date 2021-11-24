@@ -39,6 +39,7 @@ coverage: ## Run pytest with coverage report.
 docs: ## Generate documentation.
 	rm -f docs/craft_store.rst
 	rm -f docs/modules.rst
+	pip install -r docs/requirements.txt
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
