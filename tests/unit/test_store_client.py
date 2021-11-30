@@ -70,7 +70,7 @@ def http_client_request_mock(real_macaroon):
         return response
 
     patched_http_client = patch(
-        "craft_store.store_client.HTTPClient.request",
+        "craft_store.base_client.HTTPClient.request",
         autospec=True,
         side_effect=request,
     )
@@ -101,7 +101,7 @@ def bakery_discharge_mock(monkeypatch):
 
 @pytest.fixture
 def auth_mock(real_macaroon):
-    patched_auth = patch("craft_store.store_client.Auth", autospec=True)
+    patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
     mocked_auth.return_value.get_credentials.return_value = real_macaroon
     mocked_auth.return_value.encode_credentials.return_value = "c2VjcmV0LWtleXM="
@@ -132,9 +132,10 @@ def test_store_client_login(
     assert credentials == "c2VjcmV0LWtleXM="
     assert http_client_request_mock.mock_calls == [
         call(
-            store_client,
+            store_client.http_client,
             "POST",
             "https://fake-server.com/v1/tokens",
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
@@ -142,7 +143,7 @@ def test_store_client_login(
             },
         ),
         call(
-            store_client,
+            store_client.http_client,
             "POST",
             "https://fake-server.com/v1/tokens/exchange",
             headers={
@@ -183,9 +184,10 @@ def test_store_client_login_with_packages_and_channels(
     assert credentials == "c2VjcmV0LWtleXM="
     assert http_client_request_mock.mock_calls == [
         call(
-            store_client,
+            store_client.http_client,
             "POST",
             "https://fake-server.com/v1/tokens",
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
@@ -204,7 +206,7 @@ def test_store_client_login_with_packages_and_channels(
             },
         ),
         call(
-            store_client,
+            store_client.http_client,
             "POST",
             "https://fake-server.com/v1/tokens/exchange",
             headers={
@@ -249,7 +251,7 @@ def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock
 
     assert http_client_request_mock.mock_calls == [
         call(
-            store_client,
+            store_client.http_client,
             "GET",
             "https://fake-server.com/fakepath",
             params=None,
@@ -279,7 +281,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
 
     assert http_client_request_mock.mock_calls == [
         call(
-            store_client,
+            store_client.http_client,
             "GET",
             "https://fake-server.com/v1/whoami",
             params=None,
