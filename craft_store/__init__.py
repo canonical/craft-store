@@ -19,16 +19,19 @@
 __version__ = "1.1.0"
 
 
-from . import errors
+from . import endpoints, errors
 from .auth import Auth
 from .base_client import BaseClient
 from .http_client import HTTPClient
 from .store_client import StoreClient
+from .ubuntu_one_store_client import UbuntuOneStoreClient
 
 __all__ = [
+    "endpoints",
     "errors",
     "Auth",
     "BaseClient",
     "HTTPClient",
     "StoreClient",
+    "UbuntuOneStoreClient",
 ]

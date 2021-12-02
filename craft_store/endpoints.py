@@ -35,12 +35,14 @@ class Endpoints:
     :param whoami: path to the whoami API.
     :param tokens: path to the tokens API.
     :param tokens_exchange: path to the tokens_exchange API.
+    :param tokens_refresh: path to the tokens_refresh API.
     """
 
     whoami: str
     tokens: str
     tokens_exchange: str
     valid_package_types: Sequence[str]
+    tokens_refresh: Optional[str] = None
 
     def _validate_packages(self, packages: Sequence[Package]) -> None:
         unknown_packages = [
@@ -139,3 +141,13 @@ SNAP_STORE: Final = _SnapStoreEndpoints(
     valid_package_types=["snap"],
 )
 """Snap Store set of supported endpoints."""
+
+
+U1_SNAP_STORE: Final = _SnapStoreEndpoints(
+    whoami="/api/v2/tokens/whoami",
+    tokens="/dev/api/acl/",
+    tokens_exchange="/api/v2/tokens/discharge",
+    tokens_refresh="/api/v2/tokens/refresh",
+    valid_package_types=["snap"],
+)
+"""Ubuntu One compatible Snap Store set of supported endpoints."""
