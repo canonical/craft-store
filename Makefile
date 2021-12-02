@@ -90,7 +90,7 @@ test-mypy:
 
 .PHONY: test-pydocstyle
 test-pydocstyle:
-	pydocstyle craft_store
+	pydocstyle craft_store --ignore-decorator=overrides
 
 .PHONY: test-pylint
 test-pylint:

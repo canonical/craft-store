@@ -19,6 +19,16 @@
 __version__ = "1.1.0"
 
 
-from . import errors  # noqa: F401
-from .http_client import HTTPClient  # noqa: F401
-from .store_client import StoreClient  # noqa: F401
+from . import errors
+from .auth import Auth
+from .base_client import BaseClient
+from .http_client import HTTPClient
+from .store_client import StoreClient
+
+__all__ = [
+    "errors",
+    "Auth",
+    "BaseClient",
+    "HTTPClient",
+    "StoreClient",
+]
