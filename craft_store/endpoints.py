@@ -126,7 +126,7 @@ class _SnapStoreEndpoints(Endpoints):
 
 
 CHARMHUB: Final = Endpoints(
-    whoami="/v1/whoami",
+    whoami="/v1/tokens/whoami",
     tokens="/v1/tokens",
     tokens_exchange="/v1/tokens/exchange",
     valid_package_types=["charm", "bundle"],
