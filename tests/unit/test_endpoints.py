@@ -24,7 +24,7 @@ def test_charmhub():
 
     assert charmhub.tokens == "/v1/tokens"
     assert charmhub.tokens_exchange == "/v1/tokens/exchange"
-    assert charmhub.whoami == "/v1/whoami"
+    assert charmhub.whoami == "/v1/tokens/whoami"
     assert charmhub.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",

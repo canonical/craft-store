@@ -283,7 +283,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
         call(
             store_client.http_client,
             "GET",
-            "https://fake-server.com/v1/whoami",
+            "https://fake-server.com/v1/tokens/whoami",
             params=None,
             headers={"Authorization": f"Macaroon {real_macaroon}"},
         )
