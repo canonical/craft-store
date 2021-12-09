@@ -2,6 +2,13 @@
 Changelog
 *********
 
+1.2.0 (2021-12-09)
+------------------
+
+- New whoami endpoint for :class:`craft_store.endpoints.CHARMHUB`
+- New class to provide login support for Ubuntu One SSO
+  :class:`craft_store.ubuntu_one_store_client.UbuntuOneStoreClient`
+
 1.1.0 (2021-11-19)
 ------------------
 
