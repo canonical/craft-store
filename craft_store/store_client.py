@@ -75,6 +75,7 @@ class StoreClient(BaseClient):
         self,
         *,
         base_url: str,
+        storage_base_url: str,
         endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
@@ -82,6 +83,7 @@ class StoreClient(BaseClient):
     ) -> None:
         super().__init__(
             base_url=base_url,
+            storage_base_url=storage_base_url,
             endpoints=endpoints,
             application_name=application_name,
             user_agent=user_agent,

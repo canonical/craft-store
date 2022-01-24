@@ -25,6 +25,7 @@ def test_charmhub():
     assert charmhub.tokens == "/v1/tokens"
     assert charmhub.tokens_exchange == "/v1/tokens/exchange"
     assert charmhub.whoami == "/v1/tokens/whoami"
+    assert charmhub.upload == "/unscanned-upload/"
     assert charmhub.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
@@ -98,6 +99,7 @@ def test_snap_store():
     assert snap_store.tokens == "/api/v2/tokens"
     assert snap_store.tokens_exchange == "/api/v2/tokens/exchange"
     assert snap_store.whoami == "/api/v2/tokens/whoami"
+    assert snap_store.upload == "/unscanned-upload/"
     assert snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",

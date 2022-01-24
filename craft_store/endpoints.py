@@ -33,12 +33,14 @@ class Endpoints:
     """Endpoints used to make requests to a store.
 
     :param whoami: path to the whoami API.
+    :param upload: path used for uploading.
     :param tokens: path to the tokens API.
     :param tokens_exchange: path to the tokens_exchange API.
     :param tokens_refresh: path to the tokens_refresh API.
     """
 
     whoami: str
+    upload: str
     tokens: str
     tokens_exchange: str
     valid_package_types: Sequence[str]
@@ -90,6 +92,14 @@ class Endpoints:
 
         return token_request
 
+    @staticmethod
+    def get_upload_id(result: Dict[str, Any]) -> str:
+        """Return the upload ID for a given result.
+
+        :param result: the result from an upload request.
+        """
+        return result["upload-id"]
+
 
 @dataclasses.dataclass(repr=True)
 class _SnapStoreEndpoints(Endpoints):
@@ -124,9 +134,14 @@ class _SnapStoreEndpoints(Endpoints):
 
         return token_request
 
+    @staticmethod
+    def get_upload_id(result: Dict[str, Any]) -> str:
+        return result["upload_id"]
+
 
 CHARMHUB: Final = Endpoints(
     whoami="/v1/tokens/whoami",
+    upload="/unscanned-upload/",
     tokens="/v1/tokens",
     tokens_exchange="/v1/tokens/exchange",
     valid_package_types=["charm", "bundle"],
@@ -136,6 +151,7 @@ CHARMHUB: Final = Endpoints(
 
 SNAP_STORE: Final = _SnapStoreEndpoints(
     whoami="/api/v2/tokens/whoami",
+    upload="/unscanned-upload/",
     tokens="/api/v2/tokens",
     tokens_exchange="/api/v2/tokens/exchange",
     valid_package_types=["snap"],
@@ -145,6 +161,7 @@ SNAP_STORE: Final = _SnapStoreEndpoints(
 
 U1_SNAP_STORE: Final = _SnapStoreEndpoints(
     whoami="/api/v2/tokens/whoami",
+    upload="/unscanned-upload/",
     tokens="/dev/api/acl/",
     tokens_exchange="/api/v2/tokens/discharge",
     tokens_refresh="/api/v2/tokens/refresh",
