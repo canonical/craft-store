@@ -60,7 +60,7 @@ def test_session_defaults(session_mock, retry_mock):
         call("https://", ANY),
     ] in session_mock().mount.mock_calls
     retry_mock.assert_called_once_with(
-        total=8, backoff_factor=0.2, status_forcelist=[500, 502, 503, 504]
+        total=8, backoff_factor=1, status_forcelist=[500, 502, 503, 504]
     )
 
 
@@ -183,7 +183,7 @@ def test_request_500(session_mock):
 
 def test_request_connection_error(session_mock):
     connection_error = requests.exceptions.ConnectionError(
-        urllib3.exceptions.MaxRetryError(pool="test-pool", url="test-url")
+        urllib3.exceptions.MaxRetryError(pool="test-pool", url="test-url")  # type: ignore
     )
     session_mock().request.side_effect = connection_error
 

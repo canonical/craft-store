@@ -47,7 +47,10 @@ scenarios = (
         "exception_class": errors.NetworkError,
         "args": [
             requests.exceptions.ConnectionError(
-                urllib3.exceptions.MaxRetryError(pool="test-pool", url="test-url")
+                urllib3.exceptions.MaxRetryError(  # type: ignore
+                    pool=urllib3.connectionpool.ConnectionPool("https://foo.bar"),
+                    url="test-url",
+                )
             )
         ],
         "expected_message": "Maximum retries exceeded trying to reach the store.",

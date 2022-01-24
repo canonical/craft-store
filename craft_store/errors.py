@@ -49,7 +49,7 @@ class NetworkError(CraftStoreError):
     def __init__(self, exception: Exception) -> None:
         message = str(exception)
         with contextlib.suppress(IndexError):
-            if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):
+            if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):  # type: ignore
                 message = "Maximum retries exceeded trying to reach the store."
 
         super().__init__(message)

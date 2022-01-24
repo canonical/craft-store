@@ -18,7 +18,7 @@
 
 import logging
 import os
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -30,13 +30,11 @@ logger = logging.getLogger(__name__)
 
 REQUEST_TOTAL_RETRIES = 8
 """Amount of retries for a request."""
-REQUEST_BACKOFF = 0.2
+REQUEST_BACKOFF = 1
 """Backoff before retrying a request."""
 
 
-def _get_retry_value(
-    environment_var: str, default_value: Union[int, float]
-) -> Union[int, float]:
+def _get_retry_value(environment_var: str, default_value: int) -> int:
     """Return the backoff to use in HTTPClient."""
     environment_value = os.getenv(environment_var)
     if environment_value is None:
