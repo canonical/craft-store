@@ -142,6 +142,7 @@ def test_store_client_login(
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -199,6 +200,7 @@ def test_store_client_login_otp(
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -287,6 +289,7 @@ def test_store_client_login_with_packages_and_channels(
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -355,6 +358,7 @@ def test_store_client_login_with_packages_and_channels(
 def test_store_client_logout(auth_mock):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -372,6 +376,7 @@ def test_store_client_logout(auth_mock):
 def test_store_client_request(http_client_request_mock, authorization, auth_mock):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -401,6 +406,7 @@ def test_store_client_request_refresh(
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",
@@ -445,6 +451,7 @@ def test_store_client_request_refresh(
 def test_store_client_whoami(http_client_request_mock, authorization, auth_mock):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         auth_url="https://fake-sso.com",
         endpoints=endpoints.U1_SNAP_STORE,
         application_name="fakecraft",

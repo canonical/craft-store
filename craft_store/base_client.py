@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2021 Canonical Ltd.
+# Copyright 2021-2022 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,15 +16,20 @@
 
 """Craft Store BaseClient."""
 
+import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, Sequence
+from pathlib import Path
+from typing import Any, Callable, Dict, Optional, Sequence
 from urllib.parse import urlparse
 
 import requests
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
-from . import endpoints
+from . import endpoints, errors
 from .auth import Auth
 from .http_client import HTTPClient
+
+logger = logging.getLogger(__name__)
 
 
 class BaseClient(metaclass=ABCMeta):
@@ -34,6 +39,7 @@ class BaseClient(metaclass=ABCMeta):
         self,
         *,
         base_url: str,
+        storage_base_url: str,
         endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
@@ -42,6 +48,7 @@ class BaseClient(metaclass=ABCMeta):
         """Initialize the Store Client.
 
         :param base_url: the base url of the API endpoint.
+        :param storage_base_url: the base url for storage.
         :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
         :param application_name: the name application using this class, used for the keyring.
         :param user_agent: User-Agent header to use for HTTP(s) requests.
@@ -50,6 +57,7 @@ class BaseClient(metaclass=ABCMeta):
         self.http_client = HTTPClient(user_agent=user_agent)
 
         self._base_url = base_url
+        self._storage_base_url = storage_base_url
         self._store_host = urlparse(base_url).netloc
         self._endpoints = endpoints
 
@@ -168,3 +176,49 @@ class BaseClient(metaclass=ABCMeta):
         :raises errors.NotLoggedIn: if not logged in.
         """
         self._auth.del_credentials()
+
+    def upload_file(
+        self,
+        *,
+        filepath: Path,
+        monitor_callback: Optional[Callable] = None,
+    ) -> str:
+        """Upload filepath to storage.
+
+        The monitor_callback is a method receiving one argument of type
+        ``MultipartEncoderMonitor``, among others, it's ``.bytes_read`` and
+        ``.len`` attributes can be used to track progress.
+
+        :param monitor_callback: a callback to monitor progress.
+        """
+        with filepath.open("rb") as upload_file:
+            encoder = MultipartEncoder(
+                fields={
+                    "binary": (filepath.name, upload_file, "application/octet-stream")
+                }
+            )
+
+            # create a monitor (so that progress can be displayed) as call the real pusher
+            if monitor_callback is not None:
+                monitor = MultipartEncoderMonitor(encoder, monitor_callback)
+            else:
+                monitor = MultipartEncoderMonitor(encoder)
+
+            response = self.http_client.request(
+                "POST",
+                self._storage_base_url + self._endpoints.upload,
+                headers={
+                    "Content-Type": monitor.content_type,
+                    "Accept": "application/json",
+                },
+                data=monitor,
+            )
+
+        result = response.json()
+        if not result["successful"]:
+            raise errors.CraftStoreError(f"Server error while pushing file: {result}")
+
+        upload_id = self._endpoints.get_upload_id(result)
+        logger.debug("Uploading bytes for %r ended, id %r", str(filepath), upload_id)
+
+        return upload_id

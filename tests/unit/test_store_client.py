@@ -21,7 +21,7 @@ import pytest
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.macaroon import Macaroon
 
-from craft_store import endpoints, errors
+from craft_store import base_client, endpoints, errors
 from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor
 
 
@@ -63,6 +63,22 @@ def http_client_request_mock(real_macaroon):
             response = _fake_response(
                 200,
                 json={"name": "Fake Person", "username": "fakeuser", "id": "fake-id"},
+            )
+        elif (
+            args[1] == "POST"
+            and args[2] == "https://fake-charm-storage.com/unscanned-upload/"
+        ):
+            response = _fake_response(
+                200,
+                json={"upload-id": "12345", "successful": True},
+            )
+        elif (
+            args[1] == "POST"
+            and args[2] == "https://fake-snap-storage.com/unscanned-upload/"
+        ):
+            response = _fake_response(
+                200,
+                json={"upload_id": "12345", "successful": True},
             )
         else:
             response = _fake_response(200)
@@ -119,6 +135,7 @@ def test_store_client_login(
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
@@ -165,6 +182,7 @@ def test_store_client_login_with_packages_and_channels(
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
@@ -226,6 +244,7 @@ def test_store_client_login_with_packages_and_channels(
 def test_store_client_logout(auth_mock):
     store_client = StoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
@@ -242,6 +261,7 @@ def test_store_client_logout(auth_mock):
 def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock):
     store_client = StoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
@@ -268,6 +288,7 @@ def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock
 def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock):
     store_client = StoreClient(
         base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
         endpoints=endpoints.CHARMHUB,
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
@@ -292,6 +313,120 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
     assert auth_mock.mock_calls == [
         call("fakecraft", "https://fake-server.com", environment_auth=None),
         call().get_credentials(),
+    ]
+
+
+@pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
+def test_store_client_upload_file_no_monitor(tmp_path, http_client_request_mock, hub):
+    if hub == endpoints.CHARMHUB:
+        storage_url = "https://fake-charm-storage.com"
+    else:
+        storage_url = "https://fake-snap-storage.com"
+
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        storage_base_url=storage_url,
+        endpoints=hub,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+    )
+
+    filepath = tmp_path / "artifact.thing"
+    filepath.touch()
+
+    assert store_client.upload_file(filepath=filepath) == "12345"
+    store_client.upload_file(filepath=filepath)
+    assert http_client_request_mock.mock_calls == [
+        call(
+            store_client.http_client,
+            "POST",
+            f"{storage_url}/unscanned-upload/",
+            headers={
+                "Content-Type": ANY,
+                "Accept": "application/json",
+            },
+            data=ANY,
+        ),
+        call(
+            store_client.http_client,
+            "POST",
+            f"{storage_url}/unscanned-upload/",
+            headers={
+                "Content-Type": ANY,
+                "Accept": "application/json",
+            },
+            data=ANY,
+        ),
+    ]
+
+
+@pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
+def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_mock, hub):
+    if hub == endpoints.CHARMHUB:
+        storage_url = "https://fake-charm-storage.com"
+    else:
+        storage_url = "https://fake-snap-storage.com"
+
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        storage_base_url=storage_url,
+        endpoints=hub,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+    )
+
+    filepath = tmp_path / "artifact.thing"
+    filepath.write_text("file to upload")
+
+    def monitor(monitor):
+        return monitor
+
+    with patch("craft_store.base_client.MultipartEncoder"):
+        with patch(
+            "craft_store.base_client.MultipartEncoderMonitor",
+            wraps=base_client.MultipartEncoderMonitor,
+        ) as wrapped_encoder_monitor:
+            assert (
+                store_client.upload_file(filepath=filepath, monitor_callback=monitor)
+                == "12345"
+            )
+            assert wrapped_encoder_monitor.mock_calls == [
+                call(
+                    base_client.MultipartEncoder.__call__(
+                        {
+                            "binary": (
+                                "artifact.thing",
+                                ANY,
+                                "application/octect-stream",
+                            )
+                        },
+                    ),
+                    monitor,
+                )
+            ]
+
+    store_client.upload_file(filepath=filepath)
+    assert http_client_request_mock.mock_calls == [
+        call(
+            store_client.http_client,
+            "POST",
+            f"{storage_url}/unscanned-upload/",
+            headers={
+                "Content-Type": ANY,
+                "Accept": "application/json",
+            },
+            data=ANY,
+        ),
+        call(
+            store_client.http_client,
+            "POST",
+            f"{storage_url}/unscanned-upload/",
+            headers={
+                "Content-Type": ANY,
+                "Accept": "application/json",
+            },
+            data=ANY,
+        ),
     ]
 
 
