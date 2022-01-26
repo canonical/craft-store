@@ -186,10 +186,29 @@ class BaseClient(metaclass=ABCMeta):
         """Upload filepath to storage.
 
         The monitor_callback is a method receiving one argument of type
-        ``MultipartEncoderMonitor``, among others, it's ``.bytes_read`` and
-        ``.len`` attributes can be used to track progress.
+        ``MultipartEncoder``, the total length of the upload can be accessed
+        from this encoder from the ``len`` attribute to setup a progress bar
+        instance.
+
+        The callback is to return a function that receives a
+        ``MultipartEncoderMonitor`` from which the ``.bytes_read`` attribute
+        can be read to update progress.
+
+        The simplest implementation can look like:
+
+        .. code-block:: python
+
+          def monitor_callback(encoder: requests_toolbelt.MultipartEncoder):
+
+              # instantiate progress class with total bytes encoder.len
+
+              def progress_printer(monitor: requests_toolbelt.MultipartEncoderMonitor):
+                 # Print progress using monitor.bytes_read
+
+              return progress_printer
 
         :param monitor_callback: a callback to monitor progress.
+
         """
         with filepath.open("rb") as upload_file:
             encoder = MultipartEncoder(
@@ -200,7 +219,7 @@ class BaseClient(metaclass=ABCMeta):
 
             # create a monitor (so that progress can be displayed) as call the real pusher
             if monitor_callback is not None:
-                monitor = MultipartEncoderMonitor(encoder, monitor_callback)
+                monitor = MultipartEncoderMonitor(encoder, monitor_callback(encoder))
             else:
                 monitor = MultipartEncoderMonitor(encoder)
 

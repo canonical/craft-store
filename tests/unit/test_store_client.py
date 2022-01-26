@@ -378,8 +378,11 @@ def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_moc
     filepath = tmp_path / "artifact.thing"
     filepath.write_text("file to upload")
 
-    def monitor(monitor):
-        return monitor
+    def callback(monitor):  # pylint: disable=unused-argument
+        pass
+
+    def monitor(encoder):  # pylint: disable=unused-argument
+        return callback
 
     with patch("craft_store.base_client.MultipartEncoder"):
         with patch(
@@ -401,7 +404,7 @@ def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_moc
                             )
                         },
                     ),
-                    monitor,
+                    monitor(monitor),
                 )
             ]
 
