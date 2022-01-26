@@ -238,7 +238,7 @@ Store:
       storage_base_url="https://upload.apps.staging.ubuntu.com",
       endpoints=endpoints.SNAP_STORE,
       user_agent="Craft Store Tutorial Agent",
-      application_name="cart-store-tutorial"
+      application_name="craft-store-tutorial"
   )
 
   upload_id = store_client.upload_file(filepath=Path("/tmp/hello.snap"))
@@ -268,10 +268,14 @@ Now add a mechanism to view progress for the upload, open the recently saved
   from pathlib import Path
 
   from craft_store import StoreClient, endpoints
-  from requests_toolbelt import MultipartEncoderMonitor
+  from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
-  def progress_callback(monitor: MultipartEncoderMonitor) -> None:
-      print(f"Uploaded: {monitor.bytes_read} of {monitor.len}")
+
+  def monitor_callback(encoder: MultipartEncoder) -> None:
+      def progress_callback(monitor: MultipartEncoderMonitor) -> None:
+          print(f"Uploaded: {monitor.bytes_read} of {monitor.len}")
+
+      return progress_callback
 
 
   store_client = StoreClient(
@@ -279,7 +283,7 @@ Now add a mechanism to view progress for the upload, open the recently saved
       storage_base_url="https://upload.apps.staging.ubuntu.com",
       endpoints=endpoints.SNAP_STORE,
       user_agent="Craft Store Tutorial Agent",
-      application_name="cart-store-tutorial"
+      application_name="craft-store-tutorial"
   )
 
   upload_id = store_client.upload_file(
