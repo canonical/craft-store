@@ -140,6 +140,13 @@ class NotLoggedIn(CraftStoreError):
         super().__init__("Not logged in.")
 
 
+class NoKeyringError(CraftStoreError):
+    """Error raised when no keyring can be used."""
+
+    def __init__(self) -> None:
+        super().__init__("No keyring found to store or retrieve credentials from.")
+
+
 class CandidTokenTimeoutError(CraftStoreError):
     """Error raised when timeout is reached trying to discharge a macaroon."""
 

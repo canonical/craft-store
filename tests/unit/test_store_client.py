@@ -115,7 +115,7 @@ def bakery_discharge_mock(monkeypatch):
     monkeypatch.setattr(bakery, "discharge_all", mock_discharge)
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def auth_mock(real_macaroon):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()

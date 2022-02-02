@@ -23,6 +23,7 @@ from typing import Dict, Optional, Tuple
 
 import keyring
 import keyring.backend
+import keyring.backends.fail
 import keyring.errors
 
 from . import errors
@@ -96,6 +97,9 @@ class Auth:
             keyring.set_keyring(MemoryKeyring())
 
         self._keyring = keyring.get_keyring()
+        # This keyring would fail on first use, fail early instead.
+        if isinstance(self._keyring, keyring.backends.fail.Keyring):
+            raise errors.NoKeyringError()
 
         if environment_auth_value:
             self.set_credentials(self.decode_credentials(environment_auth_value))
