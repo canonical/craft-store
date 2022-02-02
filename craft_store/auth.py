@@ -33,7 +33,8 @@ logger = logging.getLogger(__name__)
 class MemoryKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a dictionary."""
 
-    priority = 1  # type: ignore
+    # Only > 0 make it to the chainer.
+    priority = -1  # type: ignore
 
     def __init__(self) -> None:
         super().__init__()
