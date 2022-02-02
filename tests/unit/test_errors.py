@@ -66,6 +66,11 @@ scenarios = (
         "expected_message": "Issue encountered while processing your request: [501] not implemented.",
     },
     {
+        "exception_class": errors.NoKeyringError,
+        "args": [],
+        "expected_message": "No keyring found to store or retrieve credentials from.",
+    },
+    {
         "exception_class": errors.NotLoggedIn,
         "args": [],
         "expected_message": "Not logged in.",

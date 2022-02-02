@@ -19,6 +19,7 @@ from typing import Any, List, Optional, Tuple
 from unittest.mock import ANY, patch
 
 import keyring
+import keyring.backends.fail
 import keyring.errors
 import pytest
 
@@ -198,6 +199,13 @@ def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     assert fake_keyring.set_password_calls == [
         ("fakeclient", "fakestore.com", "c2VjcmV0LWtleXM=")
     ]
+
+
+def test_no_keyring_get(fake_keyring_get):
+    fake_keyring_get.return_value = keyring.backends.fail.Keyring()
+
+    with pytest.raises(errors.NoKeyringError):
+        Auth("fakeclient", "fakestore.com")
 
 
 def test_memory_keyring_set_get():
