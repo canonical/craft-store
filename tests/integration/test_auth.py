@@ -40,15 +40,19 @@ def test_auth():
     assert auth.get_credentials() == "foo"
     auth.del_credentials()
 
-    with pytest.raises(errors.NotLoggedIn) as error:
+    with pytest.raises(errors.CredentialsUnavailable) as error:
         auth.get_credentials()
 
-    assert str(error.value) == ("Not logged in.")
+    assert str(error.value) == (
+        "No credentials found for 'fakecraft' on 'fakestore.com'."
+    )
 
-    with pytest.raises(errors.NotLoggedIn) as error:
+    with pytest.raises(errors.CredentialsUnavailable) as error:
         auth.del_credentials()
 
-    assert str(error.value) == ("Not logged in.")
+    assert str(error.value) == (
+        "No credentials found for 'fakecraft' on 'fakestore.com'."
+    )
 
 
 def test_auth_from_environment(monkeypatch):

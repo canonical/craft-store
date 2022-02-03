@@ -148,11 +148,13 @@ class Auth:
                 "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,
             )
-            raise errors.NotLoggedIn() from unknown_error
+            raise errors.CredentialsUnavailable(
+                self.application_name, self.host
+            ) from unknown_error
 
         if encoded_credentials_string is None:
             logger.debug("Credentials not found in the keyring %r", self._keyring.name)
-            raise errors.NotLoggedIn()
+            raise errors.CredentialsUnavailable(self.application_name, self.host)
         credentials = self.decode_credentials(encoded_credentials_string)
         return credentials
 

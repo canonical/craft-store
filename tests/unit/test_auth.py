@@ -132,7 +132,7 @@ def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
 
     auth = Auth("fakeclient", "fakestore.com")
 
-    with pytest.raises(errors.NotLoggedIn):
+    with pytest.raises(errors.CredentialsUnavailable):
         auth.get_credentials()
 
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
@@ -180,7 +180,7 @@ def test_del_credentials_gets_no_credential(caplog, fake_keyring):
 
     auth = Auth("fakeclient", "fakestore.com")
 
-    with pytest.raises(errors.NotLoggedIn):
+    with pytest.raises(errors.CredentialsUnavailable):
         auth.del_credentials()
 
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]

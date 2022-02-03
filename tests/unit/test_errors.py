@@ -71,9 +71,9 @@ scenarios = (
         "expected_message": "No keyring found to store or retrieve credentials from.",
     },
     {
-        "exception_class": errors.NotLoggedIn,
-        "args": [],
-        "expected_message": "Not logged in.",
+        "exception_class": errors.CredentialsUnavailable,
+        "args": ["mycraft", "my.host.com"],
+        "expected_message": "No credentials found for 'mycraft' on 'my.host.com'.",
     },
     {
         "exception_class": errors.CandidTokenTimeoutError,
