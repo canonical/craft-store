@@ -36,12 +36,13 @@ class FakeKeyring:
         self.set_password_calls: List[Tuple[Any, ...]] = []
         self.get_password_calls: List[Tuple[Any, ...]] = []
         self.delete_password_calls: List[Tuple[Any, ...]] = []
-        self.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+        self.password = None
         self.delete_error: Optional[Exception] = None
 
     def set_password(self, *args) -> None:
         """Set the service password for username in memory."""
         self.set_password_calls.append(args)
+        self.password = args[2]
 
     def get_password(self, *args):
         """Get the service password for username from memory."""
@@ -107,7 +108,19 @@ def test_set_credentials_log_debug(caplog, fake_keyring):
     ] == [rec.message for rec in caplog.records]
 
 
+@pytest.mark.usefixtures("fake_keyring")
+def test_double_set_credentials_fails():
+    auth = Auth("fakeclient", "fakestore.com")
+
+    auth.set_credentials("{'password': 'secret'}")
+
+    with pytest.raises(errors.CredentialsAvailable):
+        auth.set_credentials("{'password': 'secret'}")
+
+
 def test_get_credentials(caplog, fake_keyring):
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+
     auth = Auth("fakeclient", "fakestore.com")
 
     assert auth.get_credentials() == "{'password': 'secret'}"
@@ -117,6 +130,7 @@ def test_get_credentials(caplog, fake_keyring):
 
 def test_get_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -128,11 +142,9 @@ def test_get_credentials_log_debug(caplog, fake_keyring):
 
 
 def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
-    fake_keyring.password = None
-
     auth = Auth("fakeclient", "fakestore.com")
 
-    with pytest.raises(errors.NotLoggedIn):
+    with pytest.raises(errors.CredentialsUnavailable):
         auth.get_credentials()
 
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
@@ -140,6 +152,8 @@ def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
 
 
 def test_del_credentials(caplog, fake_keyring):
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+
     auth = Auth("fakeclient", "fakestore.com")
 
     auth.del_credentials()
@@ -150,6 +164,7 @@ def test_del_credentials(caplog, fake_keyring):
 
 def test_del_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -164,6 +179,7 @@ def test_del_credentials_log_debug(caplog, fake_keyring):
 
 def test_del_credentials_delete_error_in_keyring(caplog, fake_keyring):
     fake_keyring.delete_error = keyring.errors.PasswordDeleteError()
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -176,11 +192,10 @@ def test_del_credentials_delete_error_in_keyring(caplog, fake_keyring):
 
 def test_del_credentials_gets_no_credential(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
-    fake_keyring.password = None
 
     auth = Auth("fakeclient", "fakestore.com")
 
-    with pytest.raises(errors.NotLoggedIn):
+    with pytest.raises(errors.CredentialsUnavailable):
         auth.del_credentials()
 
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]

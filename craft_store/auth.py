@@ -114,11 +114,21 @@ class Auth:
         """Encode credentials to base64."""
         return base64.b64encode(credentials.encode()).decode()
 
+    def validate_set_credentials(self) -> None:
+        """Check if credentials can be set.
+
+        :raises errors.CredentialsAvailable: if credentials have already been set.
+        """
+        if self._keyring.get_password(self.application_name, self.host) is not None:
+            raise errors.CredentialsAvailable(self.application_name, self.host)
+
     def set_credentials(self, credentials: str) -> None:
         """Store credentials in the keyring.
 
         :param credentials: token to store.
         """
+        self.validate_set_credentials()
+
         logger.debug(
             "Storing credentials for %r on %r in keyring %r.",
             self.application_name,
@@ -148,11 +158,13 @@ class Auth:
                 "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,
             )
-            raise errors.NotLoggedIn() from unknown_error
+            raise errors.CredentialsUnavailable(
+                self.application_name, self.host
+            ) from unknown_error
 
         if encoded_credentials_string is None:
             logger.debug("Credentials not found in the keyring %r", self._keyring.name)
-            raise errors.NotLoggedIn()
+            raise errors.CredentialsUnavailable(self.application_name, self.host)
         credentials = self.decode_credentials(encoded_credentials_string)
         return credentials
 

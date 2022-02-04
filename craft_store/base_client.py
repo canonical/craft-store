@@ -116,6 +116,9 @@ class BaseClient(metaclass=ABCMeta):
         :param packages: Sequence of packages to limit the credentials to.
         :param channels: Sequence of channel names to limit the credentials to.
         """
+        # Early check to ensure credentials do not already exist.
+        self._auth.validate_set_credentials()
+
         token_request = self._endpoints.get_token_request(
             permissions=permissions,
             description=description,
