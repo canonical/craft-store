@@ -117,7 +117,7 @@ class BaseClient(metaclass=ABCMeta):
         :param channels: Sequence of channel names to limit the credentials to.
         """
         # Early check to ensure credentials do not already exist.
-        self._auth.validate_set_credentials()
+        self._auth.ensure_no_credentials()
 
         token_request = self._endpoints.get_token_request(
             permissions=permissions,

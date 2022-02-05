@@ -114,8 +114,8 @@ class Auth:
         """Encode credentials to base64."""
         return base64.b64encode(credentials.encode()).decode()
 
-    def validate_set_credentials(self) -> None:
-        """Check if credentials can be set.
+    def ensure_no_credentials(self) -> None:
+        """Check that no credentials exist.
 
         :raises errors.CredentialsAvailable: if credentials have already been set.
         """
@@ -127,7 +127,7 @@ class Auth:
 
         :param credentials: token to store.
         """
-        self.validate_set_credentials()
+        self.ensure_no_credentials()
 
         logger.debug(
             "Storing credentials for %r on %r in keyring %r.",

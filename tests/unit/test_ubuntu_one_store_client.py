@@ -188,7 +188,7 @@ def test_store_client_login(
 
     assert auth_mock.mock_calls == [
         call("fakecraft", "https://fake-server.com", environment_auth=environment_auth),
-        call().validate_set_credentials(),
+        call().ensure_no_credentials(),
         call().set_credentials(credentials),
         call().encode_credentials(credentials),
     ]
@@ -281,9 +281,9 @@ def test_store_client_login_otp(
     assert auth_mock.mock_calls == [
         call("fakecraft", "https://fake-server.com", environment_auth=None),
         # First call without otp.
-        call().validate_set_credentials(),
+        call().ensure_no_credentials(),
         # Second call with otp.
-        call().validate_set_credentials(),
+        call().ensure_no_credentials(),
         call().set_credentials(credentials),
         call().encode_credentials(credentials),
     ]
@@ -355,7 +355,7 @@ def test_store_client_login_with_packages_and_channels(
 
     assert auth_mock.mock_calls == [
         call("fakecraft", "https://fake-server.com", environment_auth=None),
-        call().validate_set_credentials(),
+        call().ensure_no_credentials(),
         call().set_credentials(credentials),
         call().encode_credentials(credentials),
     ]
