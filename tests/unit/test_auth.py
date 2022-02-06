@@ -114,7 +114,7 @@ def test_double_set_credentials_fails():
 
     auth.set_credentials("{'password': 'secret'}")
 
-    with pytest.raises(errors.CredentialsAvailable):
+    with pytest.raises(errors.CredentialsAlreadyAvailable):
         auth.set_credentials("{'password': 'secret'}")
 
 

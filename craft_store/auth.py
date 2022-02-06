@@ -120,7 +120,7 @@ class Auth:
         :raises errors.CredentialsAvailable: if credentials have already been set.
         """
         if self._keyring.get_password(self.application_name, self.host) is not None:
-            raise errors.CredentialsAvailable(self.application_name, self.host)
+            raise errors.CredentialsAlreadyAvailable(self.application_name, self.host)
 
     def set_credentials(self, credentials: str) -> None:
         """Store credentials in the keyring.
