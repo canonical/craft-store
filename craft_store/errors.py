@@ -133,8 +133,8 @@ class StoreServerError(CraftStoreError):
         super().__init__(message)
 
 
-class CredentialsAvailable(CraftStoreError):
-    """Error raised when credentials are found in the keyring."""
+class CredentialsAlreadyAvailable(CraftStoreError):
+    """Error raised when credentials are already found in the keyring."""
 
     def __init__(self, application: str, host: str) -> None:
         super().__init__(f"Credentials found for {application!r} on {host!r}.")
