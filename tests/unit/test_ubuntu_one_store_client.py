@@ -139,6 +139,7 @@ def test_store_client_login(
     credentials,
     auth_mock,
     environment_auth,
+    expires,
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
@@ -170,7 +171,7 @@ def test_store_client_login(
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
-                "expires": "60",
+                "expires": expires(60),
             },
         ),
         call(
@@ -198,6 +199,7 @@ def test_store_client_login_otp(
     http_client_request_mock,
     credentials,
     auth_mock,
+    expires,
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
@@ -239,7 +241,7 @@ def test_store_client_login_otp(
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
-                "expires": "60",
+                "expires": expires(60),
             },
         ),
         call(
@@ -261,7 +263,7 @@ def test_store_client_login_otp(
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
-                "expires": "60",
+                "expires": expires(60),
             },
         ),
         call(
@@ -290,7 +292,7 @@ def test_store_client_login_otp(
 
 
 def test_store_client_login_with_packages_and_channels(
-    http_client_request_mock, credentials, auth_mock
+    http_client_request_mock, credentials, auth_mock, expires
 ):
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
@@ -326,7 +328,7 @@ def test_store_client_login_with_packages_and_channels(
             json={
                 "permissions": ["perm-1", "perm-2"],
                 "description": "fakecraft@foo",
-                "expires": "60",
+                "expires": expires(60),
                 "packages": [
                     {
                         "name": "my-snap",

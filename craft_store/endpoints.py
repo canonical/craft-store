@@ -17,6 +17,7 @@
 """Endpoint definitions for different services."""
 
 import dataclasses
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Final, Optional, Sequence
 
 
@@ -114,10 +115,15 @@ class _SnapStoreEndpoints(Endpoints):
         channels: Optional[Sequence[str]] = None,
         packages: Optional[Sequence[Package]] = None,
     ) -> Dict[str, Any]:
+        expires = (
+            datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc)
+            + timedelta(seconds=ttl)
+        ).isoformat()
+
         token_request: Dict[str, Any] = {
             "permissions": permissions,
             "description": description,
-            "expires": str(ttl),
+            "expires": expires,
         }
 
         if packages:
