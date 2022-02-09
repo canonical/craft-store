@@ -81,6 +81,11 @@ scenarios = (
         "expected_message": "No credentials found for 'mycraft' on 'my.host.com'.",
     },
     {
+        "exception_class": errors.CredentialsNotParseable,
+        "args": [],
+        "expected_message": "Credentials could not be parsed. Expected base64 encoded credentials.",
+    },
+    {
         "exception_class": errors.CandidTokenTimeoutError,
         "args": ["https://foo.bar"],
         "expected_message": "Timed out waiting for token response from 'https://foo.bar'.",

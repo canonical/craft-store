@@ -147,6 +147,15 @@ class CredentialsUnavailable(CraftStoreError):
         super().__init__(f"No credentials found for {application!r} on {host!r}.")
 
 
+class CredentialsNotParseable(CraftStoreError):
+    """Error raised when credentials are not parseable."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Credentials could not be parsed. Expected base64 encoded credentials."
+        )
+
+
 class NoKeyringError(CraftStoreError):
     """Error raised when no keyring can be used."""
 
