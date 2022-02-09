@@ -58,10 +58,13 @@ class BaseClient(metaclass=ABCMeta):
 
         self._base_url = base_url
         self._storage_base_url = storage_base_url
-        self._store_host = urlparse(base_url).netloc
         self._endpoints = endpoints
 
-        self._auth = Auth(application_name, base_url, environment_auth=environment_auth)
+        self._auth = Auth(
+            application_name,
+            urlparse(base_url).netloc,
+            environment_auth=environment_auth,
+        )
 
     @abstractmethod
     def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:

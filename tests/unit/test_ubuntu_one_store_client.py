@@ -188,7 +188,7 @@ def test_store_client_login(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=environment_auth),
+        call("fakecraft", "fake-server.com", environment_auth=environment_auth),
         call().ensure_no_credentials(),
         call().set_credentials(credentials),
         call().encode_credentials(credentials),
@@ -281,7 +281,7 @@ def test_store_client_login_otp(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         # First call without otp.
         call().ensure_no_credentials(),
         # Second call with otp.
@@ -356,7 +356,7 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         call().ensure_no_credentials(),
         call().set_credentials(credentials),
         call().encode_credentials(credentials),
@@ -376,7 +376,7 @@ def test_store_client_logout(auth_mock):
     store_client.logout()
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         call().del_credentials(),
     ]
 
@@ -404,7 +404,7 @@ def test_store_client_request(http_client_request_mock, authorization, auth_mock
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
 
@@ -448,7 +448,7 @@ def test_store_client_request_refresh(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         call().get_credentials(),
         call().get_credentials(),
         call().set_credentials(credentials),
@@ -485,6 +485,6 @@ def test_store_client_whoami(http_client_request_mock, authorization, auth_mock)
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "https://fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None),
         call().get_credentials(),
     ]
