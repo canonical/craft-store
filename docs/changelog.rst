@@ -2,6 +2,15 @@
 Changelog
 *********
 
+2.0.1 (2022-02-10)
+------------------
+
+- Convert login expiration to a ISO formatted datetime for Ubuntu endpoints
+- Raise :class:`craft_store.errors.CredentialsNotParseable` on base64 decode
+  errors
+- Use network location as keyring storage location instead of full base url in
+  :class:`craft_store.base_client.BaseClient`
+
 2.0.0 (2022-02-07)
 ------------------
 
