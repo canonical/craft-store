@@ -93,7 +93,7 @@ def test_charmhub_invalid_packages():
     )
 
 
-def test_snap_store():
+def test_snap_store(expires):
     snap_store = endpoints.SNAP_STORE
 
     assert snap_store.tokens == "/api/v2/tokens"
@@ -107,11 +107,11 @@ def test_snap_store():
     ) == {
         "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "expires": "1000",
+        "expires": expires(1000),
     }
 
 
-def test_snap_store_channels():
+def test_snap_store_channels(expires):
     snap_store = endpoints.SNAP_STORE
 
     assert snap_store.get_token_request(
@@ -122,12 +122,12 @@ def test_snap_store_channels():
     ) == {
         "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "expires": "1000",
+        "expires": expires(1000),
         "channels": ["stable", "track/edge"],
     }
 
 
-def test_snap_store_packages():
+def test_snap_store_packages(expires):
     snap_store = endpoints.SNAP_STORE
 
     assert snap_store.get_token_request(
@@ -141,7 +141,7 @@ def test_snap_store_packages():
     ) == {
         "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
-        "expires": "1000",
+        "expires": expires(1000),
         "packages": [
             {"series": "16", "name": "snap1"},
             {"series": "16", "name": "snap2"},
