@@ -33,7 +33,17 @@ logger = logging.getLogger(__name__)
 
 
 class BaseClient(metaclass=ABCMeta):
-    """Encapsulates API calls for the Snap Store or Charmhub."""
+    """Encapsulates API calls for the Snap Store or Charmhub.
+
+    :param base_url: the base url of the API endpoint.
+    :param storage_base_url: the base url for storage.
+    :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
+    :param application_name: the name application using this class, used for the keyring.
+    :param user_agent: User-Agent header to use for HTTP(s) requests.
+    :param environment_auth: environment variable to use for credentials.
+
+    :raises errors.NoKeyringError: if there is no usable keyring.
+    """
 
     def __init__(
         self,
@@ -45,15 +55,7 @@ class BaseClient(metaclass=ABCMeta):
         user_agent: str,
         environment_auth: Optional[str] = None,
     ) -> None:
-        """Initialize the Store Client.
-
-        :param base_url: the base url of the API endpoint.
-        :param storage_base_url: the base url for storage.
-        :param endpoints: :data:`.endpoints.CHARMHUB` or :data:`.endpoints.SNAP_STORE`.
-        :param application_name: the name application using this class, used for the keyring.
-        :param user_agent: User-Agent header to use for HTTP(s) requests.
-        :param environment_auth: environment variable to use for credentials.
-        """
+        """Initialize the Store Client."""
         self.http_client = HTTPClient(user_agent=user_agent)
 
         self._base_url = base_url
@@ -118,6 +120,8 @@ class BaseClient(metaclass=ABCMeta):
                     long until it expires, expressed in seconds.
         :param packages: Sequence of packages to limit the credentials to.
         :param channels: Sequence of channel names to limit the credentials to.
+
+        :raises errors.CredentialsAlreadyAvailable: if credentials already exist.
         """
         # Early check to ensure credentials do not already exist.
         self._auth.ensure_no_credentials()
@@ -155,7 +159,7 @@ class BaseClient(metaclass=ABCMeta):
 
         :raises errors.StoreServerError: for error responses.
         :raises errors.NetworkError: for lower level network issues.
-        :raises errors.NotLoggedIn: if not logged in.
+        :raises errors.CredentialsUnavailable: if credentials cannot be found.
 
         :return: Response from the request.
         """
@@ -179,7 +183,7 @@ class BaseClient(metaclass=ABCMeta):
     def logout(self) -> None:
         """Clear credentials.
 
-        :raises errors.NotLoggedIn: if not logged in.
+        :raises errors.CredentialsUnavailable: if credentials cannot be found.
         """
         self._auth.del_credentials()
 
