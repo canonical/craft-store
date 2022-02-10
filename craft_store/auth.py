@@ -17,6 +17,7 @@
 """Craft Store Authentication Store."""
 
 import base64
+import binascii
 import logging
 import os
 from typing import Dict, Optional, Tuple
@@ -106,8 +107,14 @@ class Auth:
 
     @staticmethod
     def decode_credentials(encoded_credentials: str) -> str:
-        """Decode base64 encoded credentials."""
-        return base64.b64decode(encoded_credentials).decode()
+        """Decode base64 encoded credentials.
+
+        :raises errors.CredentialsNotParseable: when the credentials are incorrectly encoded.
+        """
+        try:
+            return base64.b64decode(encoded_credentials).decode()
+        except binascii.Error as err:
+            raise errors.CredentialsNotParseable from err
 
     @staticmethod
     def encode_credentials(credentials: str) -> str:

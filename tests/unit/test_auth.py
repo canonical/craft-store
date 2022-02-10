@@ -205,6 +205,13 @@ def test_del_credentials_gets_no_credential(caplog, fake_keyring):
     ] == [rec.message for rec in caplog.records]
 
 
+def test_credentials_not_parseable_error(monkeypatch):
+    monkeypatch.setenv("FAKE_ENV", "12345")
+
+    with pytest.raises(errors.CredentialsNotParseable):
+        Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
+
+
 def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     monkeypatch.setenv("FAKE_ENV", "c2VjcmV0LWtleXM=")
 
