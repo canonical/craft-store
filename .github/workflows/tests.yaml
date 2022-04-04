@@ -65,5 +65,7 @@ jobs:
         run: |
           make test-units
       - name: Run integration tests
+        env:
+          CRAFT_STORE_CHARMCRAFT_CREDENTIALS: ${{ secrets.CRAFT_STORE_CHARMCRAFT_CREDENTIALS }}
         run: |
           make test-integrations
