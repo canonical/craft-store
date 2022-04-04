@@ -131,8 +131,8 @@ class UbuntuOneStoreClient(BaseClient):
         self,
         method: str,
         url: str,
-        params: Dict[str, str] = None,
-        headers: Dict[str, str] = None,
+        params: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> requests.Response:
         response = super().request(method, url, params, headers, **kwargs)

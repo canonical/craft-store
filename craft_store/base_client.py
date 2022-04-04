@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 import requests
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
-from . import endpoints, errors
+from . import endpoints, errors, models
 from .auth import Auth
 from .http_client import HTTPClient
 
@@ -98,7 +98,7 @@ class BaseClient(metaclass=ABCMeta):
     ) -> str:
         """Obtain credentials to perform authenticated requests.
 
-        Credentials are stored on the systems keyring, handled by
+        Credentials are stored on the system's keyring, handled by
         :data:`craft_store.auth.Auth`.
 
         The list of permissions to select from can be referred to on
@@ -111,7 +111,7 @@ class BaseClient(metaclass=ABCMeta):
         - send the discharge macaroon to :attr:`.endpoints.Endpoints.tokens_exchange`
           to obtain final authorization of the macaroon
 
-        This last macaroon is stored into the systems keyring to
+        This last macaroon is stored into the system's keyring to
         perform authenticated requests.
 
         :param permissions: Set of permissions to grant the login.
@@ -146,8 +146,8 @@ class BaseClient(metaclass=ABCMeta):
         self,
         method: str,
         url: str,
-        params: Dict[str, str] = None,
-        headers: Dict[str, str] = None,
+        params: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> requests.Response:
         """Perform an authenticated request if auth_headers are True.
@@ -251,3 +251,10 @@ class BaseClient(metaclass=ABCMeta):
         logger.debug("Uploading bytes for %r ended, id %r", str(filepath), upload_id)
 
         return upload_id
+
+    def get_list_releases(self, *, name: str) -> models.MarshableModel:
+        """Query the list_releases endpoint and return the result."""
+        endpoint = f"/v1/{self._endpoints.namespace}/{name}/releases"
+        response = self.request("GET", self._base_url + endpoint).json()
+
+        return self._endpoints.list_releases_model.unmarshal(response)
