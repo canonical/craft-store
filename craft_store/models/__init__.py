@@ -17,7 +17,12 @@
 
 """Models package for store responses."""
 
-from . import charm_list_releases_model, snap_list_releases_model
+from . import charm_list_releases_model, release_request_model, snap_list_releases_model
 from ._base_model import MarshableModel
 
-__all__ = ["charm_list_releases_model", "snap_list_releases_model", "MarshableModel"]
+__all__ = [
+    "charm_list_releases_model",
+    "release_request_model",
+    "snap_list_releases_model",
+    "MarshableModel",
+]
