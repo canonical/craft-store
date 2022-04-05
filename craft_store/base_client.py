@@ -258,3 +258,22 @@ class BaseClient(metaclass=ABCMeta):
         response = self.request("GET", self._base_url + endpoint).json()
 
         return self._endpoints.list_releases_model.unmarshal(response)
+
+    def release(
+        self,
+        *,
+        name: str,
+        release_request: Sequence[models.release_request_model.ReleaseRequestModel],
+    ) -> None:
+        """Request a release of name.
+
+        :param name: name to release.
+        :param release_request: sequence of items to release.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}/{name}/releases"
+
+        self.request(
+            "POST",
+            self._base_url + endpoint,
+            json=[r.marshal() for r in release_request],
+        )
