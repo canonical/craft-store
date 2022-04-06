@@ -70,7 +70,7 @@ def http_client_request_mock(real_macaroon):
         ):
             response = _fake_response(
                 200,
-                json={"upload-id": "12345", "successful": True},
+                json={"upload_id": "12345", "successful": True},
             )
         elif (
             args[1] == "POST"

@@ -14,24 +14,36 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import cast
 
-import os
-
-import pytest
-
-from craft_store.models import release_request_model
+from craft_store.models import revisions_model
 
 
-@pytest.mark.skipif(
-    os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS") is None,
-    reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
-)
-def test_charm_release(charm_client):
-    model = release_request_model.ReleaseRequestModel(
-        channel="edge", revision=1, resources=[]
+def test_request_unmarshal_and_marshal():
+    payload = {
+        "upload-id": "fake-id",
+    }
+
+    model = cast(
+        revisions_model.RevisionsRequestModel,
+        revisions_model.RevisionsRequestModel.unmarshal(payload),
     )
 
-    charm_client.release(
-        name="craft-store-test-charm",
-        release_request=[model],
+    assert model.upload_id == "fake-id"
+
+    assert model.marshal() == payload
+
+
+def test_response_unmarshal_and_marshal():
+    payload = {
+        "status-url": "/foo.bar",
+    }
+
+    model = cast(
+        revisions_model.RevisionsResponseModel,
+        revisions_model.RevisionsResponseModel.unmarshal(payload),
     )
+
+    assert model.status_url == "/foo.bar"
+
+    assert model.marshal() == payload

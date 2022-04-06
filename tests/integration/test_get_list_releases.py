@@ -21,7 +21,6 @@ from typing import cast
 
 import pytest
 
-from craft_store import StoreClient, endpoints
 from craft_store.models import charm_list_releases_model
 
 
@@ -29,19 +28,10 @@ from craft_store.models import charm_list_releases_model
     os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS") is None,
     reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
 )
-def test_charm_get_list_releases():
-    client = StoreClient(
-        application_name="integration-test",
-        base_url="https://api.charmhub.io",
-        storage_base_url="https://storage.charmhub.io",
-        endpoints=endpoints.CHARMHUB,
-        user_agent="integration-tests",
-        environment_auth="CRAFT_STORE_CHARMCRAFT_CREDENTIALS",
-    )
-
+def test_charm_get_list_releases(charm_client):
     model = cast(
         charm_list_releases_model.ListReleasesModel,
-        client.get_list_releases(name="craft-store-test-charm"),
+        charm_client.get_list_releases(name="craft-store-test-charm"),
     )
 
     assert len(model.channel_map) == 1
@@ -55,7 +45,7 @@ def test_charm_get_list_releases():
     assert model.channel_map[0].resources == []
     assert model.channel_map[0].revision == 1
     assert model.channel_map[0].when == datetime.datetime(
-        2022, 4, 3, 22, 28, 21, tzinfo=datetime.timezone.utc
+        2022, 4, 6, 20, 41, 11, tzinfo=datetime.timezone.utc
     )
 
     assert len(model.package.channels) == 4
@@ -87,13 +77,13 @@ def test_charm_get_list_releases():
     assert model.revisions[0].bases[0].name == "ubuntu"
     # No timezone information returned from Charmhub.
     assert model.revisions[0].created_at == datetime.datetime(
-        2022, 4, 3, 22, 28, 14, 881711
+        2022, 4, 6, 20, 28, 33, 815746
     )
     assert model.revisions[0].revision == 1
     assert (
         model.revisions[0].sha3_384
-        == "ba049497f40cadd353dbbbb40a8337b25b76ef1f648af0798c3fcd0dd25e2b1d52aa6795003dc8aef678146ed1a3f49a"
+        == "491692164aa383d5ab1568bd70101c58d3ec09adf6fb5aa2e700ee8acea9553014de552ec949a71c81db77e60a23b451"
     )
-    assert model.revisions[0].size == 6488544
+    assert model.revisions[0].size == 481
     assert model.revisions[0].status == "released"
     assert model.revisions[0].version == "1"

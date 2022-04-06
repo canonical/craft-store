@@ -109,7 +109,7 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
 
         :param result: the result from an upload request.
         """
-        return result["upload-id"]
+        return result["upload_id"]
 
 
 @dataclasses.dataclass(repr=True)

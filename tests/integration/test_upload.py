@@ -16,22 +16,31 @@
 
 
 import os
+from typing import cast
 
 import pytest
 
-from craft_store.models import release_request_model
+from craft_store.models import revisions_model
 
 
 @pytest.mark.skipif(
     os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS") is None,
     reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
 )
-def test_charm_release(charm_client):
-    model = release_request_model.ReleaseRequestModel(
-        channel="edge", revision=1, resources=[]
+def test_charm_upload(charm_client, fake_charm_file):
+    upload_id = charm_client.upload_file(filepath=fake_charm_file)
+
+    request_model = revisions_model.RevisionsRequestModel(**{"upload-id": upload_id})
+
+    model_response = cast(
+        revisions_model.RevisionsResponseModel,
+        charm_client.notify_revision(
+            name="craft-store-test-charm",
+            revision_request=request_model,
+        ),
     )
 
-    charm_client.release(
-        name="craft-store-test-charm",
-        release_request=[model],
+    assert (
+        model_response.status_url
+        == f"/v1/charm/craft-store-test-charm/revisions/review?upload-id={upload_id}"
     )
