@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence
+from typing import Any, Callable, Dict, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
@@ -251,6 +251,26 @@ class BaseClient(metaclass=ABCMeta):
         logger.debug("Uploading bytes for %r ended, id %r", str(filepath), upload_id)
 
         return upload_id
+
+    def notify_revision(
+        self,
+        *,
+        name: str,
+        revision_request: models.revisions_model.RevisionsRequestModel,
+    ) -> models.revisions_model.RevisionsResponseModel:
+        """Post to the revisions endpoint to notify the store about an upload.
+
+        This request usually takes place after a successful :attr:`.upload`.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}/{name}/revisions"
+        response = self.request(
+            "POST", self._base_url + endpoint, json=revision_request.marshal()
+        ).json()
+
+        return cast(
+            models.revisions_model.RevisionsResponseModel,
+            models.revisions_model.RevisionsResponseModel.unmarshal(response),
+        )
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""

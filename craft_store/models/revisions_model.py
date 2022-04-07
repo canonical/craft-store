@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
 # Copyright 2022 Canonical Ltd.
@@ -15,20 +14,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Models package for store responses."""
+"""Revisions response models for the Store."""
 
-from . import (
-    charm_list_releases_model,
-    release_request_model,
-    revisions_model,
-    snap_list_releases_model,
-)
 from ._base_model import MarshableModel
 
-__all__ = [
-    "MarshableModel",
-    "charm_list_releases_model",
-    "release_request_model",
-    "revisions_model",
-    "snap_list_releases_model",
-]
+
+class RevisionsRequestModel(MarshableModel):
+    """Resource model for a ReleaseRequestModel.
+
+    :param upload_id: the upload-id returned from the storage endpoint.
+    """
+
+    upload_id: str
+
+
+class RevisionsResponseModel(MarshableModel):
+    """Model for a revisions response.
+
+    :param status-url: a URL to monitor the state of the posted revision.
+    """
+
+    status_url: str
