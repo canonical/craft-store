@@ -80,12 +80,14 @@ class Auth:
         application_name: str,
         host: str,
         environment_auth: Optional[str] = None,
+        ephemeral: bool = False,
     ) -> None:
         """Initialize Auth.
 
         :param application_name: name of the application using this library.
         :param host: specific host for the store used.
         :param environment_auth: environment variable used for authentication.
+        :param ephemeral: keep everything in memory.
         """
         self.application_name = application_name
         self.host = host
@@ -94,7 +96,7 @@ class Auth:
         if environment_auth:
             environment_auth_value = os.getenv(environment_auth)
 
-        if environment_auth_value:
+        if environment_auth_value or ephemeral:
             keyring.set_keyring(MemoryKeyring())
 
         self._keyring = keyring.get_keyring()

@@ -41,6 +41,7 @@ class BaseClient(metaclass=ABCMeta):
     :param application_name: the name application using this class, used for the keyring.
     :param user_agent: User-Agent header to use for HTTP(s) requests.
     :param environment_auth: environment variable to use for credentials.
+    :param ephemeral: keep everything in memory.
 
     :raises errors.NoKeyringError: if there is no usable keyring.
     """
@@ -54,6 +55,7 @@ class BaseClient(metaclass=ABCMeta):
         application_name: str,
         user_agent: str,
         environment_auth: Optional[str] = None,
+        ephemeral: bool = False,
     ) -> None:
         """Initialize the Store Client."""
         self.http_client = HTTPClient(user_agent=user_agent)
@@ -66,6 +68,7 @@ class BaseClient(metaclass=ABCMeta):
             application_name,
             urlparse(base_url).netloc,
             environment_auth=environment_auth,
+            ephemeral=ephemeral,
         )
 
     @abstractmethod

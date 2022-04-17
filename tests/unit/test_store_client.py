@@ -171,7 +171,12 @@ def test_store_client_login(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=environment_auth),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=environment_auth,
+            ephemeral=False,
+        ),
         call().ensure_no_credentials(),
         call().set_credentials(real_macaroon),
         call().encode_credentials(real_macaroon),
@@ -236,7 +241,7 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().ensure_no_credentials(),
         call().set_credentials(real_macaroon),
         call().encode_credentials(real_macaroon),
@@ -255,7 +260,7 @@ def test_store_client_logout(auth_mock):
     store_client.logout()
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().del_credentials(),
     ]
 
@@ -282,7 +287,7 @@ def test_store_client_request(http_client_request_mock, real_macaroon, auth_mock
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().get_credentials(),
     ]
 
@@ -313,7 +318,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None),
+        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().get_credentials(),
     ]
 
