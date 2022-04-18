@@ -73,14 +73,16 @@ def fake_keyring():
 
 
 @pytest.fixture(autouse=True)
-def fake_keyring_get(fake_keyring):
+def fake_keyring_get(fake_keyring, request):
     """Mock keyring and return a FakeKeyring."""
-
-    patched_keyring = patch("keyring.get_keyring")
-    mocked_keyring = patched_keyring.start()
-    mocked_keyring.return_value = fake_keyring
-    yield mocked_keyring
-    patched_keyring.stop()
+    if "disable_fake_keyring" in request.keywords:
+        yield
+    else:
+        patched_keyring = patch("keyring.get_keyring")
+        mocked_keyring = patched_keyring.start()
+        mocked_keyring.return_value = fake_keyring
+        yield mocked_keyring
+        patched_keyring.stop()
 
 
 def test_set_credentials(caplog, fake_keyring):
@@ -221,6 +223,13 @@ def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     assert fake_keyring.set_password_calls == [
         ("fakeclient", "fakestore.com", "c2VjcmV0LWtleXM=")
     ]
+
+
+@pytest.mark.disable_fake_keyring
+def test_ephemeral_set_memory_keyring():
+    auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
+
+    assert isinstance(auth._keyring, MemoryKeyring)
 
 
 def test_no_keyring_get(fake_keyring_get):

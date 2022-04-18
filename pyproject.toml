@@ -5,3 +5,8 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 88
+
+[tool.pytest.ini_options]
+markers = [
+    "disable_fake_keyring: disables the fake keyring fixture."
+]
