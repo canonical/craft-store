@@ -229,7 +229,7 @@ def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
 
-    assert isinstance(auth._keyring, MemoryKeyring)
+    assert isinstance(auth._keyring, MemoryKeyring)  # pylint: disable=protected-access
 
 
 def test_no_keyring_get(fake_keyring_get):

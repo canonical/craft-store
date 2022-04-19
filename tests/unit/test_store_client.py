@@ -125,13 +125,11 @@ def auth_mock(real_macaroon):
     patched_auth.stop()
 
 
+@pytest.mark.usefixtures("bakery_discharge_mock")
+@pytest.mark.parametrize("ephemeral_auth", (True, False))
 @pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
 def test_store_client_login(
-    http_client_request_mock,
-    real_macaroon,
-    bakery_discharge_mock,
-    auth_mock,
-    environment_auth,
+    http_client_request_mock, real_macaroon, auth_mock, environment_auth, ephemeral_auth
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
@@ -140,6 +138,7 @@ def test_store_client_login(
         application_name="fakecraft",
         user_agent="FakeCraft Unix X11",
         environment_auth=environment_auth,
+        ephemeral=ephemeral_auth,
     )
 
     credentials = store_client.login(
@@ -175,7 +174,7 @@ def test_store_client_login(
             "fakecraft",
             "fake-server.com",
             environment_auth=environment_auth,
-            ephemeral=False,
+            ephemeral=ephemeral_auth,
         ),
         call().ensure_no_credentials(),
         call().set_credentials(real_macaroon),
@@ -183,8 +182,9 @@ def test_store_client_login(
     ]
 
 
+@pytest.mark.usefixtures("bakery_discharge_mock")
 def test_store_client_login_with_packages_and_channels(
-    http_client_request_mock, real_macaroon, bakery_discharge_mock, auth_mock
+    http_client_request_mock, real_macaroon, auth_mock
 ):
     store_client = StoreClient(
         base_url="https://fake-server.com",
