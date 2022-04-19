@@ -80,6 +80,7 @@ class StoreClient(BaseClient):
         application_name: str,
         user_agent: str,
         environment_auth: Optional[str] = None,
+        ephemeral: bool = False,
     ) -> None:
         super().__init__(
             base_url=base_url,
@@ -88,6 +89,7 @@ class StoreClient(BaseClient):
             application_name=application_name,
             user_agent=user_agent,
             environment_auth=environment_auth,
+            ephemeral=ephemeral,
         )
 
         self._bakery_client = httpbakery.Client(
