@@ -2,6 +2,16 @@
 Changelog
 *********
 
+2.1.0 (2022-03-19)
+------------------
+
+- Support for ephemeral logins in :class:`craft_store.BaseClient`
+- New endpoint to complete the upload experience
+  :meth:`craft_store.BaseClient.notify_revision`
+- New endpoint to release :meth:`craft_store.BaseClient.release` and retrieve
+  release information :meth:`craft_store.BaseClient.get_list_releases`
+- Support for Python 3.10
+
 2.0.1 (2022-02-10)
 ------------------
 
@@ -15,8 +25,8 @@ Changelog
 ------------------
 
 - New endpoint for uploads to storage,
-  :class:`craft_store.store_client.StoreClient` and
-  :class:`craft_store.ubuntu_one_store_client.UbuntuOneStoreClient` require a
+  :class:`craft_store.StoreClient` and
+  :class:`craft_store.UbuntuOneStoreClient` require a
   new initialization new parameter
 - Setting credentials while credentials are already set is no longer allowed
   :class:`craft_store.errors.CredentialsAlreadyAvailable` is raised if
@@ -31,7 +41,7 @@ Changelog
 
 - New whoami endpoint for :class:`craft_store.endpoints.CHARMHUB`
 - New class to provide login support for Ubuntu One SSO
-  :class:`craft_store.ubuntu_one_store_client.UbuntuOneStoreClient`
+  :class:`craft_store.UbuntuOneStoreClient`
 
 1.1.0 (2021-11-19)
 ------------------
@@ -40,7 +50,7 @@ Changelog
 - :class:`craft_store.store_client.StoreClient` support for retrieving
   credentials from an environment variable
 - Login credentials now returned from
-  :meth:`craft_store.store_client.StoreClient.login()`
+  :meth:`craft_store.BaseClient.login`
 
 
 1.0.0 (2021-10-21)
