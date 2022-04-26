@@ -28,13 +28,6 @@ from . import endpoints, errors
 from .base_client import BaseClient
 
 
-def _is_needs_refresh_response(response: requests.Response) -> bool:
-    return (
-        response.status_code == requests.codes.unauthorized  # pylint: disable=no-member
-        and response.headers.get("WWW-Authenticate") == "Macaroon needs_refresh=1"
-    )
-
-
 class UbuntuOneStoreClient(BaseClient):
     """Encapsulates API calls for the Snap Store or Charmhub with Ubuntu One."""
 
@@ -86,7 +79,7 @@ class UbuntuOneStoreClient(BaseClient):
 
         macaroons["d"] = response.json()["discharge_macaroon"]
 
-        self._auth.set_credentials(json.dumps(macaroons))
+        self._auth.set_credentials(json.dumps(macaroons), force=True)
 
     def _extract_caveat_id(self, root_macaroon):
         macaroon = Macaroon.deserialize(root_macaroon)
@@ -137,9 +130,13 @@ class UbuntuOneStoreClient(BaseClient):
         headers: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> requests.Response:
-        response = super().request(method, url, params, headers, **kwargs)
-        if _is_needs_refresh_response(response):
-            self._refresh_token()
+        try:
             response = super().request(method, url, params, headers, **kwargs)
+        except errors.StoreServerError as store_error:
+            if "macaroon-needs-refresh" in store_error.error_list:
+                self._refresh_token()
+                response = super().request(method, url, params, headers, **kwargs)
+            else:
+                raise
 
         return response
