@@ -120,6 +120,19 @@ def test_double_set_credentials_fails():
         auth.set_credentials("{'password': 'secret'}")
 
 
+def test_double_set_credentials_force(fake_keyring):
+    auth = Auth("fakeclient", "fakestore.com")
+
+    auth.set_credentials("{'password': 'secret'}")
+
+    auth.set_credentials("{'password': 'secret2'}", force=True)
+
+    assert fake_keyring.set_password_calls == [
+        ("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="),
+        ("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQyJ30="),
+    ]
+
+
 def test_get_credentials(caplog, fake_keyring):
     fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
 

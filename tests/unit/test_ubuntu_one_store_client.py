@@ -104,10 +104,6 @@ def http_client_request_mock(root_macaroon, discharged_macaroon):
                 200,
                 json={"name": "Fake Person", "username": "fakeuser", "id": "fake-id"},
             )
-        elif args[1] == "GET" and "/refreshpath" in args[2]:
-            response = _fake_response(
-                401, headers={"WWW-Authenticate": "Macaroon needs_refresh=1"}
-            )
         else:
             response = _fake_response(200)
 
@@ -417,6 +413,23 @@ def test_store_client_request(http_client_request_mock, authorization, auth_mock
 def test_store_client_request_refresh(
     http_client_request_mock, credentials, authorization, discharged_macaroon, auth_mock
 ):
+    http_client_request_mock.side_effect = [
+        errors.StoreServerError(
+            _fake_response(
+                401,
+                json={
+                    "error_list": [
+                        {
+                            "code": "macaroon-needs-refresh",
+                            "message": "Expired macaroon (age: 1234567 seconds)",
+                        }
+                    ]
+                },
+            )
+        ),
+        _fake_response(200, json={"discharge_macaroon": discharged_macaroon}),
+        _fake_response(200),
+    ]
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
         storage_base_url="https://fake-storage.com",
@@ -456,7 +469,7 @@ def test_store_client_request_refresh(
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().get_credentials(),
         call().get_credentials(),
-        call().set_credentials(credentials),
+        call().set_credentials(credentials, force=True),
         call().get_credentials(),
     ]
 

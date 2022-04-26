@@ -131,12 +131,14 @@ class Auth:
         if self._keyring.get_password(self.application_name, self.host) is not None:
             raise errors.CredentialsAlreadyAvailable(self.application_name, self.host)
 
-    def set_credentials(self, credentials: str) -> None:
+    def set_credentials(self, credentials: str, force: bool = False) -> None:
         """Store credentials in the keyring.
 
         :param credentials: token to store.
+        :param force: overwrite existing credentials.
         """
-        self.ensure_no_credentials()
+        if not force:
+            self.ensure_no_credentials()
 
         logger.debug(
             "Storing credentials for %r on %r in keyring %r.",
