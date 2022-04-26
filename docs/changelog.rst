@@ -2,6 +2,11 @@
 Changelog
 *********
 
+2.1.1 (2022-04-26)
+------------------
+
+- Update macaroon refresh logic for :class:`craft_store.UbuntuOneStoreClient`
+
 2.1.0 (2022-03-19)
 ------------------
 
