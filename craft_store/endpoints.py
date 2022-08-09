@@ -50,11 +50,11 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
 
     namespace: str
     whoami: str
-    upload: str
     tokens: str
     tokens_exchange: str
     list_releases_model: Type[MarshableModel]
     valid_package_types: Sequence[str]
+    upload: str = "/unscanned-upload/"
     tokens_refresh: Optional[str] = None
 
     def _validate_packages(self, packages: Sequence[Package]) -> None:
@@ -158,7 +158,6 @@ class _SnapStoreEndpoints(Endpoints):
 CHARMHUB: Final = Endpoints(
     namespace="charm",
     whoami="/v1/tokens/whoami",
-    upload="/unscanned-upload/",
     tokens="/v1/tokens",
     tokens_exchange="/v1/tokens/exchange",
     valid_package_types=["charm", "bundle"],
@@ -170,7 +169,6 @@ CHARMHUB: Final = Endpoints(
 SNAP_STORE: Final = _SnapStoreEndpoints(
     namespace="snap",
     whoami="/api/v2/tokens/whoami",
-    upload="/unscanned-upload/",
     tokens="/api/v2/tokens",
     tokens_exchange="/api/v2/tokens/exchange",
     valid_package_types=["snap"],
@@ -182,7 +180,6 @@ SNAP_STORE: Final = _SnapStoreEndpoints(
 U1_SNAP_STORE: Final = _SnapStoreEndpoints(
     namespace="snap",
     whoami="/api/v2/tokens/whoami",
-    upload="/unscanned-upload/",
     tokens="/dev/api/acl/",
     tokens_exchange="/api/v2/tokens/discharge",
     tokens_refresh="/api/v2/tokens/refresh",
