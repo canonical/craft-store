@@ -18,11 +18,11 @@
 
 import contextlib
 import logging
-from json.decoder import JSONDecodeError
 from typing import Dict, List, Optional
 
 import requests
 import urllib3  # type: ignore
+from requests.exceptions import JSONDecodeError
 
 logger = logging.getLogger(__name__)
 

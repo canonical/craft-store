@@ -15,12 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from json.decoder import JSONDecodeError
 from unittest.mock import ANY, Mock, call, patch
 
 import pytest
 import requests
 import urllib3  # type: ignore
+from requests.exceptions import JSONDecodeError
 
 from craft_store import HTTPClient, errors
 from craft_store.http_client import _get_retry_value

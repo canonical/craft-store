@@ -14,13 +14,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from json.decoder import JSONDecodeError
 from textwrap import dedent
 from unittest import mock
 
 import pytest
 import requests
 import urllib3  # type: ignore
+from requests.exceptions import JSONDecodeError
 
 from craft_store import errors
 
