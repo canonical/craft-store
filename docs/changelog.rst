@@ -2,6 +2,22 @@
 Changelog
 *********
 
+2.2.0 (2022-08-11)
+------------------
+
+- Refactor common code in `endpoints`
+- Export new symbols in craft_store.models:
+
+  - :class:`craft_store.models.CharmChannelMapModel`
+  -  :class:`craft_store.models.MarshableModel`
+  - :class:`craft_store.models.ReleaseRequestModel`
+  - :class:`craft_store.models.RevisionsRequestModel`
+  - :class:`craft_store.models.RevisionsResponseModel`
+  - :class:`craft_store.models.SnapChannelMapModel`
+
+- Catch the correct :class:`JSONDecodeError`
+
+
 2.1.1 (2022-04-26)
 ------------------
 
