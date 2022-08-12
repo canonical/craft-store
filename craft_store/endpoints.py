@@ -20,6 +20,8 @@ import dataclasses
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Final, Optional, Sequence, Type
 
+from overrides import overrides
+
 from craft_store.models import (
     MarshableModel,
     charm_list_releases_model,
@@ -111,6 +113,14 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
         """
         return result["upload_id"]
 
+    def get_releases_endpoint(self, name: str) -> str:
+        """Return the slug to the releases endpoint."""
+        return f"/v1/{self.namespace}/{name}/releases"
+
+    def get_revisions_endpoint(self, name: str) -> str:
+        """Return the slug to the revisions endpoint."""
+        return f"/v1/{self.namespace}/{name}/revisions"
+
 
 @dataclasses.dataclass(repr=True)
 class _SnapStoreEndpoints(Endpoints):
@@ -153,6 +163,14 @@ class _SnapStoreEndpoints(Endpoints):
     @staticmethod
     def get_upload_id(result: Dict[str, Any]) -> str:
         return result["upload_id"]
+
+    @overrides
+    def get_releases_endpoint(self, name: str) -> str:
+        raise NotImplementedError()
+
+    @overrides
+    def get_revisions_endpoint(self, name: str) -> str:
+        raise NotImplementedError()
 
 
 CHARMHUB: Final = Endpoints(

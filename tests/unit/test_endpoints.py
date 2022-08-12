@@ -93,6 +93,23 @@ def test_charmhub_invalid_packages():
     )
 
 
+def test_charmhub_releases():
+    charmhub = endpoints.CHARMHUB
+
+    assert (
+        charmhub.get_releases_endpoint("test-charm") == "/v1/charm/test-charm/releases"
+    )
+
+
+def test_charmhub_revisions():
+    charmhub = endpoints.CHARMHUB
+
+    assert (
+        charmhub.get_revisions_endpoint("test-charm")
+        == "/v1/charm/test-charm/revisions"
+    )
+
+
 def test_snap_store(expires):
     snap_store = endpoints.SNAP_STORE
 
@@ -163,3 +180,17 @@ def test_snap_store_invalid_packages():
             ],
         )
     assert str(raised.value) == "Package types ['charm', 'rock'] not in ['snap']"
+
+
+def test_snap_store_releases():
+    snap_store = endpoints.SNAP_STORE
+
+    with pytest.raises(NotImplementedError):
+        snap_store.get_releases_endpoint("test-snap")
+
+
+def test_snap_store_revisions():
+    snap_store = endpoints.SNAP_STORE
+
+    with pytest.raises(NotImplementedError):
+        snap_store.get_revisions_endpoint("test-snap")
