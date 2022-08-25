@@ -95,7 +95,7 @@ test-pydocstyle:
 .PHONY: test-pylint
 test-pylint:
 	pylint craft_store
-	pylint tests --disable=missing-module-docstring,missing-function-docstring,redefined-outer-name
+	pylint tests --disable=missing-module-docstring,missing-function-docstring,redefined-outer-name,line-too-long,duplicate-code
 
 .PHONY: test-pyright
 test-pyright:

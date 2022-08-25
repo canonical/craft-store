@@ -55,7 +55,7 @@ has collaborator rights.
 
 PACKAGE_VIEW = "package-view"
 """
-Meta permission for easing creation of a complete RO token grants all the
+Meta permission for easing creation of a complete read only token grants all the
 package-view-* permissions.
 """
 
