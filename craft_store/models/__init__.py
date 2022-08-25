@@ -24,18 +24,18 @@ from . import (
     snap_list_releases_model,
 )
 from ._base_model import MarshableModel
-from .charm_list_releases_model import ChannelMapModel as CharmChannelMapModel
+from .charm_list_releases_model import ListReleasesModel as CharmListReleasesModel
 from .release_request_model import ReleaseRequestModel
 from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
-from .snap_list_releases_model import ChannelMapModel as SnapChannelMapModel
+from .snap_list_releases_model import ListReleasesModel as SnapListReleasesModel
 
 __all__ = [
-    "CharmChannelMapModel",
+    "CharmListReleasesModel",
     "MarshableModel",
     "ReleaseRequestModel",
     "RevisionsRequestModel",
     "RevisionsResponseModel",
-    "SnapChannelMapModel",
+    "SnapListReleasesModel",
     "charm_list_releases_model",
     "release_request_model",
     "revisions_model",

@@ -65,7 +65,7 @@ class RevisionModel(MarshableModel):
     """Model for a revision entry from list_releases."""
 
     architectures: List[str]
-    base: str
+    base: Optional[str]
     build_url: Optional[str]
     confinement: Confinement
     created_at: datetime
