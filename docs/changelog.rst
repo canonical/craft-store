@@ -2,6 +2,14 @@
 Changelog
 *********
 
+2.2.1 (2022-08-25)
+------------------
+
+- Export :class:`craft_store.models.SnapListReleasesModel` and
+  :class:`craft_store.models.CharmListReleasesModel`
+- Remove incorrectly exported `SnapChannelMapModel` and `CharmChannelMapModel`
+- Make bases optional in :class:`craft_store.models.SnapListReleasesModel`
+
 2.2.0 (2022-08-11)
 ------------------
 
@@ -9,7 +17,7 @@ Changelog
 - Export new symbols in craft_store.models:
 
   - :class:`craft_store.models.CharmChannelMapModel`
-  -  :class:`craft_store.models.MarshableModel`
+  - :class:`craft_store.models.MarshableModel`
   - :class:`craft_store.models.ReleaseRequestModel`
   - :class:`craft_store.models.RevisionsRequestModel`
   - :class:`craft_store.models.RevisionsResponseModel`
