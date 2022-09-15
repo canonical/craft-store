@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Craft Store BaseClient."""
-
+import json
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
@@ -30,6 +30,43 @@ from .auth import Auth
 from .http_client import HTTPClient
 
 logger = logging.getLogger(__name__)
+
+
+def wrap_credentials(token_type: str, credentials: str) -> str:
+    """Create a payload string that contains both `credentials` and its identifying type.
+
+    :param token_type: The identifier for the type of token stored in `credentials`
+    :param credentials:
+    :return: A payload string ready to be passed to Auth.set_credentials()
+    """
+    return json.dumps({"t": token_type, "v": credentials})
+
+
+def unwrap_credentials(token_type: str, stored_credentials: str) -> str:
+    """Retrieve the type-specific "inner" credentials from `credentials`.
+
+    This function also handles backwards-compatibility by supporting `credentials`
+    from before we stored the `token_type`; it is meant to be called with the
+    returned value from Auth.get_credentials().
+
+    :param token_type: The expected token type, for validation.
+    :param stored_credentials: The credentials retrieved from auth storage.
+    """
+    try:
+        loaded = json.loads(stored_credentials)
+    except json.JSONDecodeError:
+        # Not a JSON string, so this is already the desired value
+        return stored_credentials
+
+    if "t" in loaded:
+        if loaded["t"] == token_type:
+            return loaded["v"]
+        # TODO: What should we do in the (buggy) case where the token type is different
+        # from what was expected?
+        raise errors.CredentialsNotParseable()
+
+    # Credentials are a dict, but not in the format expected: must be the desired value
+    return stored_credentials
 
 
 class BaseClient(metaclass=ABCMeta):

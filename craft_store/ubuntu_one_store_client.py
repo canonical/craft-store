@@ -25,11 +25,13 @@ from overrides import overrides
 from pymacaroons import Macaroon
 
 from . import endpoints, errors
-from .base_client import BaseClient
+from .base_client import BaseClient, unwrap_credentials, wrap_credentials
 
 
 class UbuntuOneStoreClient(BaseClient):
     """Encapsulates API calls for the Snap Store or Charmhub with Ubuntu One."""
+
+    TOKEN_TYPE: str = "u1-macaroon"
 
     def __init__(
         self,
@@ -55,7 +57,10 @@ class UbuntuOneStoreClient(BaseClient):
         self._auth_url = auth_url
 
     def _get_authorization_header(self) -> str:
-        macaroons = json.loads(self._auth.get_credentials())
+        macaroons = json.loads(
+            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials())
+        )
+
         root_macaroon = Macaroon.deserialize(macaroons["r"])
         discharged_macaroon = Macaroon.deserialize(macaroons["d"])
         bound_macaroon = root_macaroon.prepare_for_request(
@@ -67,7 +72,9 @@ class UbuntuOneStoreClient(BaseClient):
         if self._endpoints.tokens_refresh is None:
             raise ValueError("tokens_refresh cannot be None")
 
-        macaroons = json.loads(self._auth.get_credentials())
+        macaroons = json.loads(
+            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials())
+        )
         response = self.http_client.request(
             "POST",
             self._auth_url + self._endpoints.tokens_refresh,
@@ -119,7 +126,8 @@ class UbuntuOneStoreClient(BaseClient):
         discharged_macaroon = self._discharge(
             email=email, password=password, otp=otp, caveat_id=cavead_id
         )
-        return json.dumps({"r": root_macaroon, "d": discharged_macaroon})
+        u1_macaroon = json.dumps({"r": root_macaroon, "d": discharged_macaroon})
+        return wrap_credentials(self.TOKEN_TYPE, u1_macaroon)
 
     @overrides
     def request(

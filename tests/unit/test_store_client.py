@@ -21,7 +21,8 @@ import pytest
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.macaroon import Macaroon
 
-from craft_store import base_client, endpoints, errors
+from craft_store import Auth, base_client, endpoints, errors
+from craft_store.base_client import wrap_credentials
 from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor
 
 
@@ -115,11 +116,15 @@ def bakery_discharge_mock(monkeypatch):
     monkeypatch.setattr(bakery, "discharge_all", mock_discharge)
 
 
-@pytest.fixture(autouse=True)
-def auth_mock(real_macaroon):
+@pytest.fixture
+def auth_mock(real_macaroon, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
-    mocked_auth.return_value.get_credentials.return_value = real_macaroon
+
+    wrapped_credentials = wrap_credentials(StoreClient.TOKEN_TYPE, real_macaroon)
+    stored_credentials = wrapped_credentials if new_auth else real_macaroon
+
+    mocked_auth.return_value.get_credentials.return_value = stored_credentials
     mocked_auth.return_value.encode_credentials.return_value = "c2VjcmV0LWtleXM="
     yield mocked_auth
     patched_auth.stop()
@@ -169,6 +174,8 @@ def test_store_client_login(
         ),
     ]
 
+    wrapped = wrap_credentials("macaroon", real_macaroon)
+
     assert auth_mock.mock_calls == [
         call(
             "fakecraft",
@@ -177,8 +184,8 @@ def test_store_client_login(
             ephemeral=ephemeral_auth,
         ),
         call().ensure_no_credentials(),
-        call().set_credentials(real_macaroon),
-        call().encode_credentials(real_macaroon),
+        call().set_credentials(wrapped),
+        call().encode_credentials(wrapped),
     ]
 
 
@@ -240,11 +247,13 @@ def test_store_client_login_with_packages_and_channels(
         ),
     ]
 
+    expected_credentials = wrap_credentials("macaroon", real_macaroon)
+
     assert auth_mock.mock_calls == [
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().ensure_no_credentials(),
-        call().set_credentials(real_macaroon),
-        call().encode_credentials(real_macaroon),
+        call().set_credentials(expected_credentials),
+        call().encode_credentials(expected_credentials),
     ]
 
 
@@ -324,7 +333,9 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
 
 
 @pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
-def test_store_client_upload_file_no_monitor(tmp_path, http_client_request_mock, hub):
+def test_store_client_upload_file_no_monitor(
+    tmp_path, http_client_request_mock, auth_mock, hub
+):
     if hub == endpoints.CHARMHUB:
         storage_url = "https://fake-charm-storage.com"
     else:
@@ -368,7 +379,9 @@ def test_store_client_upload_file_no_monitor(tmp_path, http_client_request_mock,
 
 
 @pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
-def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_mock, hub):
+def test_store_client_upload_file_with_monitor(
+    tmp_path, http_client_request_mock, auth_mock, hub
+):
     if hub == endpoints.CHARMHUB:
         storage_url = "https://fake-charm-storage.com"
     else:
@@ -440,7 +453,7 @@ def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_moc
     ]
 
 
-def test_webinteractore_wait_for_token(http_client_request_mock):
+def test_webinteractore_wait_for_token(http_client_request_mock, auth_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(
         200, json={"kind": "kind", "token": "TOKEN", "token64": b"VE9LRU42NA=="}
@@ -458,7 +471,9 @@ def test_webinteractore_wait_for_token(http_client_request_mock):
     ]
 
 
-def test_webinteractore_wait_for_token_timeout_error(http_client_request_mock):
+def test_webinteractore_wait_for_token_timeout_error(
+    http_client_request_mock, auth_mock
+):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(400, json={})
 
@@ -468,7 +483,7 @@ def test_webinteractore_wait_for_token_timeout_error(http_client_request_mock):
         wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
 
 
-def test_webinteractore_wait_for_token_kind_error(http_client_request_mock):
+def test_webinteractore_wait_for_token_kind_error(http_client_request_mock, auth_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(200, json={})
 
@@ -478,7 +493,7 @@ def test_webinteractore_wait_for_token_kind_error(http_client_request_mock):
         wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
 
 
-def test_webinteractore_wait_for_token_value_error(http_client_request_mock):
+def test_webinteractore_wait_for_token_value_error(http_client_request_mock, auth_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(
         200,
@@ -491,3 +506,59 @@ def test_webinteractore_wait_for_token_value_error(http_client_request_mock):
 
     with pytest.raises(errors.CandidTokenValueError):
         wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+
+
+def test_store_client_env_var(http_client_request_mock, new_auth, monkeypatch):
+    """
+    Test StoreClient credential handling when using auth from an environment variable.
+    """
+
+    # The auth environment variable contents must have the same format as those stored
+    # by Auth.set_credentials(): some payload, base64-encoded. So we "manually" encode
+    # a serialized dummy macaroon.
+    macaroon = Macaroon(
+        location="fake-server.com",
+        signature="d9533461d7835e4851c7e3b639144406cf768597dea6e133232fbd2385a5c050",
+    )
+    credentials = macaroon.serialize()
+
+    if new_auth:
+        # new, type-tagged auth: use the dict tagging the type and the actual payload
+        # (the serialized macaroon).
+        wrapped_credentials = wrap_credentials(StoreClient.TOKEN_TYPE, credentials)
+        stored_b64_credentials = Auth.encode_credentials(wrapped_credentials)
+    else:
+        # old auth: use the serialized macaroon "as-is".
+        stored_b64_credentials = Auth.encode_credentials(credentials)
+
+    environment_auth = "CRAFT_AUTH_TEST_VAR"
+    monkeypatch.setenv(environment_auth, stored_b64_credentials)
+
+    # This StoreClient uses a non-mocked Auth with a memory keyring because of `environment_auth`.
+    store_client = StoreClient(
+        base_url="https://fake-server.com",
+        storage_base_url="https://fake-storage.com",
+        endpoints=endpoints.CHARMHUB,
+        application_name="fakecraft",
+        user_agent="FakeCraft Unix X11",
+        environment_auth=environment_auth,
+    )
+
+    # Make a (mocked) network request to check the provided credentials.
+    assert store_client.whoami() == {
+        "name": "Fake Person",
+        "username": "fakeuser",
+        "id": "fake-id",
+    }
+
+    # When making the request the Authorization header must contain the original
+    # serialized (non-base64-encoded) macaroon, regardless of new or old auth.
+    assert http_client_request_mock.mock_calls == [
+        call(
+            store_client.http_client,
+            "GET",
+            "https://fake-server.com/v1/tokens/whoami",
+            params=None,
+            headers={"Authorization": f"Macaroon {credentials}"},
+        )
+    ]
