@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Craft Store BaseClient."""
-import json
+
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
@@ -30,23 +30,6 @@ from .auth import Auth
 from .http_client import HTTPClient
 
 logger = logging.getLogger(__name__)
-
-
-def wrap_token_type(token_type: str, payload: str) -> str:
-    """WIP."""
-    return json.dumps({"t": token_type, "v": payload})
-
-
-def unwrap_token_type(token_type: str, payload: str) -> str:
-    """WIP."""
-    loaded = json.loads(payload)
-
-    if "t" in loaded:
-        if loaded["t"] == token_type:
-            return loaded["v"]
-        raise errors.CredentialsNotParseable()
-
-    return payload
 
 
 class BaseClient(metaclass=ABCMeta):

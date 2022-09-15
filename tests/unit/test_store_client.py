@@ -115,19 +115,11 @@ def bakery_discharge_mock(monkeypatch):
     monkeypatch.setattr(bakery, "discharge_all", mock_discharge)
 
 
-def wrap_payload(token_type, payload):
-    return json.dumps({"t": token_type, "v": payload})
-
-
-@pytest.fixture(autouse=True, params=["new_auth", "old_auth"])
-def auth_mock(real_macaroon, request):
+@pytest.fixture(autouse=True)
+def auth_mock(real_macaroon):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
-
-    new_auth = request.param == "new_auth"
-    payload = wrap_payload("macaroon", real_macaroon) if new_auth else real_macaroon
-
-    mocked_auth.return_value.get_credentials.return_value = payload
+    mocked_auth.return_value.get_credentials.return_value = real_macaroon
     mocked_auth.return_value.encode_credentials.return_value = "c2VjcmV0LWtleXM="
     yield mocked_auth
     patched_auth.stop()
@@ -177,8 +169,6 @@ def test_store_client_login(
         ),
     ]
 
-    wrapped = wrap_payload("macaroon", real_macaroon)
-
     assert auth_mock.mock_calls == [
         call(
             "fakecraft",
@@ -187,8 +177,8 @@ def test_store_client_login(
             ephemeral=ephemeral_auth,
         ),
         call().ensure_no_credentials(),
-        call().set_credentials(wrapped),
-        call().encode_credentials(wrapped),
+        call().set_credentials(real_macaroon),
+        call().encode_credentials(real_macaroon),
     ]
 
 
@@ -250,13 +240,11 @@ def test_store_client_login_with_packages_and_channels(
         ),
     ]
 
-    wrapped = wrap_payload("macaroon", real_macaroon)
-
     assert auth_mock.mock_calls == [
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().ensure_no_credentials(),
-        call().set_credentials(wrapped),
-        call().encode_credentials(wrapped),
+        call().set_credentials(real_macaroon),
+        call().encode_credentials(real_macaroon),
     ]
 
 
