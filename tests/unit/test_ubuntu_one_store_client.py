@@ -119,12 +119,21 @@ def http_client_request_mock(root_macaroon, discharged_macaroon):
     patched_http_client.stop()
 
 
-@pytest.fixture
-def auth_mock(credentials):
+def wrap_payload(token_type, payload):
+    return json.dumps({"t": token_type, "v": payload})
+
+
+@pytest.fixture(params=["new_auth", "old_auth"])
+def auth_mock(credentials, request):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
+
+    wrapped_credentials = wrap_payload("u1-macaroon", credentials)
+    new_auth = request.param == "new_auth"
+    credentials = wrapped_credentials if new_auth else credentials
+
     mocked_auth.return_value.get_credentials.return_value = credentials
-    mocked_auth.return_value.encode_credentials.return_value = credentials
+    mocked_auth.return_value.encode_credentials.return_value = wrapped_credentials
     yield mocked_auth
     patched_auth.stop()
 
@@ -147,6 +156,7 @@ def test_store_client_login(
         environment_auth=environment_auth,
     )
 
+    wrapped_credentials = wrap_payload("u1-macaroon", credentials)
     assert (
         store_client.login(
             permissions=["perm-1", "perm-2"],
@@ -155,7 +165,7 @@ def test_store_client_login(
             email="foo@bar.com",
             password="password",
         )
-        == credentials
+        == wrapped_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -191,8 +201,8 @@ def test_store_client_login(
             ephemeral=False,
         ),
         call().ensure_no_credentials(),
-        call().set_credentials(credentials),
-        call().encode_credentials(credentials),
+        call().set_credentials(wrapped_credentials),
+        call().encode_credentials(wrapped_credentials),
     ]
 
 
@@ -221,6 +231,7 @@ def test_store_client_login_otp(
         )
     assert "twofactor-required" in server_error.value.error_list
 
+    wrapped_credentials = wrap_payload("u1-macaroon", credentials)
     assert (
         store_client.login(
             permissions=["perm-1", "perm-2"],
@@ -230,7 +241,7 @@ def test_store_client_login_otp(
             password="password",
             otp="123456",
         )
-        == credentials
+        == wrapped_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -287,14 +298,15 @@ def test_store_client_login_otp(
         call().ensure_no_credentials(),
         # Second call with otp.
         call().ensure_no_credentials(),
-        call().set_credentials(credentials),
-        call().encode_credentials(credentials),
+        call().set_credentials(wrapped_credentials),
+        call().encode_credentials(wrapped_credentials),
     ]
 
 
 def test_store_client_login_with_packages_and_channels(
     http_client_request_mock, credentials, auth_mock, expires
 ):
+    wrapped_credentials = wrap_payload("u1-macaroon", credentials)
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
         storage_base_url="https://fake-storage.com",
@@ -317,7 +329,7 @@ def test_store_client_login_with_packages_and_channels(
             email="foo@bar.com",
             password="password",
         )
-        == credentials
+        == wrapped_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -359,8 +371,8 @@ def test_store_client_login_with_packages_and_channels(
     assert auth_mock.mock_calls == [
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().ensure_no_credentials(),
-        call().set_credentials(credentials),
-        call().encode_credentials(credentials),
+        call().set_credentials(wrapped_credentials),
+        call().encode_credentials(wrapped_credentials),
     ]
 
 
