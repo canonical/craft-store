@@ -35,6 +35,9 @@ logger = logging.getLogger(__name__)
 def wrap_credentials(token_type: str, credentials: str) -> str:
     """Create a payload string that contains both `credentials` and its identifying type.
 
+    This function creates a string that contains the desired `credentials` but also
+    stores their "type", for unwrapping later with `unwrap_credentials()`.
+
     :param token_type: The identifier for the type of token stored in `credentials`
     :param credentials:
     :return: A payload string ready to be passed to Auth.set_credentials()
