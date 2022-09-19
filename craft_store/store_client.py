@@ -99,7 +99,7 @@ class StoreClient(BaseClient):
         )
 
     def _get_authorization_header(self) -> str:
-        auth = unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials())
+        auth = unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), False)
 
         return f"Macaroon {auth}"
 

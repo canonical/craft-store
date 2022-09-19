@@ -60,8 +60,21 @@ def discharged_macaroon():
 
 
 @pytest.fixture
-def credentials(root_macaroon, discharged_macaroon):
-    return json.dumps({"r": root_macaroon, "d": discharged_macaroon})
+def u1_macaroon_value(root_macaroon, discharged_macaroon):
+    """The basic "payload" for the u1-macaroon auth type"""
+    return {"r": root_macaroon, "d": discharged_macaroon}
+
+
+@pytest.fixture
+def old_credentials(u1_macaroon_value):
+    """u1-macaroon credentials encoded in the *old* ("type-less") scheme."""
+    return json.dumps(u1_macaroon_value)
+
+
+@pytest.fixture
+def new_credentials(u1_macaroon_value):
+    """u1-macaroon credentials encoded in the *new* ("typed") scheme."""
+    return wrap_credentials(UbuntuOneStoreClient.TOKEN_TYPE, u1_macaroon_value)
 
 
 @pytest.fixture
@@ -121,15 +134,15 @@ def http_client_request_mock(root_macaroon, discharged_macaroon):
 
 
 @pytest.fixture
-def auth_mock(credentials, new_auth):
+def auth_mock(old_credentials, new_credentials, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
 
-    wrapped_credentials = wrap_credentials(UbuntuOneStoreClient.TOKEN_TYPE, credentials)
-    credentials = wrapped_credentials if new_auth else credentials
+    credentials = new_credentials if new_auth else old_credentials
 
     mocked_auth.return_value.get_credentials.return_value = credentials
-    mocked_auth.return_value.encode_credentials.return_value = wrapped_credentials
+    # Note that the call to encode credentials always encode the new format.
+    mocked_auth.return_value.encode_credentials.return_value = new_credentials
     yield mocked_auth
     patched_auth.stop()
 
@@ -137,7 +150,7 @@ def auth_mock(credentials, new_auth):
 @pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
 def test_store_client_login(
     http_client_request_mock,
-    credentials,
+    new_credentials,
     auth_mock,
     environment_auth,
     expires,
@@ -152,7 +165,6 @@ def test_store_client_login(
         environment_auth=environment_auth,
     )
 
-    wrapped_credentials = wrap_credentials("u1-macaroon", credentials)
     assert (
         store_client.login(
             permissions=["perm-1", "perm-2"],
@@ -161,7 +173,7 @@ def test_store_client_login(
             email="foo@bar.com",
             password="password",
         )
-        == wrapped_credentials
+        == new_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -197,14 +209,14 @@ def test_store_client_login(
             ephemeral=False,
         ),
         call().ensure_no_credentials(),
-        call().set_credentials(wrapped_credentials),
-        call().encode_credentials(wrapped_credentials),
+        call().set_credentials(new_credentials),
+        call().encode_credentials(new_credentials),
     ]
 
 
 def test_store_client_login_otp(
     http_client_request_mock,
-    credentials,
+    new_credentials,
     auth_mock,
     expires,
 ):
@@ -227,7 +239,6 @@ def test_store_client_login_otp(
         )
     assert "twofactor-required" in server_error.value.error_list
 
-    wrapped_credentials = wrap_credentials("u1-macaroon", credentials)
     assert (
         store_client.login(
             permissions=["perm-1", "perm-2"],
@@ -237,7 +248,7 @@ def test_store_client_login_otp(
             password="password",
             otp="123456",
         )
-        == wrapped_credentials
+        == new_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -294,15 +305,14 @@ def test_store_client_login_otp(
         call().ensure_no_credentials(),
         # Second call with otp.
         call().ensure_no_credentials(),
-        call().set_credentials(wrapped_credentials),
-        call().encode_credentials(wrapped_credentials),
+        call().set_credentials(new_credentials),
+        call().encode_credentials(new_credentials),
     ]
 
 
 def test_store_client_login_with_packages_and_channels(
-    http_client_request_mock, credentials, auth_mock, expires
+    http_client_request_mock, new_credentials, auth_mock, expires
 ):
-    wrapped_credentials = wrap_credentials("u1-macaroon", credentials)
     store_client = UbuntuOneStoreClient(
         base_url="https://fake-server.com",
         storage_base_url="https://fake-storage.com",
@@ -325,7 +335,7 @@ def test_store_client_login_with_packages_and_channels(
             email="foo@bar.com",
             password="password",
         )
-        == wrapped_credentials
+        == new_credentials
     )
 
     assert http_client_request_mock.mock_calls == [
@@ -367,8 +377,8 @@ def test_store_client_login_with_packages_and_channels(
     assert auth_mock.mock_calls == [
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().ensure_no_credentials(),
-        call().set_credentials(wrapped_credentials),
-        call().encode_credentials(wrapped_credentials),
+        call().set_credentials(new_credentials),
+        call().encode_credentials(new_credentials),
     ]
 
 
@@ -419,7 +429,11 @@ def test_store_client_request(http_client_request_mock, authorization, auth_mock
 
 
 def test_store_client_request_refresh(
-    http_client_request_mock, credentials, authorization, discharged_macaroon, auth_mock
+    http_client_request_mock,
+    new_credentials,
+    authorization,
+    discharged_macaroon,
+    auth_mock,
 ):
     http_client_request_mock.side_effect = [
         errors.StoreServerError(
@@ -477,7 +491,7 @@ def test_store_client_request_refresh(
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
         call().get_credentials(),
         call().get_credentials(),
-        call().set_credentials(credentials, force=True),
+        call().set_credentials(new_credentials, force=True),
         call().get_credentials(),
     ]
 

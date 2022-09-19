@@ -17,6 +17,7 @@
 """Craft Store BaseClient."""
 import json
 import logging
+import typing
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Sequence, cast
@@ -31,21 +32,28 @@ from .http_client import HTTPClient
 
 logger = logging.getLogger(__name__)
 
+# The known types of credentials: a string for Candid and a Dict for UbuntuOne
+CandidCredType = str
+UbuntuOneCredType = typing.Dict[str, str]
+CredentialsType = typing.Union[CandidCredType, UbuntuOneCredType]
 
-def wrap_credentials(token_type: str, credentials: str) -> str:
+
+def wrap_credentials(token_type: str, credentials: CredentialsType) -> str:
     """Create a payload string that contains both `credentials` and its identifying type.
 
     This function creates a string that contains the desired `credentials` but also
     stores their "type", for unwrapping later with `unwrap_credentials()`.
 
     :param token_type: The identifier for the type of token stored in `credentials`
-    :param credentials:
+    :param credentials: The actual type-dependent credentials.
     :return: A payload string ready to be passed to Auth.set_credentials()
     """
     return json.dumps({"t": token_type, "v": credentials})
 
 
-def unwrap_credentials(token_type: str, stored_credentials: str) -> str:
+def unwrap_credentials(
+    token_type: str, stored_credentials: str, deserialize_old_creds: bool
+) -> CredentialsType:
     """Retrieve the type-specific "inner" credentials from `credentials`.
 
     This function also handles backwards-compatibility by supporting `credentials`
@@ -54,6 +62,9 @@ def unwrap_credentials(token_type: str, stored_credentials: str) -> str:
 
     :param token_type: The expected token type, for validation.
     :param stored_credentials: The credentials retrieved from auth storage.
+    :param deserialize_old_creds:
+        How to handle credentials stored in the old scheme: should they be deserialized
+        with JSON (True) or returned as-is (False).
     """
     try:
         loaded = json.loads(stored_credentials)
@@ -64,12 +75,10 @@ def unwrap_credentials(token_type: str, stored_credentials: str) -> str:
     if "t" in loaded:
         if loaded["t"] == token_type:
             return loaded["v"]
-        # TODO: What should we do in the (buggy) case where the token type is different
-        # from what was expected?
         raise errors.CredentialsNotParseable()
 
     # Credentials are a dict, but not in the format expected: must be the desired value
-    return stored_credentials
+    return loaded if deserialize_old_creds else stored_credentials
 
 
 class BaseClient(metaclass=ABCMeta):

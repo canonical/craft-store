@@ -16,8 +16,7 @@
 
 """Craft Store StoreClient."""
 
-import json
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 from urllib.parse import urlparse
 
 import requests
@@ -25,7 +24,12 @@ from overrides import overrides
 from pymacaroons import Macaroon
 
 from . import endpoints, errors
-from .base_client import BaseClient, unwrap_credentials, wrap_credentials
+from .base_client import (
+    BaseClient,
+    UbuntuOneCredType,
+    unwrap_credentials,
+    wrap_credentials,
+)
 
 
 class UbuntuOneStoreClient(BaseClient):
@@ -57,8 +61,9 @@ class UbuntuOneStoreClient(BaseClient):
         self._auth_url = auth_url
 
     def _get_authorization_header(self) -> str:
-        macaroons = json.loads(
-            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials())
+        macaroons = cast(
+            UbuntuOneCredType,
+            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), True),
         )
 
         root_macaroon = Macaroon.deserialize(macaroons["r"])
@@ -72,9 +77,11 @@ class UbuntuOneStoreClient(BaseClient):
         if self._endpoints.tokens_refresh is None:
             raise ValueError("tokens_refresh cannot be None")
 
-        macaroons = json.loads(
-            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials())
+        macaroons = cast(
+            UbuntuOneCredType,
+            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), True),
         )
+
         response = self.http_client.request(
             "POST",
             self._auth_url + self._endpoints.tokens_refresh,
@@ -86,7 +93,8 @@ class UbuntuOneStoreClient(BaseClient):
 
         macaroons["d"] = response.json()["discharge_macaroon"]
 
-        self._auth.set_credentials(json.dumps(macaroons), force=True)
+        wrapped_credentials = wrap_credentials(self.TOKEN_TYPE, macaroons)
+        self._auth.set_credentials(wrapped_credentials, force=True)
 
     def _extract_caveat_id(self, root_macaroon):
         macaroon = Macaroon.deserialize(root_macaroon)
@@ -126,7 +134,8 @@ class UbuntuOneStoreClient(BaseClient):
         discharged_macaroon = self._discharge(
             email=email, password=password, otp=otp, caveat_id=cavead_id
         )
-        u1_macaroon = json.dumps({"r": root_macaroon, "d": discharged_macaroon})
+
+        u1_macaroon = {"r": root_macaroon, "d": discharged_macaroon}
         return wrap_credentials(self.TOKEN_TYPE, u1_macaroon)
 
     @overrides
