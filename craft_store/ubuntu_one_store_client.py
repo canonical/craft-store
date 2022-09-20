@@ -16,20 +16,15 @@
 
 """Craft Store StoreClient."""
 
-from typing import Dict, Optional, cast
+from typing import Dict, Optional
 from urllib.parse import urlparse
 
 import requests
 from overrides import overrides
 from pymacaroons import Macaroon
 
-from . import endpoints, errors
-from .base_client import (
-    BaseClient,
-    UbuntuOneCredType,
-    unwrap_credentials,
-    wrap_credentials,
-)
+from . import creds, endpoints, errors
+from .base_client import BaseClient
 
 
 class UbuntuOneStoreClient(BaseClient):
@@ -61,40 +56,36 @@ class UbuntuOneStoreClient(BaseClient):
         self._auth_url = auth_url
 
     def _get_authorization_header(self) -> str:
-        macaroons = cast(
-            UbuntuOneCredType,
-            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), True),
-        )
+        credentials = self._auth.get_credentials()
+        macaroons = creds.unmarshal_u1_credentials(credentials)
 
-        root_macaroon = Macaroon.deserialize(macaroons["r"])
-        discharged_macaroon = Macaroon.deserialize(macaroons["d"])
+        root_macaroon = Macaroon.deserialize(macaroons.root)
+        discharged_macaroon = Macaroon.deserialize(macaroons.discharge)
         bound_macaroon = root_macaroon.prepare_for_request(
             discharged_macaroon
         ).serialize()
-        return f"Macaroon root={macaroons['r']}, discharge={bound_macaroon}"
+        return f"Macaroon root={macaroons.root}, discharge={bound_macaroon}"
 
     def _refresh_token(self) -> None:
         if self._endpoints.tokens_refresh is None:
             raise ValueError("tokens_refresh cannot be None")
 
-        macaroons = cast(
-            UbuntuOneCredType,
-            unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), True),
-        )
+        credentials = self._auth.get_credentials()
+        macaroons = creds.unmarshal_u1_credentials(credentials)
 
         response = self.http_client.request(
             "POST",
             self._auth_url + self._endpoints.tokens_refresh,
-            json={"discharge_macaroon": macaroons["d"]},
+            json={"discharge_macaroon": macaroons.discharge},
             headers={"Content-Type": "application/json", "Accept": "application/json"},
         )
         if not response.ok:
             raise errors.StoreServerError(response)
 
-        macaroons["d"] = response.json()["discharge_macaroon"]
+        macaroons = macaroons.with_discharge(response.json()["discharge_macaroon"])
 
-        wrapped_credentials = wrap_credentials(self.TOKEN_TYPE, macaroons)
-        self._auth.set_credentials(wrapped_credentials, force=True)
+        new_credentials = creds.marshal_u1_credentials(macaroons)
+        self._auth.set_credentials(new_credentials, force=True)
 
     def _extract_caveat_id(self, root_macaroon):
         macaroon = Macaroon.deserialize(root_macaroon)
@@ -135,8 +126,8 @@ class UbuntuOneStoreClient(BaseClient):
             email=email, password=password, otp=otp, caveat_id=cavead_id
         )
 
-        u1_macaroon = {"r": root_macaroon, "d": discharged_macaroon}
-        return wrap_credentials(self.TOKEN_TYPE, u1_macaroon)
+        u1_macaroon = creds.UbuntuOneMacaroons(r=root_macaroon, d=discharged_macaroon)
+        return creds.marshal_u1_credentials(u1_macaroon)
 
     @overrides
     def request(

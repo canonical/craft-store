@@ -20,8 +20,7 @@ from unittest.mock import Mock, call, patch
 import pytest
 from pymacaroons import Caveat, Macaroon
 
-from craft_store import endpoints, errors
-from craft_store.base_client import wrap_credentials
+from craft_store import creds, endpoints, errors
 from craft_store.ubuntu_one_store_client import UbuntuOneStoreClient
 
 
@@ -74,7 +73,7 @@ def old_credentials(u1_macaroon_value):
 @pytest.fixture
 def new_credentials(u1_macaroon_value):
     """u1-macaroon credentials encoded in the *new* ("typed") scheme."""
-    return wrap_credentials(UbuntuOneStoreClient.TOKEN_TYPE, u1_macaroon_value)
+    return creds.marshal_u1_credentials(creds.UbuntuOneMacaroons(**u1_macaroon_value))
 
 
 @pytest.fixture

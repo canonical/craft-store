@@ -21,8 +21,7 @@ import pytest
 from macaroonbakery import bakery, httpbakery
 from pymacaroons.macaroon import Macaroon
 
-from craft_store import Auth, base_client, endpoints, errors
-from craft_store.base_client import wrap_credentials
+from craft_store import Auth, base_client, creds, endpoints, errors
 from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor
 
 
@@ -121,7 +120,7 @@ def auth_mock(real_macaroon, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
 
-    wrapped_credentials = wrap_credentials(StoreClient.TOKEN_TYPE, real_macaroon)
+    wrapped_credentials = creds.marshal_candid_credentials(real_macaroon)
     stored_credentials = wrapped_credentials if new_auth else real_macaroon
 
     mocked_auth.return_value.get_credentials.return_value = stored_credentials
@@ -174,7 +173,7 @@ def test_store_client_login(
         ),
     ]
 
-    wrapped = wrap_credentials("macaroon", real_macaroon)
+    wrapped = creds.marshal_candid_credentials(real_macaroon)
 
     assert auth_mock.mock_calls == [
         call(
@@ -247,7 +246,7 @@ def test_store_client_login_with_packages_and_channels(
         ),
     ]
 
-    expected_credentials = wrap_credentials("macaroon", real_macaroon)
+    expected_credentials = creds.marshal_candid_credentials(real_macaroon)
 
     assert auth_mock.mock_calls == [
         call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
@@ -525,7 +524,7 @@ def test_store_client_env_var(http_client_request_mock, new_auth, monkeypatch):
     if new_auth:
         # new, type-tagged auth: use the dict tagging the type and the actual payload
         # (the serialized macaroon).
-        wrapped_credentials = wrap_credentials(StoreClient.TOKEN_TYPE, credentials)
+        wrapped_credentials = creds.marshal_candid_credentials(credentials)
         stored_b64_credentials = Auth.encode_credentials(wrapped_credentials)
     else:
         # old auth: use the serialized macaroon "as-is".

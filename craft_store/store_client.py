@@ -24,8 +24,8 @@ from macaroonbakery import bakery, httpbakery
 from overrides import overrides
 from pymacaroons.serializers import json_serializer
 
-from . import endpoints, errors
-from .base_client import BaseClient, unwrap_credentials, wrap_credentials
+from . import creds, endpoints, errors
+from .base_client import BaseClient
 from .http_client import HTTPClient
 
 
@@ -99,7 +99,7 @@ class StoreClient(BaseClient):
         )
 
     def _get_authorization_header(self) -> str:
-        auth = unwrap_credentials(self.TOKEN_TYPE, self._auth.get_credentials(), False)
+        auth = creds.unmarshal_candid_credentials(self._auth.get_credentials())
 
         return f"Macaroon {auth}"
 
@@ -129,4 +129,5 @@ class StoreClient(BaseClient):
     def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
         candid_discharged_macaroon = self._candid_discharge(root_macaroon)
         credentials = self._authorize_token(candid_discharged_macaroon)
-        return wrap_credentials(self.TOKEN_TYPE, credentials)
+
+        return creds.marshal_candid_credentials(credentials)
