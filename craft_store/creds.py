@@ -3,6 +3,7 @@
 import json
 from typing import Literal
 
+import pydantic
 from pydantic import BaseModel, Field
 
 from . import errors
@@ -63,7 +64,12 @@ def unmarshal_candid_credentials(marshalled_creds: str) -> str:
     :param marshalled_creds: The credentials retrieved from auth storage.
     :return: The actual Candid credentials.
     """
-    return CandidModel.unmarshal(marshalled_creds).value
+    try:
+        return CandidModel.unmarshal(marshalled_creds).value
+    except pydantic.ValidationError as err:
+        raise errors.CredentialsNotParseable(
+            "Expected valid Candid credentials"
+        ) from err
 
 
 class UbuntuOneMacaroons(BaseModel):
@@ -141,7 +147,7 @@ def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
     """
     try:
         return UbuntuOneModel.unmarshal(marshalled_creds).value
-    except json.JSONDecodeError as err:
+    except (json.JSONDecodeError, pydantic.ValidationError) as err:
         raise errors.CredentialsNotParseable(
             "Expected valid Ubuntu One credentials"
         ) from err

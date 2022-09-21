@@ -71,3 +71,19 @@ def test_u1_creds_marshal():
 def test_u1_creds_unmarshal_failure():
     with pytest.raises(errors.CredentialsNotParseable):
         creds.unmarshal_u1_credentials("not a valid json string")
+
+
+def test_mixed_creds():
+    """Test the case of trying to load the wrong type of credentials."""
+    macaroons = creds.UbuntuOneMacaroons(r="fake root", d="fake discharge")
+    stored_u1 = creds.marshal_u1_credentials(macaroons)
+
+    stored_candid = creds.marshal_candid_credentials("fake candid")
+
+    # Try to load Ubuntu One as Candid:
+    with pytest.raises(errors.CredentialsNotParseable):
+        creds.unmarshal_candid_credentials(stored_u1)
+
+    # Try to load Candid as Ubuntu One:
+    with pytest.raises(errors.CredentialsNotParseable):
+        creds.unmarshal_u1_credentials(stored_candid)
