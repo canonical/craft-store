@@ -37,3 +37,13 @@ def expires():
     with patch("craft_store.endpoints.datetime", wraps=datetime.datetime) as dt_mock:
         dt_mock.utcnow.return_value = now
         yield offset_iso_dt
+
+
+@pytest.fixture(params=[True, False], ids=["new_auth", "old_auth"])
+def new_auth(request) -> bool:
+    """
+    Parametrized fixture representing either the new, type-based auth storage (True) or the old one (False).
+
+    :see: base_client.wrap_credentials()
+    """
+    return request.param

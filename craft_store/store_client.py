@@ -24,7 +24,7 @@ from macaroonbakery import bakery, httpbakery
 from overrides import overrides
 from pymacaroons.serializers import json_serializer
 
-from . import endpoints, errors
+from . import creds, endpoints, errors
 from .base_client import BaseClient
 from .http_client import HTTPClient
 
@@ -70,6 +70,8 @@ class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):
 class StoreClient(BaseClient):
     """Encapsulates API calls for the Snap Store or Charmhub."""
 
+    TOKEN_TYPE: str = "macaroon"
+
     @overrides
     def __init__(
         self,
@@ -97,7 +99,8 @@ class StoreClient(BaseClient):
         )
 
     def _get_authorization_header(self) -> str:
-        auth = self._auth.get_credentials()
+        auth = creds.unmarshal_candid_credentials(self._auth.get_credentials())
+
         return f"Macaroon {auth}"
 
     def _candid_discharge(self, macaroon: str) -> str:
@@ -125,4 +128,6 @@ class StoreClient(BaseClient):
 
     def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
         candid_discharged_macaroon = self._candid_discharge(root_macaroon)
-        return self._authorize_token(candid_discharged_macaroon)
+        credentials = self._authorize_token(candid_discharged_macaroon)
+
+        return creds.marshal_candid_credentials(credentials)

@@ -19,7 +19,7 @@
 __version__ = "2.2.1"
 
 
-from . import endpoints, errors, models
+from . import creds, endpoints, errors, models
 from .auth import Auth
 from .base_client import BaseClient
 from .http_client import HTTPClient
@@ -27,6 +27,7 @@ from .store_client import StoreClient
 from .ubuntu_one_store_client import UbuntuOneStoreClient
 
 __all__ = [
+    "creds",
     "endpoints",
     "errors",
     "models",
