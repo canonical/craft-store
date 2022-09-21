@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Craft Store BaseClient."""
+
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path

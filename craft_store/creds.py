@@ -12,17 +12,12 @@ from . import errors
 class CandidModel(BaseModel):
     """Model for Candid credentials."""
 
-    t: Literal["macaroon"] = Field("macaroon")
-    v: str
-
-    @property
-    def value(self) -> str:
-        """Get the actual credentials string."""
-        return self.v
+    token_type: Literal["macaroon"] = Field("macaroon", alias="t")
+    value: str = Field(..., alias="v")
 
     def marshal(self) -> str:
         """Serialize this Candid model into a string suitable for storage."""
-        return json.dumps(self.dict())
+        return json.dumps(self.dict(by_alias=True))
 
     @classmethod
     def unmarshal(cls, marshalled_creds: str) -> "CandidModel":
@@ -75,18 +70,8 @@ def unmarshal_candid_credentials(marshalled_creds: str) -> str:
 class UbuntuOneMacaroons(BaseModel):
     """Model representation of the set of macaroons used in Ubuntu SSO."""
 
-    r: str
-    d: str
-
-    @property
-    def root(self) -> str:
-        """Get the root macaroon."""
-        return self.r
-
-    @property
-    def discharge(self):
-        """Get the discharge macaroon."""
-        return self.d
+    root: str = Field(..., alias="r")
+    discharge: str = Field(..., alias="d")
 
     def with_discharge(self, discharge: str) -> "UbuntuOneMacaroons":
         """Create a copy of this UbuntuOneMacaroons with a different discharge macaroon."""
@@ -96,17 +81,12 @@ class UbuntuOneMacaroons(BaseModel):
 class UbuntuOneModel(BaseModel):
     """Model for Ubuntu One credentials."""
 
-    t: Literal["u1-macaroon"] = Field("u1-macaroon")
-    v: UbuntuOneMacaroons
-
-    @property
-    def value(self) -> UbuntuOneMacaroons:
-        """Get the actual "payload" UbuntuOneMacaroons."""
-        return self.v
+    token_type: Literal["u1-macaroon"] = Field("u1-macaroon", alias="t")
+    value: UbuntuOneMacaroons = Field(..., alias="v")
 
     def marshal(self) -> str:
         """Serialize this Ubuntu One model into a string suitable for storage."""
-        return json.dumps(self.dict())
+        return json.dumps(self.dict(by_alias=True))
 
     @classmethod
     def unmarshal(cls, marshalled_creds: str) -> "UbuntuOneModel":
