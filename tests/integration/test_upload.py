@@ -24,7 +24,7 @@ from craft_store.models import revisions_model
 
 
 @pytest.mark.skipif(
-    os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS") is None,
+    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
     reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
 )
 def test_charm_upload(charm_client, fake_charm_file):
