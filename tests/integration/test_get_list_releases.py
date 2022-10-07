@@ -25,7 +25,7 @@ from craft_store.models import charm_list_releases_model
 
 
 @pytest.mark.skipif(
-    os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS") is None,
+    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
     reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
 )
 def test_charm_get_list_releases(charm_client):
