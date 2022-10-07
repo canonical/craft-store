@@ -2,6 +2,12 @@
 Changelog
 *********
 
+2.3.0 (2022-10-07)
+------------------
+
+- Add support for exporting the new credentials format (which is backwards
+  compatible with the existing one)
+
 2.2.1 (2022-08-25)
 ------------------
 
