@@ -161,6 +161,16 @@ class NoKeyringError(CraftStoreError):
         super().__init__("No keyring found to store or retrieve credentials from.")
 
 
+class KeyringUnlockError(CraftStoreError):
+    """Error raised when keyring unlocking fails."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Failed to unlock the keyring.",
+            resolution="Make sure the password is correct and the keyring is available.",
+        )
+
+
 class CandidTokenTimeoutError(CraftStoreError):
     """Error raised when timeout is reached trying to discharge a macaroon."""
 
