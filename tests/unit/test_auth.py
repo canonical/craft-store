@@ -238,6 +238,17 @@ def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     ]
 
 
+def test_ensure_no_credentials_unlock_error(fake_keyring, mocker):
+    mocker.patch.object(
+        fake_keyring, "get_password", side_effect=errors.KeyringUnlockError
+    )
+
+    auth = Auth("fakeclient", "fakestore.com")
+
+    with pytest.raises(errors.KeyringUnlockError):
+        auth.ensure_no_credentials()
+
+
 @pytest.mark.disable_fake_keyring
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)

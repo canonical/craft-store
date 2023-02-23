@@ -71,6 +71,11 @@ scenarios = (
         "expected_message": "No keyring found to store or retrieve credentials from.",
     },
     {
+        "exception_class": errors.KeyringUnlockError,
+        "args": [],
+        "expected_message": "Failed to unlock the keyring.",
+    },
+    {
         "exception_class": errors.CredentialsAlreadyAvailable,
         "args": ["mycraft", "my.host.com"],
         "expected_message": "Credentials found for 'mycraft' on 'my.host.com'.",
