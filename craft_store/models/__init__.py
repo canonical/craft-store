@@ -28,14 +28,21 @@ from .charm_list_releases_model import ListReleasesModel as CharmListReleasesMod
 from .release_request_model import ReleaseRequestModel
 from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
 from .snap_list_releases_model import ListReleasesModel as SnapListReleasesModel
+from .track_model import TrackModel
+from .track_guardrail_model import TrackGuardrailModel
+from .account_model import AccountModel
+from .registered_name_model import RegisteredNameModel
 
 __all__ = [
+    "AccountModel",
     "CharmListReleasesModel",
     "MarshableModel",
     "ReleaseRequestModel",
     "RevisionsRequestModel",
     "RevisionsResponseModel",
     "SnapListReleasesModel",
+    "TrackGuardrailModel",
+    "TrackModel",
     "charm_list_releases_model",
     "release_request_model",
     "revisions_model",
