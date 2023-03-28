@@ -15,7 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for the store trock model."""
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytest
 
@@ -31,36 +31,22 @@ FULL_TRACK = {
 
 
 @pytest.mark.parametrize(
-    "json_dict,expected",
+    "json_dict",
     [
-        pytest.param(
-            BASIC_TRACK,
-            TrackModel(
-                name="1.0/stable",
-                **{"created-at": datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc)}
-            ),
-            id="basic",
-        ),
-        pytest.param(
-            FULL_TRACK,
-            TrackModel(
-                name="1.0/stable",
-                **{
-                    "created-at": datetime(
-                        2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
-                    ),
-                    "version-pattern": r"^\d\.\d/",
-                    "automatic-phasing-percentage": 10,
-                }
-            ),
-            id="fully-described",
-        ),
+        pytest.param(BASIC_TRACK, id="basic"),
+        pytest.param(FULL_TRACK, id="fully-described"),
     ],
 )
-def test_unmarshal(json_dict, expected):
+def test_unmarshal(check, json_dict):
     actual = TrackModel.unmarshal(json_dict)
 
-    assert actual == expected
+    check.equal(actual.name, json_dict["name"])
+    check.equal(actual.created_at, datetime.fromisoformat(json_dict["created-at"]))
+    pct = json_dict.get("automatic-phasing-percentage")
+    if isinstance(pct, str):
+        pct = int(pct)
+    check.equal(actual.automatic_phasing_percentage, pct)
+    check.equal(actual.version_pattern, json_dict.get("version-pattern"))
 
 
 @pytest.mark.parametrize("payload", [BASIC_TRACK, FULL_TRACK])

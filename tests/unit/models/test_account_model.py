@@ -36,11 +36,11 @@ FULL_ACCOUNT = {
         pytest.param(
             FULL_ACCOUNT,
             AccountModel(
+                display_name="Display Name",  # pyright: ignore
                 id="abc123",
                 username="usso-username",
                 validation="unproven",
                 email="charmcrafters@lists.launchpad.net",
-                **{"display-name": "Display Name"},
             ),
             id="fully-described",
         ),

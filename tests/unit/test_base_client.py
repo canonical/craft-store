@@ -21,7 +21,7 @@ import pytest
 import requests
 
 from craft_store import BaseClient, endpoints
-from craft_store.models import RegisteredNameModel, AccountModel
+from craft_store.models import AccountModel, RegisteredNameModel
 
 SAMPLE_REAL_REGISTERED_NAMES = b"""{
   "results": [

@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, cast, List
+from typing import Any, Callable, Dict, List, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
@@ -310,13 +310,9 @@ class BaseClient(metaclass=ABCMeta):
             collaborator on but does not own.
         """
         endpoint = f"/v1/{self._endpoints.namespace}"
-        results = (
-            self.request(
-                "GET",
-                self._base_url + endpoint,
-                params={"include-collaborations": include_collaborations},
-            )
-            .json()
-            .get("results", [])
-        )
+        params = {
+            "include-collaborations": "true" if include_collaborations else "false",
+        }
+        response = self.request("GET", self._base_url + endpoint, params=params)
+        results = response.json().get("results", [])
         return [models.RegisteredNameModel.unmarshal(item) for item in results]
