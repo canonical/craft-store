@@ -42,7 +42,7 @@ create a `charmcraft.yaml` file containing the lines:
       api-url: "https://api.staging.charmhub.io"
       storage-url: "https://storage.staging.snapcraftcontent.com"
 
-and then running `charmcraft login --export cc.cred` to do the login and
+and then run `charmcraft login --export cc.cred` to login and
 `export CRAFT_STORE_CHARMCRAFT_CREDENTIALS=$(cat cc.cred)` to put the credentials
 into the environment variable. Note that if you do not have collaborator permissions
 on `craft-store-test-charm`, some tests will fail rather than being skipped.
