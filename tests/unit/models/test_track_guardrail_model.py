@@ -40,10 +40,7 @@ import pytest
 
 from craft_store.models.track_guardrail_model import TrackGuardrailModel
 
-GUARDRAIL_DICT = {
-    "created-at": "2023-03-28T18:50:44+00:00",
-    "pattern": r"^\d\.\d/"
-}
+GUARDRAIL_DICT = {"created-at": "2023-03-28T18:50:44+00:00", "pattern": r"^\d\.\d/"}
 
 
 @pytest.mark.parametrize(
@@ -53,10 +50,14 @@ GUARDRAIL_DICT = {
             GUARDRAIL_DICT,
             TrackGuardrailModel(
                 pattern=re.compile(r"^\d\.\d/"),
-                **{"created-at": datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc),}
+                **{
+                    "created-at": datetime(
+                        2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
+                    ),
+                }
             ),
         ),
-    ]
+    ],
 )
 def test_unmarshal(json_dict, expected):
     actual = TrackGuardrailModel.unmarshal(json_dict)

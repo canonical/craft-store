@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, cast
+from typing import Any, Callable, Dict, Optional, Sequence, cast, List
 from urllib.parse import urlparse
 
 import requests
@@ -300,3 +300,23 @@ class BaseClient(metaclass=ABCMeta):
             self._base_url + endpoint,
             json=[r.marshal() for r in release_request],
         )
+
+    def list_registered_names(
+        self, *, include_collaborations: bool = False
+    ) -> List[models.RegisteredNameModel]:
+        """List the registered names available to the logged in account.
+
+        :param include_collaborations: if True, includes names the user is a
+            collaborator on but does not own.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}"
+        results = (
+            self.request(
+                "GET",
+                self._base_url + endpoint,
+                params={"include-collaborations": include_collaborations},
+            )
+            .json()
+            .get("results", [])
+        )
+        return [models.RegisteredNameModel.unmarshal(item) for item in results]

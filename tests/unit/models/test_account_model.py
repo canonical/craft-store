@@ -25,17 +25,14 @@ FULL_ACCOUNT = {
     "email": "charmcrafters@lists.launchpad.net",
     "id": "abc123",
     "username": "usso-username",
-    "validation": "unproven"
+    "validation": "unproven",
 }
+
 
 @pytest.mark.parametrize(
     "json_dict,expected",
     [
-        pytest.param(
-            BASIC_ACCOUNT,
-            AccountModel(id="123"),
-            id="basic"
-        ),
+        pytest.param(BASIC_ACCOUNT, AccountModel(id="123"), id="basic"),
         pytest.param(
             FULL_ACCOUNT,
             AccountModel(
@@ -45,9 +42,9 @@ FULL_ACCOUNT = {
                 email="charmcrafters@lists.launchpad.net",
                 **{"display-name": "Display Name"},
             ),
-            id="fully-described"
+            id="fully-described",
         ),
-    ]
+    ],
 )
 def test_unmarshal(json_dict, expected):
     actual = AccountModel.unmarshal(json_dict)
