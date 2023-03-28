@@ -20,7 +20,12 @@ from datetime import datetime, timezone
 
 import pytest
 
-from craft_store.models import RegisteredNameModel, AccountModel, TrackGuardrailModel, TrackModel
+from craft_store.models import (
+    RegisteredNameModel,
+    AccountModel,
+    TrackGuardrailModel,
+    TrackModel,
+)
 from craft_store.models.registered_name_model import MediaModel
 
 BASIC_REGISTERED_NAME = {
@@ -38,7 +43,9 @@ REGISTERED_NAME_ALL_FIELDS = {
     "description": "This is a thing",
     "id": "123",
     "links": ["https://ubuntu.com/"],
-    "media": [{"type": "icon", "url": "https://assets.ubuntu.com/v1/0843d517-favicon.ico"}],
+    "media": [
+        {"type": "icon", "url": "https://assets.ubuntu.com/v1/0843d517-favicon.ico"}
+    ],
     "name": "charming-charm",
     "private": "false",
     "publisher": {"id": "456"},
@@ -46,16 +53,12 @@ REGISTERED_NAME_ALL_FIELDS = {
     "store": "ubuntu",
     "summary": "This is a thing",
     "title": "Some charming charm",
-    "track-guardrails": [{
-        "created-at": "2023-03-28T18:50:44+00:00",
-        "pattern": r"^\d\.\d/"
-    }],
-    "tracks": [{
-        "created-at": "2023-03-28T18:50:44+00:00",
-        "name": "1.0/stable"
-    }],
+    "track-guardrails": [
+        {"created-at": "2023-03-28T18:50:44+00:00", "pattern": r"^\d\.\d/"}
+    ],
+    "tracks": [{"created-at": "2023-03-28T18:50:44+00:00", "name": "1.0/stable"}],
     "type": "charm",
-    "website": "https://canonical.com"
+    "website": "https://canonical.com",
 }
 
 
@@ -75,50 +78,54 @@ REGISTERED_NAME_ALL_FIELDS = {
                 type="charm",
                 **{"track-guardrails": []}
             ),
-            id="basic"
+            id="basic",
         ),
         pytest.param(
             REGISTERED_NAME_ALL_FIELDS,
             RegisteredNameModel(
-                authority='Mark',
-                contact='charmcrafters@lists.canonical.com',
-                description='This is a thing',
-                id='123',
-                links=['https://ubuntu.com/'],
+                authority="Mark",
+                contact="charmcrafters@lists.canonical.com",
+                description="This is a thing",
+                id="123",
+                links=["https://ubuntu.com/"],
                 media=[
                     MediaModel(
-                        type='icon',
-                        url='https://assets.ubuntu.com/v1/0843d517-favicon.ico',
+                        type="icon",
+                        url="https://assets.ubuntu.com/v1/0843d517-favicon.ico",
                     )
                 ],
-                name='charming-charm',
+                name="charming-charm",
                 private=False,
-                publisher=AccountModel(id='456'),
-                status='registered',
-                store='ubuntu',
-                summary='This is a thing',
-                title='Some charming charm',
+                publisher=AccountModel(id="456"),
+                status="registered",
+                store="ubuntu",
+                summary="This is a thing",
+                title="Some charming charm",
                 tracks=[
-                    TrackModel.unmarshal({
-                        "created-at": "2023-03-28T18:50:44+00:00",
-                        "name": "1.0/stable"
-                    }),
+                    TrackModel.unmarshal(
+                        {
+                            "created-at": "2023-03-28T18:50:44+00:00",
+                            "name": "1.0/stable",
+                        }
+                    ),
                 ],
-                type='charm',
-                website='https://canonical.com',
+                type="charm",
+                website="https://canonical.com",
                 **{
                     "default-track": "lts",
                     "track-guardrails": [
-                        TrackGuardrailModel.unmarshal({
-                            "created-at": "2023-03-28T18:50:44+00:00",
-                            "pattern": r"^\d\.\d/"
-                        })
+                        TrackGuardrailModel.unmarshal(
+                            {
+                                "created-at": "2023-03-28T18:50:44+00:00",
+                                "pattern": r"^\d\.\d/",
+                            }
+                        )
                     ],
                 }
             ),
-            id="all_fields"
-        )
-    ]
+            id="all_fields",
+        ),
+    ],
 )
 def test_unmarshal(json_dict, expected):
     actual = RegisteredNameModel.unmarshal(json_dict)

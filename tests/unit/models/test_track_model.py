@@ -21,16 +21,14 @@ import pytest
 
 from craft_store.models.track_model import TrackModel
 
-BASIC_TRACK = {
-    "created-at": "2023-03-28T18:50:44+00:00",
-    "name": "1.0/stable"
-}
+BASIC_TRACK = {"created-at": "2023-03-28T18:50:44+00:00", "name": "1.0/stable"}
 FULL_TRACK = {
     "automatic-phasing-percentage": "10",
     "created-at": "2023-03-28T18:50:44+00:00",
     "name": "1.0/stable",
-    "version-pattern": r"^\d\.\d/"
+    "version-pattern": r"^\d\.\d/",
 }
+
 
 @pytest.mark.parametrize(
     "json_dict,expected",
@@ -41,21 +39,23 @@ FULL_TRACK = {
                 name="1.0/stable",
                 **{"created-at": datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc)}
             ),
-            id="basic"
+            id="basic",
         ),
         pytest.param(
             FULL_TRACK,
             TrackModel(
                 name="1.0/stable",
                 **{
-                    "created-at": datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc),
+                    "created-at": datetime(
+                        2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
+                    ),
                     "version-pattern": r"^\d\.\d/",
                     "automatic-phasing-percentage": 10,
                 }
             ),
-            id="fully-described"
+            id="fully-described",
         ),
-    ]
+    ],
 )
 def test_unmarshal(json_dict, expected):
     actual = TrackModel.unmarshal(json_dict)
@@ -71,22 +71,12 @@ def test_unmarshal_and_marshal(payload, check):
     check.equal(marshalled["name"], payload["name"])
     check.equal(
         "automatic-phasing-percentage" in marshalled,
-        "automatic-phasing-percentage" in payload
+        "automatic-phasing-percentage" in payload,
     )
     if "automatic-phasing-percentage" in payload:
         phasing_percentage = int(payload.get("automatic-phasing-percentage"))
     else:
         phasing_percentage = None
-    check.equal(
-        marshalled.get("automatic-phasing-percentage"),
-        phasing_percentage
-    )
-    check.equal(
-        "version-pattern" in marshalled,
-        "version-pattern" in payload
-    )
-    check.equal(
-        marshalled.get("version-pattern"),
-        payload.get("version-pattern")
-    )
-
+    check.equal(marshalled.get("automatic-phasing-percentage"), phasing_percentage)
+    check.equal("version-pattern" in marshalled, "version-pattern" in payload)
+    check.equal(marshalled.get("version-pattern"), payload.get("version-pattern"))

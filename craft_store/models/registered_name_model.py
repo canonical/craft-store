@@ -41,7 +41,7 @@ class RegisteredNameModel(MarshableModel):
     default_track: Optional[str]
     description: Optional[str]
     id: str
-    links: List[AnyHttpUrl] = Field(default_factory=list)
+    links: Dict[str, Any] = Field(default_factory=dict)
     media: List[MediaModel] = Field(default_factory=list)
     name: Optional[str]
     private: bool
