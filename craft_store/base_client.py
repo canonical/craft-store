@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, cast, List, Literal
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
@@ -351,11 +351,7 @@ class BaseClient(metaclass=ABCMeta):
         if entity_type is not None:
             request_json["type"] = entity_type
 
-        response = self.request(
-            "POST",
-            self._base_url + endpoint,
-            json=request_json
-        )
+        response = self.request("POST", self._base_url + endpoint, json=request_json)
         return response.json()["id"]
 
     def unregister_name(self, name: str) -> str:

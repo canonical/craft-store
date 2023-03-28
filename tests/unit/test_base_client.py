@@ -21,7 +21,7 @@ import pytest
 import requests
 
 from craft_store import BaseClient, endpoints
-from craft_store.models import RegisteredNameModel, AccountModel
+from craft_store.models import AccountModel, RegisteredNameModel
 
 SAMPLE_REAL_REGISTERED_NAMES = b"""{
   "results": [
@@ -119,28 +119,33 @@ def test_list_registered_names(charm_client, content, expected):
             False,
             None,
             {"name": "test-charm-abcxyz", "private": False},
-            id="basic"
+            id="basic",
         ),
         pytest.param(
             "test-charm-abc123",
             "charm",
             True,
             "starcraft",
-            {"name": "test-charm-abc123", "private": True, "type": "charm", "team": "starcraft"},
-            id="all_filled"
+            {
+                "name": "test-charm-abc123",
+                "private": True,
+                "type": "charm",
+                "team": "starcraft",
+            },
+            id="all_filled",
         ),
-    ]
+    ],
 )
 def test_register_name(charm_client, name, entity_type, private, team, expected_json):
     charm_client.request = Mock()
     charm_client.request.return_value.json.return_value = {"id": "abc"}
 
-    charm_client.register_name(name, entity_type=entity_type, private=private, team=team)
+    charm_client.register_name(
+        name, entity_type=entity_type, private=private, team=team
+    )
 
     charm_client.request.assert_called_once_with(
-        "POST",
-        "https://staging.example.com/v1/charm",
-        json=expected_json
+        "POST", "https://staging.example.com/v1/charm", json=expected_json
     )
 
 
@@ -151,6 +156,5 @@ def test_unregister_name(charm_client):
     charm_client.unregister_name("test-charm-abcxyz")
 
     charm_client.request.assert_called_once_with(
-        "DELETE",
-        "https://staging.example.com/v1/charm/test-charm-abcxyz"
+        "DELETE", "https://staging.example.com/v1/charm/test-charm-abcxyz"
     )

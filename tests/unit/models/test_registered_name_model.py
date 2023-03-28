@@ -16,13 +16,13 @@
 #
 """Tests for RegisteredNameModel."""
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytest
 
 from craft_store.models import (
-    RegisteredNameModel,
     AccountModel,
+    RegisteredNameModel,
     TrackGuardrailModel,
     TrackModel,
 )

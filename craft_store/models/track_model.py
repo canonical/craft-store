@@ -15,11 +15,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Track model for Craft Store packages."""
-import numbers
 from datetime import datetime
 from typing import Optional
-
-from pydantic import Field
 
 from craft_store.models import MarshableModel
 
