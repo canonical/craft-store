@@ -108,3 +108,42 @@ def test_list_registered_names(charm_client, content, expected):
     actual = charm_client.list_registered_names()
 
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["name", "entity_type", "private", "team", "expected_json"],
+    [
+        pytest.param(
+            "test-charm-abcxyz",
+            None,
+            False,
+            None,
+            {"name": "test-charm-abcxyz", "private": False},
+            id="basic",
+        ),
+        pytest.param(
+            "test-charm-abc123",
+            "charm",
+            True,
+            "starcraft",
+            {
+                "name": "test-charm-abc123",
+                "private": True,
+                "type": "charm",
+                "team": "starcraft",
+            },
+            id="all_filled",
+        ),
+    ],
+)
+def test_register_name(charm_client, name, entity_type, private, team, expected_json):
+    charm_client.request = Mock()
+    charm_client.request.return_value.json.return_value = {"id": "abc"}
+
+    charm_client.register_name(
+        name, entity_type=entity_type, private=private, team=team
+    )
+
+    charm_client.request.assert_called_once_with(
+        "POST", charm_client._base_url + "/v1/charm", json=expected_json
+    )
