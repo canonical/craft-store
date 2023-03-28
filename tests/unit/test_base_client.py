@@ -139,6 +139,18 @@ def test_register_name(charm_client, name, entity_type, private, team, expected_
 
     charm_client.request.assert_called_once_with(
         "POST",
-        charm_client._base_url + "/v1/charm",
+        "https://staging.example.com/v1/charm",
         json=expected_json
+    )
+
+
+def test_unregister_name(charm_client):
+    charm_client.request = Mock()
+    charm_client.request.return_value.json.return_value = {"package-id": "abc"}
+
+    charm_client.unregister_name("test-charm-abcxyz")
+
+    charm_client.request.assert_called_once_with(
+        "DELETE",
+        "https://staging.example.com/v1/charm/test-charm-abcxyz"
     )
