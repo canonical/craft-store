@@ -27,7 +27,7 @@ import pytest
 )
 def test_register_unregister_cycle(charm_client):
     whoami = charm_client.whoami()
-    account_id = whoami.get("account", {}).get("id")
+    account_id = whoami.get("account", {}).get("id").lower()
     timestamp_us = int(datetime.datetime.utcnow().timestamp() * 1_000_000)
     charm_name = f"test-charm-{account_id}-{timestamp_us}"
 
@@ -37,9 +37,9 @@ def test_register_unregister_cycle(charm_client):
     charm_client.register_name(charm_name, entity_type="charm")
 
     names = [result.name for result in charm_client.list_registered_names()]
-    assert charm_name not in names, "Charm was not successfully registered."
+    assert charm_name in names, "Charm was not successfully registered."
 
-    charm_client.unregister_package(charm_name)
+    charm_client.unregister_name(charm_name)
 
     names = [result.name for result in charm_client.list_registered_names()]
     assert charm_name not in names, "Charm was not successfully unregistered."
