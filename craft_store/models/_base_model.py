@@ -55,4 +55,4 @@ class MarshableModel(BaseModel):
         :return: The newly created dictionary.
 
         """
-        return self.dict(by_alias=True)
+        return self.dict(by_alias=True, exclude_unset=True)
