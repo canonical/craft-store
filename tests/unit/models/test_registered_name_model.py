@@ -16,13 +16,13 @@
 #
 """Tests for RegisteredNameModel."""
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytest
 
 from craft_store.models import (
-    RegisteredNameModel,
     AccountModel,
+    RegisteredNameModel,
     TrackGuardrailModel,
     TrackModel,
 )
@@ -42,7 +42,7 @@ REGISTERED_NAME_ALL_FIELDS = {
     "default-track": "lts",
     "description": "This is a thing",
     "id": "123",
-    "links": ["https://ubuntu.com/"],
+    "links": {"Ubuntu": "https://ubuntu.com/"},
     "media": [
         {"type": "icon", "url": "https://assets.ubuntu.com/v1/0843d517-favicon.ico"}
     ],
@@ -63,74 +63,43 @@ REGISTERED_NAME_ALL_FIELDS = {
 
 
 @pytest.mark.parametrize(
-    "json_dict,expected",
+    "json_dict",
     [
-        pytest.param(
-            BASIC_REGISTERED_NAME,
-            RegisteredNameModel(
-                id="123",
-                private=True,
-                publisher=AccountModel(id="456"),
-                status="registered",
-                store="ubuntu",
-                media=[],
-                tracks=[],
-                type="charm",
-                **{"track-guardrails": []}
-            ),
-            id="basic",
-        ),
-        pytest.param(
-            REGISTERED_NAME_ALL_FIELDS,
-            RegisteredNameModel(
-                authority="Mark",
-                contact="charmcrafters@lists.canonical.com",
-                description="This is a thing",
-                id="123",
-                links=["https://ubuntu.com/"],
-                media=[
-                    MediaModel(
-                        type="icon",
-                        url="https://assets.ubuntu.com/v1/0843d517-favicon.ico",
-                    )
-                ],
-                name="charming-charm",
-                private=False,
-                publisher=AccountModel(id="456"),
-                status="registered",
-                store="ubuntu",
-                summary="This is a thing",
-                title="Some charming charm",
-                tracks=[
-                    TrackModel.unmarshal(
-                        {
-                            "created-at": "2023-03-28T18:50:44+00:00",
-                            "name": "1.0/stable",
-                        }
-                    ),
-                ],
-                type="charm",
-                website="https://canonical.com",
-                **{
-                    "default-track": "lts",
-                    "track-guardrails": [
-                        TrackGuardrailModel.unmarshal(
-                            {
-                                "created-at": "2023-03-28T18:50:44+00:00",
-                                "pattern": r"^\d\.\d/",
-                            }
-                        )
-                    ],
-                }
-            ),
-            id="all_fields",
-        ),
+        pytest.param(BASIC_REGISTERED_NAME, id="basic"),
+        pytest.param(REGISTERED_NAME_ALL_FIELDS, id="all_fields"),
     ],
 )
-def test_unmarshal(json_dict, expected):
+def test_unmarshal(check, json_dict):
     actual = RegisteredNameModel.unmarshal(json_dict)
 
-    assert actual == expected
+    check.equal(actual.authority, json_dict.get("authority"))
+    check.equal(actual.contact, json_dict.get("contact"))
+    check.equal(actual.default_track, json_dict.get("default-track"))
+    check.equal(actual.description, json_dict.get("description"))
+    check.equal(actual.id, json_dict.get("id"))
+    check.equal(actual.links, json_dict.get("links", {}))
+    check.equal(
+        actual.media, [MediaModel.unmarshal(m) for m in json_dict.get("media", [])]
+    )
+    check.equal(actual.name, json_dict.get("name"))
+    check.equal(actual.private, True if json_dict["private"] == "true" else False)
+    check.equal(actual.publisher, AccountModel.unmarshal(json_dict["publisher"]))
+    check.equal(actual.status, json_dict.get("status"))
+    check.equal(actual.store, json_dict.get("store"))
+    check.equal(actual.summary, json_dict.get("summary"))
+    check.equal(actual.title, json_dict.get("title"))
+    check.equal(
+        actual.tracks, [TrackModel.unmarshal(t) for t in json_dict.get("tracks", [])]
+    )
+    check.equal(actual.type, json_dict.get("type"))
+    check.equal(actual.website, json_dict.get("website"))
+    check.equal(
+        actual.track_guardrails,
+        [
+            TrackGuardrailModel.unmarshal(g)
+            for g in json_dict.get("track-guardrails", [])
+        ],
+    )
 
 
 @pytest.mark.parametrize("payload", [BASIC_REGISTERED_NAME, REGISTERED_NAME_ALL_FIELDS])

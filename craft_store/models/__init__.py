@@ -24,19 +24,20 @@ from . import (
     snap_list_releases_model,
 )
 from ._base_model import MarshableModel
+from .account_model import AccountModel
 from .charm_list_releases_model import ListReleasesModel as CharmListReleasesModel
+from .registered_name_model import RegisteredNameModel
 from .release_request_model import ReleaseRequestModel
 from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
 from .snap_list_releases_model import ListReleasesModel as SnapListReleasesModel
-from .track_model import TrackModel
 from .track_guardrail_model import TrackGuardrailModel
-from .account_model import AccountModel
-from .registered_name_model import RegisteredNameModel
+from .track_model import TrackModel
 
 __all__ = [
     "AccountModel",
     "CharmListReleasesModel",
     "MarshableModel",
+    "RegisteredNameModel",
     "ReleaseRequestModel",
     "RevisionsRequestModel",
     "RevisionsResponseModel",

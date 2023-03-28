@@ -15,15 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Registered Names models for the Store."""
-import datetime
-import numbers
-from typing import Optional, List, Literal, Pattern, Dict, Any
+from typing import Any, Dict, List, Literal, Optional
 
-from overrides import override
 from pydantic import AnyHttpUrl, Field
 
-from . import AccountModel, TrackGuardrailModel, TrackModel
 from ._base_model import MarshableModel
+from .account_model import AccountModel
+from .track_guardrail_model import TrackGuardrailModel
+from .track_model import TrackModel
 
 
 class MediaModel(MarshableModel):
@@ -36,21 +35,21 @@ class MediaModel(MarshableModel):
 class RegisteredNameModel(MarshableModel):
     """Resource model for a registered name."""
 
-    authority: Optional[str]
-    contact: Optional[str]
-    default_track: Optional[str]
-    description: Optional[str]
+    authority: Optional[str] = None
+    contact: Optional[str] = None
+    default_track: Optional[str] = None
+    description: Optional[str] = None
     id: str
     links: Dict[str, Any] = Field(default_factory=dict)
     media: List[MediaModel] = Field(default_factory=list)
-    name: Optional[str]
+    name: Optional[str] = None
     private: bool
     publisher: AccountModel
     status: str
     store: str
-    summary: Optional[str]
-    title: Optional[str]
+    summary: Optional[str] = None
+    title: Optional[str] = None
     track_guardrails: List[TrackGuardrailModel] = Field(default_factory=list)
     tracks: List[TrackModel] = Field(default_factory=list)
     type: str
-    website: Optional[AnyHttpUrl]
+    website: Optional[AnyHttpUrl] = None

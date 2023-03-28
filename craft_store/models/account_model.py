@@ -25,8 +25,8 @@ from ._base_model import MarshableModel
 class AccountModel(MarshableModel):
     """A Store account."""
 
-    display_name: Optional[str] = Field(alias="display-name")
-    email: Optional[str]
+    display_name: Optional[str] = Field(default=None, alias="display-name")
+    email: Optional[str] = None
     id: str
-    username: Optional[str]
-    validation: Optional[str]
+    username: Optional[str] = None
+    validation: Optional[str] = None
