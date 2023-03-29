@@ -21,3 +21,17 @@ extension-pkg-whitelist = [
     "pydantic"
 ]
 load-plugins = "pylint_fixme_info,pylint_pytest"
+
+[tool.mypy]
+python_version = "3.8"
+plugins = ["pydantic.mypy"]
+files = [
+    "setup.py",
+    "craft_store",
+    "tests",
+]
+
+[tool.pydantic-mypy]
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
