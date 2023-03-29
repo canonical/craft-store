@@ -134,8 +134,8 @@ class Auth:
                 raise errors.CredentialsAlreadyAvailable(
                     self.application_name, self.host
                 )
-        except keyring.errors.KeyringLocked:
-            raise errors.KeyringUnlockError()
+        except keyring.errors.KeyringLocked as exc:
+            raise errors.KeyringUnlockError() from exc
 
     def set_credentials(self, credentials: str, force: bool = False) -> None:
         """Store credentials in the keyring.
