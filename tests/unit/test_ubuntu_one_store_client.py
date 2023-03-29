@@ -18,7 +18,7 @@ import json
 from unittest.mock import Mock, call, patch
 
 import pytest
-from pymacaroons import Caveat, Macaroon
+from pymacaroons import Caveat, Macaroon  # type: ignore
 
 from craft_store import creds, endpoints, errors
 from craft_store.ubuntu_one_store_client import UbuntuOneStoreClient
