@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 
 import requests
 from overrides import overrides
-from pymacaroons import Macaroon
+from pymacaroons import Macaroon  # type: ignore
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
@@ -126,7 +126,7 @@ class UbuntuOneStoreClient(BaseClient):
             email=email, password=password, otp=otp, caveat_id=cavead_id
         )
 
-        u1_macaroon = creds.UbuntuOneMacaroons(r=root_macaroon, d=discharged_macaroon)
+        u1_macaroon = creds.UbuntuOneMacaroons(r=root_macaroon, d=discharged_macaroon)  # type: ignore
         return creds.marshal_u1_credentials(u1_macaroon)
 
     @overrides

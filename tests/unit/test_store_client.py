@@ -18,8 +18,8 @@ import json
 from unittest.mock import ANY, Mock, call, patch
 
 import pytest
-from macaroonbakery import bakery, httpbakery
-from pymacaroons.macaroon import Macaroon
+from macaroonbakery import bakery, httpbakery  # type: ignore
+from pymacaroons.macaroon import Macaroon  # type: ignore
 
 from craft_store import Auth, base_client, creds, endpoints, errors
 from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor

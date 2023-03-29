@@ -20,9 +20,9 @@ import base64
 import json
 from typing import Optional
 
-from macaroonbakery import bakery, httpbakery
+from macaroonbakery import bakery, httpbakery  # type: ignore
 from overrides import overrides
-from pymacaroons.serializers import json_serializer
+from pymacaroons.serializers import json_serializer  # type: ignore
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
