@@ -50,7 +50,8 @@ def marshal_candid_credentials(candid_creds: str) -> str:
     :param candid_creds: The actual Candid credentials.
     :return: A payload string ready to be passed to Auth.set_credentials()
     """
-    return json.dumps(CandidModel(v=candid_creds).marshal())  # pyright: ignore
+    model = CandidModel(v=candid_creds)  # type: ignore
+    return json.dumps(model.marshal())
 
 
 def unmarshal_candid_credentials(marshalled_creds: str) -> str:
@@ -133,7 +134,8 @@ def marshal_u1_credentials(u1_creds: UbuntuOneMacaroons) -> str:
     :param u1_creds: The actual Ubuntu One macaroons credentials.
     :return: A payload string ready to be passed to Auth.set_credentials()
     """
-    return json.dumps(UbuntuOneModel(v=u1_creds).marshal())  # pyright: ignore
+    model = UbuntuOneModel(v=u1_creds)  # type: ignore
+    return json.dumps(model.marshal())
 
 
 def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
@@ -166,13 +168,12 @@ def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
         raise errors.CredentialsNotParseable(
             "Expected valid Ubuntu One credentials"
         ) from err
+    if "t" in creds:
+        # Cases (1) and (4).
+        data = creds
     else:
-        if "t" in creds:
-            # Cases (1) and (4).
-            data = creds
-        else:
-            # Case (2).
-            data["v"] = creds
+        # Case (2).
+        data["v"] = creds
 
     try:
         return UbuntuOneModel.unmarshal(data).value
