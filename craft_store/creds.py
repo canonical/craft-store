@@ -168,13 +168,12 @@ def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
         raise errors.CredentialsNotParseable(
             "Expected valid Ubuntu One credentials"
         ) from err
+    if "t" in creds:
+        # Cases (1) and (4).
+        data = creds
     else:
-        if "t" in creds:
-            # Cases (1) and (4).
-            data = creds
-        else:
-            # Case (2).
-            data["v"] = creds
+        # Case (2).
+        data["v"] = creds
 
     try:
         return UbuntuOneModel.unmarshal(data).value

@@ -414,7 +414,7 @@ def test_store_client_upload_file_with_monitor(
             )
             assert wrapped_encoder_monitor.mock_calls == [
                 call(
-                    base_client.MultipartEncoder.__call__(
+                    base_client.MultipartEncoder(
                         {
                             "binary": (
                                 "artifact.thing",
