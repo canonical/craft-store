@@ -23,7 +23,7 @@ from typing import Any, Callable, Dict, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor  # type: ignore
 
 from . import endpoints, errors, models
 from .auth import Auth
