@@ -26,7 +26,7 @@ class AccountModel(MarshableModel):
     """A Store account."""
 
     display_name: Optional[str] = Field(alias="display-name")
-    email: Optional[str]
+    email: Optional[str] = None
     id: str
-    username: Optional[str]
-    validation: Optional[str]
+    username: Optional[str] = None
+    validation: Optional[str] = None

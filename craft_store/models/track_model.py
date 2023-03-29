@@ -24,7 +24,7 @@ from craft_store.models import MarshableModel
 class TrackModel(MarshableModel):
     """A track that a package can be published on."""
 
-    automatic_phasing_percentage: Optional[int]
+    automatic_phasing_percentage: Optional[int] = None
     created_at: datetime
     name: str
-    version_pattern: Optional[str]
+    version_pattern: Optional[str] = None

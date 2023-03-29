@@ -15,10 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """BaseModel with marshaling capabilities."""
-
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    _MarshableModel = TypeVar("_MarshableModel")
 
 
 class MarshableModel(BaseModel):
@@ -30,9 +32,12 @@ class MarshableModel(BaseModel):
         validate_assignment = True
         allow_mutation = False
         alias_generator = lambda s: s.replace("_", "-")  # noqa: E731
+        allow_population_by_field_name = True
 
     @classmethod
-    def unmarshal(cls, data: Dict[str, Any]) -> "MarshableModel":
+    def unmarshal(
+        cls: "Type[_MarshableModel]", data: Dict[str, Any]
+    ) -> "_MarshableModel":
         """Create and populate a new ``MarshableModel`` from a dict.
 
         The unmarshal method validates entries in the input dictionary, populating

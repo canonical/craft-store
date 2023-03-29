@@ -42,7 +42,7 @@ REGISTERED_NAME_ALL_FIELDS = {
     "default-track": "lts",
     "description": "This is a thing",
     "id": "123",
-    "links": ["https://ubuntu.com/"],
+    "links": {"Ubuntu": "https://ubuntu.com/"},
     "media": [
         {"type": "icon", "url": "https://assets.ubuntu.com/v1/0843d517-favicon.ico"}
     ],
@@ -70,13 +70,13 @@ REGISTERED_NAME_ALL_FIELDS = {
             RegisteredNameModel(
                 id="123",
                 private=True,
-                publisher=AccountModel(id="456"),
+                publisher=AccountModel(id="456"),  # type: ignore
                 status="registered",
                 store="ubuntu",
                 media=[],
                 tracks=[],
                 type="charm",
-                **{"track-guardrails": []}
+                track_guardrails=[],
             ),
             id="basic",
         ),
@@ -87,16 +87,16 @@ REGISTERED_NAME_ALL_FIELDS = {
                 contact="charmcrafters@lists.canonical.com",
                 description="This is a thing",
                 id="123",
-                links=["https://ubuntu.com/"],
+                links={"Ubuntu": "https://ubuntu.com/"},
                 media=[
                     MediaModel(
                         type="icon",
-                        url="https://assets.ubuntu.com/v1/0843d517-favicon.ico",
+                        url="https://assets.ubuntu.com/v1/0843d517-favicon.ico",  # type: ignore
                     )
                 ],
                 name="charming-charm",
                 private=False,
-                publisher=AccountModel(id="456"),
+                publisher=AccountModel(id="456"),  # type: ignore
                 status="registered",
                 store="ubuntu",
                 summary="This is a thing",
@@ -110,18 +110,16 @@ REGISTERED_NAME_ALL_FIELDS = {
                     ),
                 ],
                 type="charm",
-                website="https://canonical.com",
-                **{
-                    "default-track": "lts",
-                    "track-guardrails": [
-                        TrackGuardrailModel.unmarshal(
-                            {
-                                "created-at": "2023-03-28T18:50:44+00:00",
-                                "pattern": r"^\d\.\d/",
-                            }
-                        )
-                    ],
-                }
+                website="https://canonical.com",  # type: ignore
+                default_track="lts",
+                track_guardrails=[
+                    TrackGuardrailModel.unmarshal(
+                        {
+                            "created-at": "2023-03-28T18:50:44+00:00",
+                            "pattern": r"^\d\.\d/",
+                        }
+                    )
+                ],
             ),
             id="all_fields",
         ),

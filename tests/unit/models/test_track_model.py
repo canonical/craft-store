@@ -37,7 +37,7 @@ FULL_TRACK = {
             BASIC_TRACK,
             TrackModel(
                 name="1.0/stable",
-                **{"created-at": datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc)}
+                created_at=datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc),
             ),
             id="basic",
         ),
@@ -45,13 +45,9 @@ FULL_TRACK = {
             FULL_TRACK,
             TrackModel(
                 name="1.0/stable",
-                **{
-                    "created-at": datetime(
-                        2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
-                    ),
-                    "version-pattern": r"^\d\.\d/",
-                    "automatic-phasing-percentage": 10,
-                }
+                created_at=datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc),
+                version_pattern=r"^\d\.\d/",
+                automatic_phasing_percentage=10,
             ),
             id="fully-described",
         ),

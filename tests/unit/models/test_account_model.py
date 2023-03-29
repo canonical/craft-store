@@ -32,7 +32,7 @@ FULL_ACCOUNT = {
 @pytest.mark.parametrize(
     "json_dict,expected",
     [
-        pytest.param(BASIC_ACCOUNT, AccountModel(id="123"), id="basic"),
+        pytest.param(BASIC_ACCOUNT, AccountModel(id="123"), id="basic"),  # type: ignore
         pytest.param(
             FULL_ACCOUNT,
             AccountModel(
@@ -40,7 +40,7 @@ FULL_ACCOUNT = {
                 username="usso-username",
                 validation="unproven",
                 email="charmcrafters@lists.launchpad.net",
-                **{"display-name": "Display Name"},
+                display_name="Display Name",  # type: ignore
             ),
             id="fully-described",
         ),
