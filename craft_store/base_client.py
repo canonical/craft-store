@@ -333,8 +333,6 @@ class BaseClient(metaclass=ABCMeta):
         :param team: An optional team ID to register the name with.
 
         :returns: the ID of the registered name.
-
-        Further Detail: https://api.charmhub.io/docs/default.html#register_name
         """
         endpoint = f"/v1/{self._endpoints.namespace}"
 
