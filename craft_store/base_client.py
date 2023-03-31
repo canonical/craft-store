@@ -347,3 +347,15 @@ class BaseClient(metaclass=ABCMeta):
 
         response = self.request("POST", self._base_url + endpoint, json=request_json)
         return response.json()["id"]
+
+    def unregister_name(self, name: str) -> str:
+        """Unregister a name with no published packages.
+
+        :param name: The name to unregister.
+
+        :returns: the ID of the deleted name.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}/{name}"
+        response = self.request("DELETE", self._base_url + endpoint)
+
+        return response.json()["package-id"]
