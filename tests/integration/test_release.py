@@ -13,25 +13,22 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-import os
-
 import pytest
 
 from craft_store.models import release_request_model
 
+from .conftest import needs_charmhub_credentials
 
-@pytest.mark.skipif(
-    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
-    reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
-)
-def test_charm_release(charm_client):
+pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
+
+
+@needs_charmhub_credentials()
+def test_charm_release(charm_client, charmhub_charm_name):
     model = release_request_model.ReleaseRequestModel(
         channel="edge", revision=1, resources=[]
     )
 
     charm_client.release(
-        name="craft-store-test-charm",
+        name=charmhub_charm_name,
         release_request=[model],
     )

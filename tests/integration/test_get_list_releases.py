@@ -16,22 +16,22 @@
 
 
 import datetime
-import os
 from typing import cast
 
 import pytest
 
 from craft_store.models import charm_list_releases_model
 
+from .conftest import needs_charmhub_credentials
 
-@pytest.mark.skipif(
-    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
-    reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
-)
-def test_charm_get_list_releases(charm_client):
+pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
+
+
+@needs_charmhub_credentials()
+def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     model = cast(
         charm_list_releases_model.ListReleasesModel,
-        charm_client.get_list_releases(name="craft-store-test-charm"),
+        charm_client.get_list_releases(name=charmhub_charm_name),
     )
 
     assert len(model.channel_map) == 1
