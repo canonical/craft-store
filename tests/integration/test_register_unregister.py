@@ -14,32 +14,37 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import datetime
-import os
-
 import pytest
 
+from craft_store.errors import StoreServerError
 
-@pytest.mark.skipif(
-    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
-    reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
-)
-def test_register_unregister_cycle(charm_client):
-    whoami = charm_client.whoami()
-    account_id = whoami.get("account", {}).get("id")
-    timestamp_us = int(datetime.datetime.utcnow().timestamp() * 1_000_000)
-    charm_name = f"test-charm-{account_id}-{timestamp_us}"
+from .conftest import needs_charmhub_credentials
 
-    names = [result.name for result in charm_client.list_registered_names()]
-    assert charm_name not in names, "Charm name already registered, test setup failed."
+pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
-    charm_client.register_name(charm_name, entity_type="charm")
 
-    names = [result.name for result in charm_client.list_registered_names()]
-    assert charm_name not in names, "Charm was not successfully registered."
+@needs_charmhub_credentials()
+@pytest.mark.parametrize("entity_type", ["charm", "bundle"])
+def test_register_unregister_cycle(charm_client, unregistered_charm_name, entity_type):
+    try:
+        charm_client.register_name(unregistered_charm_name, entity_type=entity_type)
 
-    charm_client.unregister_package(charm_name)
+        names = {result.name for result in charm_client.list_registered_names()}
+        assert (
+            unregistered_charm_name in names
+        ), f"{entity_type} was not successfully registered."
+    finally:
+        charm_client.unregister_name(unregistered_charm_name)
 
-    names = [result.name for result in charm_client.list_registered_names()]
-    assert charm_name not in names, "Charm was not successfully unregistered."
+    names = {result.name for result in charm_client.list_registered_names()}
+    assert (
+        unregistered_charm_name not in names
+    ), f"{entity_type} was not successfully unregistered."
+
+
+@needs_charmhub_credentials()
+def test_unregister_nonexistent(charm_client, unregistered_charm_name):
+    with pytest.raises(StoreServerError) as exc_info:
+        charm_client.unregister_name(unregistered_charm_name)
+
+    assert "resource-not-found" in exc_info.value.error_list

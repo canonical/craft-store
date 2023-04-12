@@ -15,19 +15,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import os
 from typing import cast
 
 import pytest
 
 from craft_store.models import revisions_model
 
+from .conftest import needs_charmhub_credentials
 
-@pytest.mark.skipif(
-    not os.getenv("CRAFT_STORE_CHARMCRAFT_CREDENTIALS"),
-    reason="CRAFT_STORE_CHARMCRAFT_CREDENTIALS are not set",
-)
-def test_charm_upload(charm_client, fake_charm_file):
+pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
+
+
+@needs_charmhub_credentials()
+def test_charm_upload(charm_client, fake_charm_file, charmhub_charm_name):
     upload_id = charm_client.upload_file(filepath=fake_charm_file)
 
     request_model = revisions_model.RevisionsRequestModel(**{"upload-id": upload_id})
@@ -35,12 +35,12 @@ def test_charm_upload(charm_client, fake_charm_file):
     model_response = cast(
         revisions_model.RevisionsResponseModel,
         charm_client.notify_revision(
-            name="craft-store-test-charm",
+            name=charmhub_charm_name,
             revision_request=request_model,
         ),
     )
 
     assert (
         model_response.status_url
-        == f"/v1/charm/craft-store-test-charm/revisions/review?upload-id={upload_id}"
+        == f"/v1/charm/{charmhub_charm_name}/revisions/review?upload-id={upload_id}"
     )
