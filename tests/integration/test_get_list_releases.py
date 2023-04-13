@@ -31,7 +31,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     """Test list releases for a given charm.
 
-    If you need to create this for yourself you gat replicate the
+    If you need to create this for yourself you can replicate the
     Charmcraft "resources" spread test:
     https://github.com/canonical/charmcraft/blob/main/tests/spread/store/resources/task.yaml
     but with only the Docker image, not the example file.
