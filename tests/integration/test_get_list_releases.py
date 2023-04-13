@@ -29,6 +29,20 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 @needs_charmhub_credentials()
 def test_charm_get_list_releases(charm_client, charmhub_charm_name):
+    """Test list releases for a given charm.
+
+    If you need to create this for yourself you can replicate the
+    Charmcraft "resources" spread test:
+    https://github.com/canonical/charmcraft/blob/main/tests/spread/store/resources/task.yaml
+    but with only the Docker image, not the example file.
+
+    Only upload a single revision, and release that to the edge channel.
+
+    Set the charm name to something not already registered in the staging store.
+    Set the environment variable CRAFT_STORE_TEST_CHARM to the name of the
+    charm you registered before running this test. This will ensure that the
+    test will run against your charm.
+    """
     model = cast(
         charm_list_releases_model.ListReleasesModel,
         charm_client.get_list_releases(name=charmhub_charm_name),
@@ -42,10 +56,16 @@ def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     assert model.channel_map[0].expiration_date is None
     assert model.channel_map[0].progressive.paused is None
     assert model.channel_map[0].progressive.percentage is None
-    assert model.channel_map[0].resources == []
+    assert model.channel_map[0].resources == [
+        charm_list_releases_model.ResourceModel(
+            name="example-image", revision=1, type="oci-image"
+        )
+    ]
     assert model.channel_map[0].revision == 1
-    assert model.channel_map[0].when == datetime.datetime(
-        2022, 4, 6, 20, 41, 11, tzinfo=datetime.timezone.utc
+    # Greater than or equal to in order to allow someone to replicate this
+    # integration test themselves.
+    assert model.channel_map[0].when >= datetime.datetime(
+        2023, 4, 13, 16, 12, 55, tzinfo=datetime.timezone.utc
     )
 
     assert len(model.package.channels) == 4
@@ -76,14 +96,16 @@ def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     assert model.revisions[0].bases[0].channel == "22.04"
     assert model.revisions[0].bases[0].name == "ubuntu"
     # No timezone information returned from Charmhub.
-    assert model.revisions[0].created_at == datetime.datetime(
-        2022, 4, 6, 20, 28, 33, 815746
+    # Greater than or equal to in order to allow someone to replicate this
+    # integration test themselves.
+    assert model.revisions[0].created_at >= datetime.datetime(
+        2023, 4, 13, 16, 9, 55, 19472
     )
     assert model.revisions[0].revision == 1
     assert (
         model.revisions[0].sha3_384
-        == "491692164aa383d5ab1568bd70101c58d3ec09adf6fb5aa2e700ee8acea9553014de552ec949a71c81db77e60a23b451"
+        == "9c1368ba01e30aff43c3372ed61b7cdfc3330b3a3044d887964ccd8100fe2ea59f13409a70596107f981bd09cc9d9b21"
     )
-    assert model.revisions[0].size == 481
+    assert model.revisions[0].size == 6119029
     assert model.revisions[0].status == "released"
     assert model.revisions[0].version == "1"

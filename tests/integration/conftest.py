@@ -44,7 +44,7 @@ def charmhub_charm_name():
     NOTE: Most integration tests check specifics about craft-store-test-charm,
     so overriding the test charm may cause test failures.
     """
-    yield os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test-charm")
+    yield os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test")
 
 
 @pytest.fixture
