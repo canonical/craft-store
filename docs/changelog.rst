@@ -2,6 +2,21 @@
 Changelog
 *********
 
+2.4.0 (2023-04-13)
+------------------
+
+- Add support for registering, unregistering, and listing names, with usage
+  examples in `integration tests
+  <https://github.com/canonical/craft-store/blob/main/tests/integration
+  /test_register_unregister.py>`_.
+
+  - :class:`craft_store.base_client.BaseClient.register_name`
+  - :class:`craft_store.base_client.BaseClient.unregister_name`
+  - :class:`craft_store.base_client.BaseClient.list_registered_names`
+- Handle keyring unlocking errors
+
+`Full Changelog <https://github.com/canonical/craft-store/compare/2.3.0...v2.4.0>`_
+
 2.3.0 (2022-10-07)
 ------------------
 
