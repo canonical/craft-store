@@ -28,6 +28,25 @@ To run all tests in the suite run:
 make tests
 ```
 
+### Integration tests
+
+Some integration tests require collaborator permission on the `craft-store-test-charm`
+charm package on the staging craft-store. These can be run by creating a pull request.
+
+Other integration tests simply require a valid login to the staging charmhub store.
+These can be run by exporting charmhub staging credentials to the environment
+variable `CRAFT_STORE_CHARMCRAFT_CREDENTIALS`. An easy way to do this is to 
+create a `charmcraft.yaml` file containing the lines:
+
+    charmhub:
+      api-url: "https://api.staging.charmhub.io"
+      storage-url: "https://storage.staging.snapcraftcontent.com"
+
+and then run `charmcraft login --export cc.cred` to login and
+`export CRAFT_STORE_CHARMCRAFT_CREDENTIALS=$(cat cc.cred)` to put the credentials
+into the environment variable. Note that if you do not have collaborator permissions
+on `craft-store-test-charm`, some tests will fail rather than being skipped.
+
 ## Adding new requirements
 
 If a new dependency is added to the project run:

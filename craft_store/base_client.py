@@ -19,11 +19,11 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, cast
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor  # type: ignore
 
 from . import endpoints, errors, models
 from .auth import Auth
@@ -307,3 +307,62 @@ class BaseClient(metaclass=ABCMeta):
             self._base_url + endpoint,
             json=[r.marshal() for r in release_request],
         )
+
+    def list_registered_names(
+        self, *, include_collaborations: bool = False
+    ) -> List[models.RegisteredNameModel]:
+        """List the registered names available to the logged in account.
+
+        :param include_collaborations: if True, includes names the user is a
+            collaborator on but does not own.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}"
+        params = {
+            "include-collaborations": "true" if include_collaborations else "false",
+        }
+        response = self.request("GET", self._base_url + endpoint, params=params)
+        results = response.json().get("results", [])
+        return [models.RegisteredNameModel.unmarshal(item) for item in results]
+
+    def register_name(
+        self,
+        name: str,
+        *,
+        entity_type: Optional[Literal["charm", "bundle", "snap"]] = None,
+        private: bool = False,
+        team: Optional[str] = None,
+    ) -> str:
+        """Register a name on the store.
+
+        :param name: the name to register.
+        :param entity_type: The type of package to register (e.g. charm or snap)
+        :param private: Whether this entity is private or not.
+        :param team: An optional team ID to register the name with.
+
+        :returns: the ID of the registered name.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}"
+
+        request_json = {
+            "name": name,
+            "private": private,
+        }
+        if team is not None:
+            request_json["team"] = team
+        if entity_type is not None:
+            request_json["type"] = entity_type
+
+        response = self.request("POST", self._base_url + endpoint, json=request_json)
+        return response.json()["id"]
+
+    def unregister_name(self, name: str) -> str:
+        """Unregister a name with no published packages.
+
+        :param name: The name to unregister.
+
+        :returns: the ID of the deleted name.
+        """
+        endpoint = f"/v1/{self._endpoints.namespace}/{name}"
+        response = self.request("DELETE", self._base_url + endpoint)
+
+        return response.json()["package-id"]

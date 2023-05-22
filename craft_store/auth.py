@@ -127,9 +127,15 @@ class Auth:
         """Check that no credentials exist.
 
         :raises errors.CredentialsAvailable: if credentials have already been set.
+        :raises errors.KeyringUnlockError: if the keyring cannot be unlocked.
         """
-        if self._keyring.get_password(self.application_name, self.host) is not None:
-            raise errors.CredentialsAlreadyAvailable(self.application_name, self.host)
+        try:
+            if self._keyring.get_password(self.application_name, self.host) is not None:
+                raise errors.CredentialsAlreadyAvailable(
+                    self.application_name, self.host
+                )
+        except keyring.errors.KeyringLocked as exc:
+            raise errors.KeyringUnlockError() from exc
 
     def set_credentials(self, credentials: str, force: bool = False) -> None:
         """Store credentials in the keyring.

@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2022 Canonical Ltd.
+# Copyright 2023 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -13,22 +13,20 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import pytest
 
-from craft_store.models import release_request_model
+"""Account model for the Store."""
+from typing import Optional
 
-from .conftest import needs_charmhub_credentials
+from pydantic import Field
 
-pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
+from ._base_model import MarshableModel
 
 
-@needs_charmhub_credentials()
-def test_charm_release(charm_client, charmhub_charm_name):
-    model = release_request_model.ReleaseRequestModel(
-        channel="edge", revision=1, resources=[]
-    )
+class AccountModel(MarshableModel):
+    """A Store account."""
 
-    charm_client.release(
-        name=charmhub_charm_name,
-        release_request=[model],
-    )
+    display_name: Optional[str] = Field(default=None, alias="display-name")
+    email: Optional[str] = None
+    id: str
+    username: Optional[str] = None
+    validation: Optional[str] = None
