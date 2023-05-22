@@ -223,6 +223,13 @@ class BaseClient(metaclass=ABCMeta):
         :param monitor_callback: a callback to monitor progress.
 
         """
+        file_size = filepath.stat().st_size
+        logger.debug(
+            "Beginning to upload a file %r with size of %r bytes",
+            str(filepath),
+            file_size,
+        )
+
         with filepath.open("rb") as upload_file:
             encoder = MultipartEncoder(
                 fields={
