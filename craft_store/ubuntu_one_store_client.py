@@ -138,14 +138,19 @@ class UbuntuOneStoreClient(BaseClient):
         url: str,
         params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
+        request_auth: Optional[bool] = None,
         **kwargs,
     ) -> requests.Response:
         try:
-            response = super().request(method, url, params, headers, **kwargs)
+            response = super().request(
+                method, url, params, headers, request_auth=request_auth, **kwargs
+            )
         except errors.StoreServerError as store_error:
             if "macaroon-needs-refresh" in store_error.error_list:
                 self._refresh_token()
-                response = super().request(method, url, params, headers, **kwargs)
+                response = super().request(
+                    method, url, params, headers, request_auth=request_auth, **kwargs
+                )
             else:
                 raise
 

@@ -151,6 +151,7 @@ class BaseClient(metaclass=ABCMeta):
         url: str,
         params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
+        request_auth: Optional[bool] = None,
         **kwargs,
     ) -> requests.Response:
         """Perform an authenticated request if auth_headers are True.
@@ -169,7 +170,12 @@ class BaseClient(metaclass=ABCMeta):
         if headers is None:
             headers = {}
 
-        headers["Authorization"] = self._get_authorization_header()
+        if request_auth is None:
+            auth_header = self._get_authorization_header()
+            if auth_header:
+                headers["Authorization"] = auth_header
+        elif request_auth is True:
+            headers["Authorization"] = self._get_authorization_header()
 
         return self.http_client.request(
             method,
@@ -181,7 +187,9 @@ class BaseClient(metaclass=ABCMeta):
 
     def whoami(self) -> Dict[str, Any]:
         """Return whoami json data queyring :attr:`.endpoints.Endpoints.whoami`."""
-        return self.request("GET", self._base_url + self._endpoints.whoami).json()
+        return self.request(
+            "GET", self._base_url + self._endpoints.whoami, request_auth=True
+        ).json()
 
     def logout(self) -> None:
         """Clear credentials.
@@ -274,7 +282,10 @@ class BaseClient(metaclass=ABCMeta):
         """
         endpoint = f"/v1/{self._endpoints.namespace}/{name}/revisions"
         response = self.request(
-            "POST", self._base_url + endpoint, json=revision_request.marshal()
+            "POST",
+            self._base_url + endpoint,
+            json=revision_request.marshal(),
+            request_auth=True,
         ).json()
 
         return cast(
@@ -306,6 +317,7 @@ class BaseClient(metaclass=ABCMeta):
             "POST",
             self._base_url + endpoint,
             json=[r.marshal() for r in release_request],
+            request_auth=True,
         )
 
     def list_registered_names(
@@ -320,7 +332,9 @@ class BaseClient(metaclass=ABCMeta):
         params = {
             "include-collaborations": "true" if include_collaborations else "false",
         }
-        response = self.request("GET", self._base_url + endpoint, params=params)
+        response = self.request(
+            "GET", self._base_url + endpoint, params=params, request_auth=True
+        )
         results = response.json().get("results", [])
         return [models.RegisteredNameModel.unmarshal(item) for item in results]
 
@@ -352,7 +366,9 @@ class BaseClient(metaclass=ABCMeta):
         if entity_type is not None:
             request_json["type"] = entity_type
 
-        response = self.request("POST", self._base_url + endpoint, json=request_json)
+        response = self.request(
+            "POST", self._base_url + endpoint, json=request_json, request_auth=True
+        )
         return response.json()["id"]
 
     def unregister_name(self, name: str) -> str:
@@ -363,6 +379,6 @@ class BaseClient(metaclass=ABCMeta):
         :returns: the ID of the deleted name.
         """
         endpoint = f"/v1/{self._endpoints.namespace}/{name}"
-        response = self.request("DELETE", self._base_url + endpoint)
+        response = self.request("DELETE", self._base_url + endpoint, request_auth=True)
 
         return response.json()["package-id"]

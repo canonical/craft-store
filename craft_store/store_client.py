@@ -131,3 +131,29 @@ class StoreClient(BaseClient):
         credentials = self._authorize_token(candid_discharged_macaroon)
 
         return creds.marshal_candid_credentials(credentials)
+
+
+class CharmhubStoreClient(StoreClient):
+    """Encapsulates API calls for Charmhub."""
+
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        storage_base_url: str,
+        endpoints: endpoints.Endpoints = endpoints.CHARMHUB,  # pylint: disable=W0621
+        application_name: str,
+        user_agent: str,
+        environment_auth: Optional[str] = None,
+        ephemeral: bool = False,
+    ) -> None:
+        """Encapsulates API calls for Charmhub."""
+        super().__init__(
+            base_url=base_url,
+            storage_base_url=storage_base_url,
+            endpoints=endpoints,
+            application_name=application_name,
+            user_agent=user_agent,
+            environment_auth=environment_auth,
+            ephemeral=ephemeral,
+        )
