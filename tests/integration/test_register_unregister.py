@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-
 from craft_store.errors import StoreServerError
 
 from .conftest import needs_charmhub_credentials

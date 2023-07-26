@@ -19,11 +19,11 @@
 from datetime import datetime
 from re import Pattern
 
-from craft_store.models import MarshableModel
+from craft_store.models._base_model import MarshableModel
 
 
 class TrackGuardrailModel(MarshableModel):
     """A guardrail regular expression for tracks that can be created."""
 
-    pattern: Pattern
+    pattern: Pattern  # type: ignore[type-arg]
     created_at: datetime

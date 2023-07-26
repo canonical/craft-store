@@ -19,10 +19,10 @@ from unittest import mock
 
 import pytest
 import requests
-import urllib3  # type: ignore
-from requests.exceptions import JSONDecodeError
-
+import urllib3
+import urllib3.exceptions
 from craft_store import errors
+from requests.exceptions import JSONDecodeError
 
 
 def _fake_error_response(status_code, reason, json=None):
@@ -47,7 +47,7 @@ scenarios = (
         "exception_class": errors.NetworkError,
         "args": [
             requests.exceptions.ConnectionError(
-                urllib3.exceptions.MaxRetryError(  # type: ignore
+                urllib3.exceptions.MaxRetryError(
                     pool=urllib3.connectionpool.ConnectionPool("https://foo.bar"),
                     url="test-url",
                 )
@@ -145,7 +145,7 @@ error_lists = [
 ]
 
 
-@pytest.mark.parametrize("error_list_key", ("error-list", "error_list"))
+@pytest.mark.parametrize("error_list_key", ["error-list", "error_list"])
 @pytest.mark.parametrize("error_list", error_lists)
 def test_store_error_list(error_list_key, error_list):
     response = _fake_error_response(
@@ -154,8 +154,8 @@ def test_store_error_list(error_list_key, error_list):
     assert str(errors.StoreServerError(response)) == error_list["expected"]
 
 
-@pytest.mark.parametrize("missing", ("code", "message"))
-@pytest.mark.parametrize("error_list_key", ("error-list", "error_list"))
+@pytest.mark.parametrize("missing", ["code", "message"])
+@pytest.mark.parametrize("error_list_key", ["error-list", "error_list"])
 def test_store_error_list_missing_element(missing, error_list_key):
     error_list = [
         {"code": "resource-not-found", "message": "could not find resource"},

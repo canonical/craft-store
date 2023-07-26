@@ -19,7 +19,6 @@ import re
 from datetime import datetime
 
 import pytest
-
 from craft_store.models import (
     AccountModel,
     RegisteredNameModel,
@@ -82,7 +81,7 @@ def test_unmarshal(check, json_dict):
         actual.media, [MediaModel.unmarshal(m) for m in json_dict.get("media", [])]
     )
     check.equal(actual.name, json_dict.get("name"))
-    check.equal(actual.private, True if json_dict["private"] == "true" else False)
+    check.equal(actual.private, json_dict["private"] == "true")
     check.equal(actual.publisher, AccountModel.unmarshal(json_dict["publisher"]))
     check.equal(actual.status, json_dict.get("status"))
     check.equal(actual.store, json_dict.get("store"))

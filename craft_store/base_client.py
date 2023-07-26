@@ -19,11 +19,14 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, cast
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence
 from urllib.parse import urlparse
 
 import requests
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor  # type: ignore
+from requests_toolbelt import (  # type: ignore[import]
+    MultipartEncoder,
+    MultipartEncoderMonitor,
+)
 
 from . import endpoints, errors, models
 from .auth import Auth
@@ -72,7 +75,9 @@ class BaseClient(metaclass=ABCMeta):
         )
 
     @abstractmethod
-    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
+    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
+        self, root_macaroon: str, **kwargs
+    ) -> str:
         """Return a discharged macaroon ready to use in an Authorization header."""
 
     @abstractmethod
@@ -87,9 +92,9 @@ class BaseClient(metaclass=ABCMeta):
             json=token_request,
         )
 
-        return token_response.json()["macaroon"]
+        return str(token_response.json()["macaroon"])
 
-    def login(
+    def login(  # type: ignore[no-untyped-def]
         self,
         *,
         permissions: Sequence[str],
@@ -145,7 +150,7 @@ class BaseClient(metaclass=ABCMeta):
 
         return self._auth.encode_credentials(store_authorized_macaroon)
 
-    def request(
+    def request(  # type: ignore[no-untyped-def]
         self,
         method: str,
         url: str,
@@ -181,7 +186,7 @@ class BaseClient(metaclass=ABCMeta):
 
     def whoami(self) -> Dict[str, Any]:
         """Return whoami json data queyring :attr:`.endpoints.Endpoints.whoami`."""
-        return self.request("GET", self._base_url + self._endpoints.whoami).json()
+        return dict(self.request("GET", self._base_url + self._endpoints.whoami).json())
 
     def logout(self) -> None:
         """Clear credentials.
@@ -194,7 +199,7 @@ class BaseClient(metaclass=ABCMeta):
         self,
         *,
         filepath: Path,
-        monitor_callback: Optional[Callable] = None,
+        monitor_callback: Optional[Callable] = None,  # type: ignore[type-arg]
     ) -> str:
         """Upload filepath to storage.
 
@@ -277,10 +282,7 @@ class BaseClient(metaclass=ABCMeta):
             "POST", self._base_url + endpoint, json=revision_request.marshal()
         ).json()
 
-        return cast(
-            models.revisions_model.RevisionsResponseModel,
-            models.revisions_model.RevisionsResponseModel.unmarshal(response),
-        )
+        return models.revisions_model.RevisionsResponseModel.unmarshal(response)
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""
@@ -353,7 +355,7 @@ class BaseClient(metaclass=ABCMeta):
             request_json["type"] = entity_type
 
         response = self.request("POST", self._base_url + endpoint, json=request_json)
-        return response.json()["id"]
+        return str(response.json()["id"])
 
     def unregister_name(self, name: str) -> str:
         """Unregister a name with no published packages.
@@ -365,4 +367,4 @@ class BaseClient(metaclass=ABCMeta):
         endpoint = f"/v1/{self._endpoints.namespace}/{name}"
         response = self.request("DELETE", self._base_url + endpoint)
 
-        return response.json()["package-id"]
+        return str(response.json()["package-id"])

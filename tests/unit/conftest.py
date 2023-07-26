@@ -20,7 +20,7 @@ from unittest.mock import patch
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture()
 def expires():
     """Mocks/freezes utcnow() in craft_store.endpoints module.
 

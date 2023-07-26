@@ -17,11 +17,10 @@
 import datetime
 
 import pytest
-
 from craft_store.models import snap_list_releases_model
 
 
-@pytest.fixture
+@pytest.fixture()
 def payload():
     return {
         "channel-map": [
