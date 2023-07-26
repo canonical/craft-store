@@ -1,20 +1,18 @@
+.. craft store documentation root file
+
 =======================================
 Welcome to Craft Store's documentation!
 =======================================
 
 .. toctree::
-   :caption: Getting started
-   :maxdepth: 2
+   :maxdepth: 1
+   :hidden:
 
-   tutorials
+   tutorials/index
+   howto/index
+   reference/index
+   explanation/index
 
-   howtos
-
-.. toctree::
-   :caption: Reference:
-   :maxdepth: 2
-
-   craft_store
 
 .. toctree::
    :caption: About the project

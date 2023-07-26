@@ -1,6 +1,11 @@
-******
-How To
-******
+.. _howto:
+
+How-to guides
+*************
+
+.. toctree::
+   :maxdepth: 1
+
 
 Using credentials provided by an environment variable
 =====================================================
@@ -43,7 +48,7 @@ Using retrieved credentials
 ---------------------------
 
 If :class:`craft_store.store_client.StoreClient` is initialized with
-`environment_auth` and the value is set then a in-memory
+``environment_auth`` and the value is set then a in-memory
 keyring is used instead of the system keyring.
 
 To make use of such thing, export ``CREDENTIALS=<credentials>`` where
@@ -74,7 +79,7 @@ Using craft-cli for upload progress
 ===================================
 
 Progress can be provided by use of craft-cli_. This example will upload
-`./test.snap` with something that looks like the following:
+``./test.snap`` with something that looks like the following:
 
 .. code-block:: python
 

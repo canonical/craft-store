@@ -19,14 +19,13 @@ import re
 from datetime import datetime, timezone
 
 import pytest
-
 from craft_store.models.track_guardrail_model import TrackGuardrailModel
 
 GUARDRAIL_DICT = {"created-at": "2023-03-28T18:50:44+00:00", "pattern": r"^\d\.\d/"}
 
 
 @pytest.mark.parametrize(
-    "json_dict,expected",
+    ("json_dict", "expected"),
     [
         pytest.param(
             GUARDRAIL_DICT,
@@ -36,7 +35,7 @@ GUARDRAIL_DICT = {"created-at": "2023-03-28T18:50:44+00:00", "pattern": r"^\d\.\
                     "created-at": datetime(
                         2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
                     ),
-                }
+                },
             ),
         ),
     ],

@@ -19,7 +19,6 @@ from unittest.mock import Mock
 
 import pytest
 import requests
-
 from craft_store import BaseClient, endpoints
 from craft_store.models import AccountModel, RegisteredNameModel
 
@@ -57,7 +56,7 @@ DEMO_ACCOUNT = AccountModel(
     id="pubid",
     username="usso-someone",
     validation="unproven",
-    **{"display-name": "Charmhub Publisher"}
+    **{"display-name": "Charmhub Publisher"},
 )
 
 
@@ -65,11 +64,13 @@ class ConcreteTestClient(BaseClient):
     def _get_authorization_header(self) -> str:
         return "I am authorised."
 
-    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
+    def _get_discharged_macaroon(
+        self, root_macaroon: str, **kwargs  # noqa: ARG002
+    ) -> str:
         return "The voltmeter reads 0V over this macaroon."
 
 
-@pytest.fixture
+@pytest.fixture()
 def charm_client():
     client = ConcreteTestClient(
         base_url="https://staging.example.com",
@@ -79,11 +80,11 @@ def charm_client():
         user_agent="craft-store unit tests, should not be hitting a real server",
     )
     client.http_client = Mock(spec=client.http_client)
-    yield client
+    return client
 
 
 @pytest.mark.parametrize(
-    "content,expected",
+    ("content", "expected"),
     [
         (b'{"results":[]}', []),
         (
@@ -111,7 +112,7 @@ def test_list_registered_names(charm_client, content, expected):
 
 
 @pytest.mark.parametrize(
-    ["name", "entity_type", "private", "team", "expected_json"],
+    ("name", "entity_type", "private", "team", "expected_json"),
     [
         pytest.param(
             "test-charm-abcxyz",

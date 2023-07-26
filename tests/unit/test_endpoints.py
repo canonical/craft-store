@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-
 from craft_store import endpoints
 
 
@@ -78,7 +77,7 @@ def test_charmhub_packages():
 def test_charmhub_invalid_packages():
     charmhub = endpoints.CHARMHUB
 
-    with pytest.raises(ValueError) as raised:
+    with pytest.raises(ValueError) as raised:  # noqa: PT011
         charmhub.get_token_request(
             permissions=["permission-foo", "permission-bar"],
             description="client description",
@@ -169,7 +168,7 @@ def test_snap_store_packages(expires):
 def test_snap_store_invalid_packages():
     snap_store = endpoints.SNAP_STORE
 
-    with pytest.raises(ValueError) as raised:
+    with pytest.raises(ValueError) as raised:  # noqa: PT011
         snap_store.get_token_request(
             permissions=["permission-foo", "permission-bar"],
             description="client description",

@@ -20,12 +20,13 @@ import base64
 import binascii
 import logging
 import os
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 import keyring
 import keyring.backend
 import keyring.backends.fail
 import keyring.errors
+from keyring._compat import properties
 
 from . import errors
 
@@ -35,8 +36,14 @@ logger = logging.getLogger(__name__)
 class MemoryKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a dictionary."""
 
-    # Only > 0 make it to the chainer.
-    priority = -1  # type: ignore
+    @properties.classproperty  #  type: ignore[misc]
+    def priority(self) -> Union[int, float]:
+        """Supply a priority.
+
+        Indicating the priority of the backend relative to all other backends.
+        """
+        # Only > 0 make it to the chainer.
+        return -1
 
     def __init__(self) -> None:
         super().__init__()
@@ -56,7 +63,7 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
         try:
             del self._credentials[service, username]
         except KeyError as key_error:
-            raise keyring.errors.PasswordDeleteError() from key_error
+            raise keyring.errors.PasswordDeleteError from key_error
 
 
 class Auth:
@@ -79,8 +86,8 @@ class Auth:
         self,
         application_name: str,
         host: str,
-        environment_auth: Optional[str] = None,
         ephemeral: bool = False,
+        environment_auth: Optional[str] = None,
     ) -> None:
         """Initialize Auth.
 
@@ -102,7 +109,7 @@ class Auth:
         self._keyring = keyring.get_keyring()
         # This keyring would fail on first use, fail early instead.
         if isinstance(self._keyring, keyring.backends.fail.Keyring):
-            raise errors.NoKeyringError()
+            raise errors.NoKeyringError
 
         if environment_auth_value:
             self.set_credentials(self.decode_credentials(environment_auth_value))
@@ -130,12 +137,12 @@ class Auth:
         :raises errors.KeyringUnlockError: if the keyring cannot be unlocked.
         """
         try:
-            if self._keyring.get_password(self.application_name, self.host) is not None:
-                raise errors.CredentialsAlreadyAvailable(
-                    self.application_name, self.host
-                )
+            password = self._keyring.get_password(self.application_name, self.host)
         except keyring.errors.KeyringLocked as exc:
-            raise errors.KeyringUnlockError() from exc
+            raise errors.KeyringUnlockError from exc
+
+        if password is not None:
+            raise errors.CredentialsAlreadyAvailable(self.application_name, self.host)
 
     def set_credentials(self, credentials: str, force: bool = False) -> None:
         """Store credentials in the keyring.
@@ -170,7 +177,7 @@ class Auth:
             encoded_credentials_string = self._keyring.get_password(
                 self.application_name, self.host
             )
-        except Exception as unknown_error:
+        except Exception as unknown_error:  # noqa: BLE001
             logger.debug(
                 "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,
@@ -182,8 +189,7 @@ class Auth:
         if encoded_credentials_string is None:
             logger.debug("Credentials not found in the keyring %r", self._keyring.name)
             raise errors.CredentialsUnavailable(self.application_name, self.host)
-        credentials = self.decode_credentials(encoded_credentials_string)
-        return credentials
+        return self.decode_credentials(encoded_credentials_string)
 
     def del_credentials(self) -> None:
         """Delete credentials from the keyring."""

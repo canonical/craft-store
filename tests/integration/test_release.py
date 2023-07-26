@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
-
 from craft_store.models import release_request_model
 
 from .conftest import needs_charmhub_credentials

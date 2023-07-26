@@ -18,15 +18,14 @@ import keyring
 import keyring.backend
 import keyring.errors
 import pytest
-
 from craft_store import errors
 from craft_store.auth import Auth, MemoryKeyring
 
 pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
-@pytest.fixture
-def test_keyring():
+@pytest.fixture()
+def _test_keyring():
     """In memory keyring backend for testing."""
     current_keyring = keyring.get_keyring()
     keyring.set_keyring(MemoryKeyring())
@@ -34,7 +33,7 @@ def test_keyring():
     keyring.set_keyring(current_keyring)
 
 
-@pytest.mark.usefixtures("test_keyring")
+@pytest.mark.usefixtures("_test_keyring")
 def test_auth():
     auth = Auth("fakecraft", "fakestore.com")
 
@@ -60,6 +59,6 @@ def test_auth():
 def test_auth_from_environment(monkeypatch):
     monkeypatch.setenv("CREDENTIALS", "c2VjcmV0LWtleXM=")
 
-    auth = Auth("fakecraft", "fakestore.com", "CREDENTIALS")
+    auth = Auth("fakecraft", "fakestore.com", environment_auth="CREDENTIALS")
 
     assert auth.get_credentials() == "secret-keys"

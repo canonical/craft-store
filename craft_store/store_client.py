@@ -20,20 +20,24 @@ import base64
 import json
 from typing import Optional
 
-from macaroonbakery import bakery, httpbakery  # type: ignore
+from macaroonbakery import bakery, httpbakery  # type: ignore[import]
 from overrides import overrides
-from pymacaroons.serializers import json_serializer  # type: ignore
+from pymacaroons import Macaroon  # type: ignore[import]
+from pymacaroons.serializers import json_serializer  # type: ignore[import]
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
 from .http_client import HTTPClient
 
 
-def _macaroon_to_json_string(macaroon) -> str:
-    return macaroon.serialize(json_serializer.JsonSerializer())
+def _macaroon_to_json_string(macaroon: Macaroon) -> str:
+    json_string = macaroon.serialize(json_serializer.JsonSerializer())
+    if json_string is None:
+        return ""
+    return str(json_string)
 
 
-class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):
+class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):  # type: ignore[misc]
     """WebBrowserInteractor implementation using HTTPClient.
 
     Waiting for a token is implemented using HTTPClient which mounts
@@ -47,7 +51,9 @@ class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):
         self.user_agent = user_agent
 
     # TODO: transfer implementation to macaroonbakery.
-    def _wait_for_token(self, ctx, wait_token_url):
+    def _wait_for_token(
+        self, ctx: Optional[str], wait_token_url: str  # noqa: ARG002
+    ) -> httpbakery._interactor.DischargeToken:
         request_client = HTTPClient(user_agent=self.user_agent)
         resp = request_client.request("GET", wait_token_url)
         if resp.status_code != 200:
@@ -124,9 +130,11 @@ class StoreClient(BaseClient):
             json={},
         )
 
-        return token_exchange_response.json()["macaroon"]
+        return str(token_exchange_response.json()["macaroon"])
 
-    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
+    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
+        self, root_macaroon: str, **_kwargs
+    ) -> str:
         candid_discharged_macaroon = self._candid_discharge(root_macaroon)
         credentials = self._authorize_token(candid_discharged_macaroon)
 

@@ -18,7 +18,6 @@
 from datetime import datetime
 
 import pytest
-
 from craft_store.models.track_model import TrackModel
 
 BASIC_TRACK = {"created-at": "2023-03-28T18:50:44+00:00", "name": "1.0/stable"}

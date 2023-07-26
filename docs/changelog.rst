@@ -15,7 +15,8 @@ Changelog
   - :class:`craft_store.base_client.BaseClient.list_registered_names`
 - Handle keyring unlocking errors
 
-`Full Changelog <https://github.com/canonical/craft-store/compare/2.3.0...v2.4.0>`_
+`Full Changelog
+<https://github.com/canonical/craft-store/compare/2.3.0...v2.4.0>`_
 
 2.3.0 (2022-10-07)
 ------------------
@@ -28,13 +29,14 @@ Changelog
 
 - Export :class:`craft_store.models.SnapListReleasesModel` and
   :class:`craft_store.models.CharmListReleasesModel`
-- Remove incorrectly exported `SnapChannelMapModel` and `CharmChannelMapModel`
+- Remove incorrectly exported ``SnapChannelMapModel`` and
+  ``CharmChannelMapModel``
 - Make bases optional in :class:`craft_store.models.SnapListReleasesModel`
 
 2.2.0 (2022-08-11)
 ------------------
 
-- Refactor common code in `endpoints`
+- Refactor common code in ``endpoints``
 - Export new symbols in craft_store.models:
 
   - :class:`craft_store.models.CharmChannelMapModel`

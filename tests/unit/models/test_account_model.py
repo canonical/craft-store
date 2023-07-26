@@ -16,7 +16,6 @@
 #
 """Tests for the store account model."""
 import pytest
-
 from craft_store.models.account_model import AccountModel
 
 BASIC_ACCOUNT = {"id": "123"}
@@ -30,13 +29,14 @@ FULL_ACCOUNT = {
 
 
 @pytest.mark.parametrize(
-    "json_dict,expected",
+    ("json_dict", "expected"),
     [
         pytest.param(BASIC_ACCOUNT, AccountModel(id="123"), id="basic"),
         pytest.param(
             FULL_ACCOUNT,
             AccountModel(
-                display_name="Display Name",  # pyright: ignore
+                display_name="Display Name",  # pyright: ignore[reportGeneralTypeIssues]
+                # bug https://github.com/pydantic/pydantic/discussions/3986
                 id="abc123",
                 username="usso-username",
                 validation="unproven",

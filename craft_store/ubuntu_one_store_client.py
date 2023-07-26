@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 
 import requests
 from overrides import overrides
-from pymacaroons import Macaroon  # type: ignore
+from pymacaroons import Macaroon  # type: ignore[import]
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
@@ -87,18 +87,18 @@ class UbuntuOneStoreClient(BaseClient):
         new_credentials = creds.marshal_u1_credentials(macaroons)
         self._auth.set_credentials(new_credentials, force=True)
 
-    def _extract_caveat_id(self, root_macaroon):
+    def _extract_caveat_id(self, root_macaroon: str) -> str:
         macaroon = Macaroon.deserialize(root_macaroon)
         # macaroons are all bytes, never strings
         sso_host = urlparse(self._auth_url).netloc
 
         for caveat in macaroon.caveats:
             if caveat.location == sso_host:
-                return caveat.caveat_id
+                return str(caveat.caveat_id)
         raise errors.CraftStoreError("Invalid root macaroon")
 
     def _discharge(
-        self, email: str, password: str, otp: Optional[str], caveat_id
+        self, email: str, password: str, otp: Optional[str], caveat_id: str
     ) -> str:
         data = {"email": email, "password": password, "caveat_id": caveat_id}
         if otp:
@@ -114,9 +114,11 @@ class UbuntuOneStoreClient(BaseClient):
         if not response.ok:
             raise errors.StoreServerError(response)
 
-        return response.json()["discharge_macaroon"]
+        return str(response.json()["discharge_macaroon"])
 
-    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
+    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
+        self, root_macaroon: str, **kwargs
+    ) -> str:
         email = kwargs["email"]
         password = kwargs["password"]
         otp = kwargs.get("otp")
@@ -126,13 +128,11 @@ class UbuntuOneStoreClient(BaseClient):
             email=email, password=password, otp=otp, caveat_id=cavead_id
         )
 
-        u1_macaroon = creds.UbuntuOneMacaroons(
-            r=root_macaroon, d=discharged_macaroon
-        )  # type: ignore
+        u1_macaroon = creds.UbuntuOneMacaroons(r=root_macaroon, d=discharged_macaroon)
         return creds.marshal_u1_credentials(u1_macaroon)
 
     @overrides
-    def request(
+    def request(  # type: ignore[no-untyped-def]
         self,
         method: str,
         url: str,
@@ -140,6 +140,7 @@ class UbuntuOneStoreClient(BaseClient):
         headers: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> requests.Response:
+        """Make a request to the store."""
         try:
             response = super().request(method, url, params, headers, **kwargs)
         except errors.StoreServerError as store_error:

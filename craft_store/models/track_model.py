@@ -18,7 +18,7 @@
 from datetime import datetime
 from typing import Optional
 
-from craft_store.models import MarshableModel
+from craft_store.models._base_model import MarshableModel
 
 
 class TrackModel(MarshableModel):
