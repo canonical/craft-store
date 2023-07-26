@@ -26,7 +26,7 @@ Model = TypeVar("Model")
 class MarshableModel(BaseModel):
     """A BaseModel that can be marshaled and unmarshaled."""
 
-    class Config:  # type: ignore # pylint: disable=too-few-public-methods
+    class Config:  # pylint: disable=too-few-public-methods
         """Pydantic model configuration."""
 
         validate_assignment = True

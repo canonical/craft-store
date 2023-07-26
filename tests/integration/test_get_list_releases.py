@@ -19,7 +19,6 @@ import datetime
 from typing import cast
 
 import pytest
-
 from craft_store.models import charm_list_releases_model
 
 from .conftest import needs_charmhub_credentials

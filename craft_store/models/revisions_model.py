@@ -16,7 +16,7 @@
 
 """Revisions response models for the Store."""
 
-from ._base_model import MarshableModel
+from craft_store.models._base_model import MarshableModel
 
 
 class RevisionsRequestModel(MarshableModel):

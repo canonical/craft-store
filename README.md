@@ -13,19 +13,13 @@ https://craft-store.readthedocs.io.
 
 # Contributing
 
-A `Makefile` is provided for easy interaction with the project. To see
-all available options run:
-
-```
-make help
-```
 
 ## Running tests
 
 To run all tests in the suite run:
 
 ```
-make tests
+tox
 ```
 
 ### Integration tests
@@ -35,7 +29,7 @@ charm package on the staging craft-store. These can be run by creating a pull re
 
 Other integration tests simply require a valid login to the staging charmhub store.
 These can be run by exporting charmhub staging credentials to the environment
-variable `CRAFT_STORE_CHARMCRAFT_CREDENTIALS`. An easy way to do this is to 
+variable `CRAFT_STORE_CHARMCRAFT_CREDENTIALS`. An easy way to do this is to
 create a `charmcraft.yaml` file containing the lines:
 
     charmhub:
@@ -51,17 +45,15 @@ on `craft-store-test-charm`, some tests will fail rather than being skipped.
 
 If a new dependency is added to the project run:
 
-```
-make freeze-requirements
-```
+TODO
+
 
 ## Verifying documentation changes
 
 To locally verify documentation changes run:
 
-```
-make docs
-```
+`tox run -e lint-docs,build-docs`
+
 
 After running, newly generated documentation shall be available at
 `./docs/_build/html/`.
@@ -86,4 +78,3 @@ As an example:
 
     Required in order to obtain credentials that apply only to a given package;
     be it charm, snap or bundle.
-

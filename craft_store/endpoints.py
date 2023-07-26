@@ -111,7 +111,7 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
 
         :param result: the result from an upload request.
         """
-        return result["upload_id"]
+        return str(result["upload_id"])
 
     def get_releases_endpoint(self, name: str) -> str:
         """Return the slug to the releases endpoint."""
@@ -162,15 +162,15 @@ class _SnapStoreEndpoints(Endpoints):
 
     @staticmethod
     def get_upload_id(result: Dict[str, Any]) -> str:
-        return result["upload_id"]
+        return str(result["upload_id"])
 
     @overrides
     def get_releases_endpoint(self, name: str) -> str:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @overrides
     def get_revisions_endpoint(self, name: str) -> str:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 CHARMHUB: Final = Endpoints(

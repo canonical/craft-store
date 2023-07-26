@@ -1,6 +1,14 @@
-*********
+.. _tutorial:
+
 Tutorials
 *********
+
+If you want to learn the basics from experience, then our tutorials will help
+you acquire the necessary competencies from real-life examples with fully
+reproducible steps.
+
+.. toctree::
+   :maxdepth: 1
 
 .. _tutorial-snap_store_login:
 
@@ -83,7 +91,8 @@ Enable the virtual environment and then install Craft Store by running::
 Code
 ----
 
-Write following into a a text editor and save it as ``snap_store_login_ubuntu_one.py``:
+Write following into a a text editor and save it as
+``snap_store_login_ubuntu_one.py``:
 
 .. code-block:: python
 
@@ -154,7 +163,8 @@ Prerequisites
 -------------
 
 - Completed :ref:`tutorial-snap_store_login`
-- Shelled into the virtual environment created in :ref:`tutorial-snap_store_login`
+- Shelled into the virtual environment created in
+  :ref:`tutorial-snap_store_login`
 
 Code
 ----
@@ -223,8 +233,8 @@ predictable name::
 Code for uploading
 ------------------
 
-Open a text editor to add logic to instantiate a StoreClient for the Staging Snap
-Store:
+Open a text editor to add logic to instantiate a StoreClient for the Staging
+Snap Store:
 
 .. code-block:: python
 
@@ -298,7 +308,7 @@ Save the file.
 Run
 ---
 
-Run the saved python module again to upload the *hello* snap and obtain an upload-id
-at the end, but observing progress as the upload takes place::
+Run the saved python module again to upload the *hello* snap and obtain an
+upload-id at the end, but observing progress as the upload takes place::
 
   $ python snap_store_upload.py

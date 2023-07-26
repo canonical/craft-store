@@ -18,10 +18,11 @@
 
 import contextlib
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
-import urllib3  # type: ignore
+import urllib3
+import urllib3.exceptions
 from requests.exceptions import JSONDecodeError
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class NetworkError(CraftStoreError):
     def __init__(self, exception: Exception) -> None:
         message = str(exception)
         with contextlib.suppress(IndexError):
-            if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):  # type: ignore
+            if isinstance(exception.args[0], urllib3.exceptions.MaxRetryError):
                 message = "Maximum retries exceeded trying to reach the store."
 
         super().__init__(message)
@@ -77,7 +78,7 @@ class StoreErrorList:
         return "<StoreErrorList: {' '.join(code_list)}>"
 
     def __contains__(self, error_code: str) -> bool:
-        return any((error.get("code") == error_code for error in self._error_list))
+        return any(error.get("code") == error_code for error in self._error_list)
 
     def __getitem__(self, error_code: str) -> Dict[str, str]:
         for error in self._error_list:
@@ -100,10 +101,10 @@ class StoreServerError(CraftStoreError):
     """
 
     def _get_raw_error_list(self) -> List[Dict[str, str]]:
-        response_json = self.response.json()
+        response_json: Dict[str, Any] = self.response.json()
         try:
             # Charmhub uses error-list.
-            error_list = response_json["error-list"]
+            error_list: List[Dict[str, str]] = response_json["error-list"]
         except KeyError:
             # Snap Store uses error_list.
             error_list = response_json["error_list"]
@@ -133,21 +134,21 @@ class StoreServerError(CraftStoreError):
         super().__init__(message)
 
 
-class CredentialsAlreadyAvailable(CraftStoreError):
+class CredentialsAlreadyAvailable(CraftStoreError):  # noqa: N818
     """Error raised when credentials are already found in the keyring."""
 
     def __init__(self, application: str, host: str) -> None:
         super().__init__(f"Credentials found for {application!r} on {host!r}.")
 
 
-class CredentialsUnavailable(CraftStoreError):
+class CredentialsUnavailable(CraftStoreError):  # noqa: N818
     """Error raised when credentials are not found in the keyring."""
 
     def __init__(self, application: str, host: str) -> None:
         super().__init__(f"No credentials found for {application!r} on {host!r}.")
 
 
-class CredentialsNotParseable(CraftStoreError):
+class CredentialsNotParseable(CraftStoreError):  # noqa: N818
     """Error raised when credentials are not parseable."""
 
     def __init__(self, msg: str = "Expected base64 encoded credentials") -> None:

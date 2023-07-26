@@ -18,11 +18,10 @@ import json
 from unittest.mock import ANY, Mock, call, patch
 
 import pytest
-from macaroonbakery import bakery, httpbakery  # type: ignore
-from pymacaroons.macaroon import Macaroon  # type: ignore
-
 from craft_store import Auth, base_client, creds, endpoints, errors
 from craft_store.store_client import StoreClient, WebBrowserWaitingInteractor
+from macaroonbakery import bakery, httpbakery
+from pymacaroons.macaroon import Macaroon
 
 
 def _fake_response(status_code, reason=None, json=None):
@@ -35,7 +34,7 @@ def _fake_response(status_code, reason=None, json=None):
     return response
 
 
-@pytest.fixture
+@pytest.fixture()
 def real_macaroon():
     return json.dumps(
         {
@@ -54,9 +53,9 @@ def real_macaroon():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def http_client_request_mock(real_macaroon):
-    def request(*args, **kwargs):  # pylint: disable=W0613
+    def request(*args, **kwargs):  # noqa: ARG001
         if args[1] == "POST" and "tokens" in args[2]:
             response = _fake_response(200, json={"macaroon": real_macaroon})
         elif args[1] == "GET" and "whoami" in args[2]:
@@ -64,17 +63,9 @@ def http_client_request_mock(real_macaroon):
                 200,
                 json={"name": "Fake Person", "username": "fakeuser", "id": "fake-id"},
             )
-        elif (
-            args[1] == "POST"
-            and args[2] == "https://fake-charm-storage.com/unscanned-upload/"
-        ):
-            response = _fake_response(
-                200,
-                json={"upload_id": "12345", "successful": True},
-            )
-        elif (
-            args[1] == "POST"
-            and args[2] == "https://fake-snap-storage.com/unscanned-upload/"
+        elif args[1] == "POST" and args[2] in (
+            "https://fake-charm-storage.com/unscanned-upload/",
+            "https://fake-snap-storage.com/unscanned-upload/",
         ):
             response = _fake_response(
                 200,
@@ -95,8 +86,8 @@ def http_client_request_mock(real_macaroon):
     patched_http_client.stop()
 
 
-@pytest.fixture
-def bakery_discharge_mock(monkeypatch):
+@pytest.fixture()
+def _bakery_discharge_mock(monkeypatch):
     token_response_mock = _fake_response(
         200, json={"kind": "kind", "token": "TOKEN", "token64": b"VE9LRU42NA=="}
     )
@@ -104,7 +95,7 @@ def bakery_discharge_mock(monkeypatch):
         httpbakery.Client, "acquire_discharge", lambda: token_response_mock
     )
 
-    def mock_discharge(*args, **kwargs):  # pylint: disable=W0613
+    def mock_discharge(*args, **kwargs):  # noqa: ARG001
         return [
             Macaroon(
                 location="fake-server.com",
@@ -115,7 +106,7 @@ def bakery_discharge_mock(monkeypatch):
     monkeypatch.setattr(bakery, "discharge_all", mock_discharge)
 
 
-@pytest.fixture
+@pytest.fixture()
 def auth_mock(real_macaroon, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
@@ -129,9 +120,9 @@ def auth_mock(real_macaroon, new_auth):
     patched_auth.stop()
 
 
-@pytest.mark.usefixtures("bakery_discharge_mock")
-@pytest.mark.parametrize("ephemeral_auth", (True, False))
-@pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
+@pytest.mark.usefixtures("_bakery_discharge_mock")
+@pytest.mark.parametrize("ephemeral_auth", [True, False])
+@pytest.mark.parametrize("environment_auth", [None, "APPLICATION_CREDENTIALS"])
 def test_store_client_login(
     http_client_request_mock, real_macaroon, auth_mock, environment_auth, ephemeral_auth
 ):
@@ -188,7 +179,7 @@ def test_store_client_login(
     ]
 
 
-@pytest.mark.usefixtures("bakery_discharge_mock")
+@pytest.mark.usefixtures("_bakery_discharge_mock")
 def test_store_client_login_with_packages_and_channels(
     http_client_request_mock, real_macaroon, auth_mock
 ):
@@ -332,9 +323,7 @@ def test_store_client_whoami(http_client_request_mock, real_macaroon, auth_mock)
 
 
 @pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
-def test_store_client_upload_file_no_monitor(
-    tmp_path, http_client_request_mock, auth_mock, hub
-):
+def test_store_client_upload_file_no_monitor(tmp_path, http_client_request_mock, hub):
     if hub == endpoints.CHARMHUB:
         storage_url = "https://fake-charm-storage.com"
     else:
@@ -378,9 +367,7 @@ def test_store_client_upload_file_no_monitor(
 
 
 @pytest.mark.parametrize("hub", [endpoints.CHARMHUB, endpoints.SNAP_STORE])
-def test_store_client_upload_file_with_monitor(
-    tmp_path, http_client_request_mock, auth_mock, hub
-):
+def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_mock, hub):
     if hub == endpoints.CHARMHUB:
         storage_url = "https://fake-charm-storage.com"
     else:
@@ -397,10 +384,10 @@ def test_store_client_upload_file_with_monitor(
     filepath = tmp_path / "artifact.thing"
     filepath.write_text("file to upload")
 
-    def callback(monitor):  # pylint: disable=unused-argument
+    def callback(monitor):  # noqa: ARG001
         pass
 
-    def monitor(encoder):  # pylint: disable=unused-argument
+    def monitor(encoder):  # noqa: ARG001
         return callback
 
     with patch("craft_store.base_client.MultipartEncoder"):
@@ -452,7 +439,7 @@ def test_store_client_upload_file_with_monitor(
     ]
 
 
-def test_webinteractore_wait_for_token(http_client_request_mock, auth_mock):
+def test_webinteractore_wait_for_token(http_client_request_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(
         200, json={"kind": "kind", "token": "TOKEN", "token64": b"VE9LRU42NA=="}
@@ -460,9 +447,7 @@ def test_webinteractore_wait_for_token(http_client_request_mock, auth_mock):
 
     wbi = WebBrowserWaitingInteractor(user_agent="foobar")
 
-    discharged_token = wbi._wait_for_token(  # pylint: disable=W0212
-        object(), "https://foo.bar/candid"
-    )
+    discharged_token = wbi._wait_for_token(None, "https://foo.bar/candid")
 
     assert discharged_token == httpbakery.DischargeToken(kind="kind", value="TOKEN")
     assert http_client_request_mock.mock_calls == [
@@ -471,7 +456,7 @@ def test_webinteractore_wait_for_token(http_client_request_mock, auth_mock):
 
 
 def test_webinteractore_wait_for_token_timeout_error(
-    http_client_request_mock, auth_mock
+    http_client_request_mock,
 ):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(400, json={})
@@ -479,20 +464,20 @@ def test_webinteractore_wait_for_token_timeout_error(
     wbi = WebBrowserWaitingInteractor(user_agent="foobar")
 
     with pytest.raises(errors.CandidTokenTimeoutError):
-        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+        wbi._wait_for_token(None, "https://foo.bar/candid")
 
 
-def test_webinteractore_wait_for_token_kind_error(http_client_request_mock, auth_mock):
+def test_webinteractore_wait_for_token_kind_error(http_client_request_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(200, json={})
 
     wbi = WebBrowserWaitingInteractor(user_agent="foobar")
 
     with pytest.raises(errors.CandidTokenKindError):
-        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+        wbi._wait_for_token(None, "https://foo.bar/candid")
 
 
-def test_webinteractore_wait_for_token_value_error(http_client_request_mock, auth_mock):
+def test_webinteractore_wait_for_token_value_error(http_client_request_mock):
     http_client_request_mock.side_effect = None
     http_client_request_mock.return_value = _fake_response(
         200,
@@ -504,7 +489,7 @@ def test_webinteractore_wait_for_token_value_error(http_client_request_mock, aut
     wbi = WebBrowserWaitingInteractor(user_agent="foobar")
 
     with pytest.raises(errors.CandidTokenValueError):
-        wbi._wait_for_token(object(), "https://foo.bar/candid")  # pylint: disable=W0212
+        wbi._wait_for_token(None, "https://foo.bar/candid")
 
 
 def test_store_client_env_var(http_client_request_mock, new_auth, monkeypatch):

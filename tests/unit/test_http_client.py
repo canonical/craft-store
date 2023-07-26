@@ -19,11 +19,11 @@ from unittest.mock import ANY, Mock, call, patch
 
 import pytest
 import requests
-import urllib3  # type: ignore
-from requests.exceptions import JSONDecodeError
-
+import urllib3
+import urllib3.exceptions
 from craft_store import HTTPClient, errors
 from craft_store.http_client import _get_retry_value
+from requests.exceptions import JSONDecodeError
 
 
 def _fake_error_response(status_code, reason, json_raises=False):
@@ -36,7 +36,7 @@ def _fake_error_response(status_code, reason, json_raises=False):
     return response
 
 
-@pytest.fixture
+@pytest.fixture()
 def session_mock():
     patched_session = patch("requests.Session", autospec=True)
     mocked_session = patched_session.start()
@@ -45,7 +45,7 @@ def session_mock():
     patched_session.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def retry_mock():
     patched_retry = patch("craft_store.http_client.Retry", autospec=True)
     yield patched_retry.start()
@@ -79,7 +79,7 @@ def test_session_environment_values(monkeypatch, session_mock, retry_mock):
     )
 
 
-@pytest.mark.parametrize("method", ("get", "post", "put"))
+@pytest.mark.parametrize("method", ["get", "post", "put"])
 def test_methods(session_mock, method):
     client = HTTPClient(user_agent="Secret Agent")
     getattr(client, method)("https://foo.bar")
@@ -178,12 +178,14 @@ def test_request_500(session_mock):
             "GET",
             "https://foo.bar",
         )
-        assert store_error.response == fake_response  # type: ignore
+
+    assert store_error.value.response == fake_response
 
 
 def test_request_connection_error(session_mock):
+    connection_pool = urllib3.connectionpool.ConnectionPool("https://foo.bar")
     connection_error = requests.exceptions.ConnectionError(
-        urllib3.exceptions.MaxRetryError(pool="test-pool", url="test-url")  # type: ignore
+        urllib3.exceptions.MaxRetryError(pool=connection_pool, url="test-url")
     )
     session_mock().request.side_effect = connection_error
 
@@ -192,7 +194,8 @@ def test_request_connection_error(session_mock):
             "GET",
             "https://foo.bar",
         )
-        assert network_error.__cause__ == connection_error  # type: ignore
+
+    assert network_error.value.__cause__ == connection_error
 
 
 def test_request_retry_error(session_mock):
@@ -204,11 +207,11 @@ def test_request_retry_error(session_mock):
             "GET",
             "https://foo.bar",
         )
-        assert network_error.__cause__ == retry_error  # type: ignore
-        assert network_error.exception == retry_error  # type: ignore
+
+    assert network_error.value.__cause__ == retry_error
 
 
-@pytest.mark.parametrize("environment_value", ("0", "10", "20000"))
+@pytest.mark.parametrize("environment_value", ["0", "10", "20000"])
 def test_get_retry_value_environment_override(monkeypatch, caplog, environment_value):
     monkeypatch.setenv("FAKE_ENV", environment_value)
     caplog.set_level(logging.DEBUG)
@@ -218,7 +221,7 @@ def test_get_retry_value_environment_override(monkeypatch, caplog, environment_v
 
 
 @pytest.mark.parametrize(
-    "environment_value,default", [("NaN", 10), ("NaN", 0.4), ("foo", 1)]
+    ("environment_value", "default"), [("NaN", 10), ("NaN", 0.4), ("foo", 1)]
 )
 def test_get_retry_value_not_a_number_returns_default(
     monkeypatch, caplog, environment_value, default
@@ -232,7 +235,7 @@ def test_get_retry_value_not_a_number_returns_default(
     ] == [rec.message for rec in caplog.records]
 
 
-@pytest.mark.parametrize("environment_value,default", [("-1", 10), ("-1000", 0.4)])
+@pytest.mark.parametrize(("environment_value", "default"), [("-1", 10), ("-1000", 0.4)])
 def test_get_retry_value_negative_number_returns_default(
     monkeypatch, caplog, environment_value, default
 ):

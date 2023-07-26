@@ -20,11 +20,10 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from craft_store import StoreClient, endpoints
 
 
-@pytest.fixture
+@pytest.fixture()
 def charm_client():
     """A common StoreClient for charms"""
     return StoreClient(
@@ -37,17 +36,17 @@ def charm_client():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def charmhub_charm_name():
     """Allow overriding the user to override the test charm.
 
     NOTE: Most integration tests check specifics about craft-store-test-charm,
     so overriding the test charm may cause test failures.
     """
-    yield os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test")
+    return os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test")
 
 
-@pytest.fixture
+@pytest.fixture()
 def fake_charm_file(tmpdir, charmhub_charm_name):
     """Provide a fake charm to upload to charmhub."""
     # Make tmpdir Path instead of Path-like.
@@ -103,7 +102,7 @@ def fake_charm_file(tmpdir, charmhub_charm_name):
         return charm_file
 
 
-@pytest.fixture
+@pytest.fixture()
 def unregistered_charm_name(charm_client):
     """Get an unregistered name for use in tests"""
     account_id = charm_client.whoami().get("account", {}).get("id", "").lower()
@@ -111,7 +110,7 @@ def unregistered_charm_name(charm_client):
     while (name := f"test-{account_id}-{uuid.uuid4()}") in registered_names:
         # Regenerate UUIDs until we find one that's not registered or timeout.
         pass
-    yield name
+    return name
 
 
 def needs_charmhub_credentials():

@@ -22,7 +22,6 @@ import keyring
 import keyring.backends.fail
 import keyring.errors
 import pytest
-
 from craft_store import errors
 from craft_store.auth import Auth, MemoryKeyring
 
@@ -57,7 +56,7 @@ class FakeKeyring:
             raise self.delete_error  # pylint: disable=raising-bad-type
 
 
-@pytest.fixture
+@pytest.fixture()
 def keyring_set_keyring_mock():
     """Mock setting the keyring."""
 
@@ -67,7 +66,7 @@ def keyring_set_keyring_mock():
     patched_keyring.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def fake_keyring():
     return FakeKeyring()
 
@@ -134,7 +133,7 @@ def test_double_set_credentials_force(fake_keyring):
 
 
 def test_get_credentials(caplog, fake_keyring):
-    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="  # noqa: S105
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -145,7 +144,7 @@ def test_get_credentials(caplog, fake_keyring):
 
 def test_get_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
-    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="  # noqa: S105
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -167,7 +166,7 @@ def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
 
 
 def test_del_credentials(caplog, fake_keyring):
-    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="  # noqa: S105
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -179,7 +178,7 @@ def test_del_credentials(caplog, fake_keyring):
 
 def test_del_credentials_log_debug(caplog, fake_keyring):
     caplog.set_level(logging.DEBUG)
-    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="  # noqa: S105
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -194,7 +193,7 @@ def test_del_credentials_log_debug(caplog, fake_keyring):
 
 def test_del_credentials_delete_error_in_keyring(caplog, fake_keyring):
     fake_keyring.delete_error = keyring.errors.PasswordDeleteError()
-    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="
+    fake_keyring.password = "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="  # noqa: S105
 
     auth = Auth("fakeclient", "fakestore.com")
 
@@ -249,7 +248,7 @@ def test_ensure_no_credentials_unlock_error(fake_keyring, mocker):
         auth.ensure_no_credentials()
 
 
-@pytest.mark.disable_fake_keyring
+@pytest.mark.disable_fake_keyring()
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
 

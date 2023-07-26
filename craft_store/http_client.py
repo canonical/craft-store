@@ -99,19 +99,19 @@ class HTTPClient:
         self._session.mount("http://", http_adapter)
         self._session.mount("https://", http_adapter)
 
-    def get(self, *args, **kwargs) -> requests.Response:
+    def get(self, *args, **kwargs) -> requests.Response:  # type: ignore[no-untyped-def]
         """Perform an HTTP GET request."""
         return self.request("GET", *args, **kwargs)
 
-    def post(self, *args, **kwargs) -> requests.Response:
+    def post(self, *args, **kwargs) -> requests.Response:  # type: ignore[no-untyped-def]
         """Perform an HTTP POST request."""
         return self.request("POST", *args, **kwargs)
 
-    def put(self, *args, **kwargs) -> requests.Response:
+    def put(self, *args, **kwargs) -> requests.Response:  # type: ignore[no-untyped-def]
         """Perform an HTTP PUT request."""
         return self.request("PUT", *args, **kwargs)
 
-    def request(
+    def request(  # type: ignore[no-untyped-def]
         self,
         method: str,
         url: str,

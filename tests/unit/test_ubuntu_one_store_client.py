@@ -18,10 +18,9 @@ import json
 from unittest.mock import Mock, call, patch
 
 import pytest
-from pymacaroons import Caveat, Macaroon  # type: ignore
-
 from craft_store import creds, endpoints, errors
 from craft_store.ubuntu_one_store_client import UbuntuOneStoreClient
+from pymacaroons import Caveat, Macaroon
 
 
 def _fake_response(status_code, reason=None, headers=None, json=None):
@@ -35,7 +34,7 @@ def _fake_response(status_code, reason=None, headers=None, json=None):
     return response
 
 
-@pytest.fixture
+@pytest.fixture()
 def root_macaroon():
     return Macaroon(
         location="fake-server.com",
@@ -50,7 +49,7 @@ def root_macaroon():
     ).serialize()
 
 
-@pytest.fixture
+@pytest.fixture()
 def discharged_macaroon():
     return Macaroon(
         location="fake-server.com",
@@ -58,25 +57,25 @@ def discharged_macaroon():
     ).serialize()
 
 
-@pytest.fixture
+@pytest.fixture()
 def u1_macaroon_value(root_macaroon, discharged_macaroon):
     """The basic "payload" for the u1-macaroon auth type"""
     return {"r": root_macaroon, "d": discharged_macaroon}
 
 
-@pytest.fixture
+@pytest.fixture()
 def old_credentials(u1_macaroon_value):
     """u1-macaroon credentials encoded in the *old* ("type-less") scheme."""
     return json.dumps(u1_macaroon_value)
 
 
-@pytest.fixture
+@pytest.fixture()
 def new_credentials(u1_macaroon_value):
     """u1-macaroon credentials encoded in the *new* ("typed") scheme."""
     return creds.marshal_u1_credentials(creds.UbuntuOneMacaroons(**u1_macaroon_value))
 
 
-@pytest.fixture
+@pytest.fixture()
 def authorization():
     return (
         "Macaroon "
@@ -85,7 +84,7 @@ def authorization():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def http_client_request_mock(root_macaroon, discharged_macaroon):
     def request(*args, **kwargs):  # pylint: disable=W0613
         if args[1] == "POST" and "tokens/discharge" in args[2]:
@@ -132,7 +131,7 @@ def http_client_request_mock(root_macaroon, discharged_macaroon):
     patched_http_client.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def auth_mock(old_credentials, new_credentials, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()
@@ -146,7 +145,7 @@ def auth_mock(old_credentials, new_credentials, new_auth):
     patched_auth.stop()
 
 
-@pytest.mark.parametrize("environment_auth", (None, "APPLICATION_CREDENTIALS"))
+@pytest.mark.parametrize("environment_auth", [None, "APPLICATION_CREDENTIALS"])
 def test_store_client_login(
     http_client_request_mock,
     new_credentials,
@@ -170,7 +169,7 @@ def test_store_client_login(
             description="fakecraft@foo",
             ttl=60,
             email="foo@bar.com",
-            password="password",
+            password="password",  # noqa: S106
         )
         == new_credentials
     )
@@ -234,7 +233,7 @@ def test_store_client_login_otp(
             description="fakecraft@foo",
             ttl=60,
             email="otp@foo.bar",
-            password="password",
+            password="password",  # noqa: S106
         )
     assert "twofactor-required" in server_error.value.error_list
 
@@ -244,7 +243,7 @@ def test_store_client_login_otp(
             description="fakecraft@foo",
             ttl=60,
             email="otp@foo.bar",
-            password="password",
+            password="password",  # noqa: S106
             otp="123456",
         )
         == new_credentials
@@ -332,7 +331,7 @@ def test_store_client_login_with_packages_and_channels(
                 endpoints.Package("my-other-snap", "snap"),
             ],
             email="foo@bar.com",
-            password="password",
+            password="password",  # noqa: S106
         )
         == new_credentials
     )
