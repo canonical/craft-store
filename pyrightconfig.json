@@ -6,6 +6,7 @@
     ".direnv",
     ".tox",
     "build",
+    "craft_store/_version.py",
     "docs",
     "venv"
   ],
