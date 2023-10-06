@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.com/projects/canonical-craft-store/badge/?version=latest)](https://canonical-craft-store.readthedocs-hosted.com/en/latest/?badge=latest)
+
 # Craft Store
 
 This project aims to provide python interfaces for communicating with
@@ -9,7 +11,7 @@ Free software: GNU Lesser General Public License v3
 
 # Documentation:
 
-https://craft-store.readthedocs.io.
+https://canonical-craft-store.readthedocs-hosted.com.
 
 # Contributing
 
