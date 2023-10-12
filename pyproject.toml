@@ -27,8 +27,8 @@ requires-python = ">=3.8"
 dev = [
     "build",
     "pyyaml>=6.0.0",
-    "coverage[toml]==7.2.7",
-    "pytest==7.4.0",
+    "coverage[toml]==7.3.2",
+    "pytest==7.4.2",
     "pytest-cov==4.1.0",
     "pytest-mock==3.11.1",
     "pytest-check>=2.0",
@@ -36,17 +36,17 @@ dev = [
     "pytest-timeout>=2.0",
 ]
 lint = [
-    "black==23.3.0",
+    "black==23.9.1",
     "pylint>=2.17.0,<3.0.0",
     "pylint_fixme_info>=1.0.0",
     "pylint_pytest>=1.1.0",
-    "codespell[toml]==2.2.5",
+    "codespell[toml]==2.2.6",
     "ruff==0.0.272",
     "yamllint==1.32.0"
 ]
 types = [
-    "mypy[reports]==1.4.1",
-    "pyright==1.1.316",
+    "mypy[reports]==1.6.0",
+    "pyright==1.1.330.post0",
 ]
 docs = [
     "furo==2023.9.10",
