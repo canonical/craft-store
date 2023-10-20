@@ -36,7 +36,7 @@ dev = [
     "pytest-timeout>=2.0",
 ]
 lint = [
-    "black==23.9.1",
+    "black==23.10.0",
     "pylint>=2.17.0,<3.0.0",
     "pylint_fixme_info>=1.0.0",
     "pylint_pytest>=1.1.0",
@@ -45,8 +45,8 @@ lint = [
     "yamllint==1.32.0"
 ]
 types = [
-    "mypy[reports]==1.6.0",
-    "pyright==1.1.330.post0",
+    "mypy[reports]==1.6.1",
+    "pyright==1.1.332",
 ]
 docs = [
     "furo==2023.9.10",
