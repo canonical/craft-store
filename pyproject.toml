@@ -37,9 +37,6 @@ dev = [
 ]
 lint = [
     "black==23.10.0",
-    "pylint>=2.17.0,<3.0.0",
-    "pylint_fixme_info>=1.0.0",
-    "pylint_pytest>=1.1.0",
     "codespell[toml]==2.2.6",
     "ruff==0.1.1",
     "yamllint==1.32.0"
@@ -62,7 +59,8 @@ docs = [
     "sphinx-lint==0.8.1",
     "sphinx-notfound-page==1.0.0",
     "sphinx-reredirects==0.1.2",
-    "sphinx-tabs==3.4.1",   "sphinx-rtd-theme",
+    "sphinx-rtd-theme",
+    "sphinx-tabs==3.4.1",
 ]
 
 [build-system]
