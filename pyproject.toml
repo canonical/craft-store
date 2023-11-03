@@ -44,6 +44,12 @@ lint = [
 types = [
     "mypy[reports]==1.6.1",
     "pyright==1.1.334",
+    "types-PyYAML",
+    "types-Pygments",
+    "types-colorama",
+    "types-docutils",
+    "types-requests",
+    "types-setuptools",
 ]
 docs = [
     "furo==2023.9.10",
