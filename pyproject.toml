@@ -144,9 +144,25 @@ extension-pkg-whitelist = [
 load-plugins = "pylint_fixme_info,pylint_pytest"
 
 [tool.pyright]
-strict = ["craft_store"]
+#strict = ["craft_store"]  # Disabled because pyrightconfig.json didn't include this.
 pythonVersion = "3.8"
 pythonPlatform = "Linux"
+include = [
+    "craft_store",
+    "tests",
+]
+exclude = [
+    "**/__pycache__",
+    "**/.mypy_cache",
+    "**/.pytest_cache",
+    ".direnv",
+    ".tox",
+    ".venv",
+    "build",
+    "craft_store/_version.py",
+    "docs",
+    "venv",
+]
 
 [tool.mypy]
 python_version = "3.8"
