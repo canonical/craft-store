@@ -18,19 +18,32 @@
 
 import base64
 import binascii
+import json
 import logging
 import os
-from typing import Dict, Optional, Tuple, Union
+import sys
+from pathlib import Path
+from typing import Dict, Optional, Tuple, Union, cast
 
 import keyring
 import keyring.backend
 import keyring.backends.fail
 import keyring.errors
 from keyring._compat import properties
+from keyring.backends import SecretService
+from xdg import BaseDirectory  # type: ignore[import]
 
 from . import errors
 
 logger = logging.getLogger(__name__)
+
+
+if sys.platform == "linux":
+    from secretstorage.exceptions import SecretServiceNotAvailableException
+
+    KEYRING_EXCEPTIONS = (keyring.errors.InitError, SecretServiceNotAvailableException)
+else:
+    KEYRING_EXCEPTIONS = (keyring.errors.InitError,)
 
 
 class MemoryKeyring(keyring.backend.KeyringBackend):
@@ -64,6 +77,70 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
             del self._credentials[service, username]
         except KeyError as key_error:
             raise keyring.errors.PasswordDeleteError from key_error
+
+
+class FileKeyring(keyring.backend.KeyringBackend):
+    """A keyring that stores credentials in a file."""
+
+    @properties.classproperty  #  type: ignore[misc]
+    def priority(self) -> Union[int, float]:
+        """Supply a priority.
+
+        Indicating the priority of the backend relative to all other backends.
+        """
+        # Only > 0 make it to the chainer.
+        return -1
+
+    @property
+    def credentials_file(self) -> Path:
+        """Credentials file path for instance of application_name."""
+        return (
+            Path(BaseDirectory.save_data_path(self._application_name))
+            / "credentials.json"
+        )
+
+    def _write_credentials(self) -> None:
+        if not self.credentials_file.exists():
+            self.credentials_file.parent.mkdir(parents=True, exist_ok=True)
+            self.credentials_file.touch(mode=0o600)
+        with self.credentials_file.open("w") as credentials_file:
+            json.dump(self._credentials, credentials_file)
+
+    def _read_credentials(self) -> None:
+        try:
+            with self.credentials_file.open() as credentials_file:
+                self._credentials = json.load(credentials_file)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            self._credentials = {}
+
+    def __init__(self, application_name: str) -> None:
+        super().__init__()
+
+        self._application_name = application_name
+        self._read_credentials()
+
+    def set_password(self, service: str, username: str, password: str) -> None:
+        """Set the service password for username in memory."""
+        if service not in self._credentials:
+            self._credentials[service] = {username: password}
+        else:
+            self._credentials[service][username] = password
+        self._write_credentials()
+
+    def get_password(self, service: str, username: str) -> Optional[str]:
+        """Get the service password for username from memory."""
+        try:
+            return cast(str, self._credentials[service][username])
+        except KeyError:
+            return None
+
+    def delete_password(self, service: str, username: str) -> None:
+        """Delete the service password for username from memory."""
+        try:
+            del self._credentials[service][username]
+        except KeyError as key_error:
+            raise keyring.errors.PasswordDeleteError from key_error
+        self._write_credentials()
 
 
 class Auth:
@@ -108,7 +185,16 @@ class Auth:
 
         self._keyring = keyring.get_keyring()
         # This keyring would fail on first use, fail early instead.
-        if isinstance(self._keyring, keyring.backends.fail.Keyring):
+        # Only SecretService has get_preferred_collection, which can
+        # fail if the keyring backend cannot be unlocked.
+        if isinstance(self._keyring, SecretService.Keyring):
+            try:
+                self._keyring.get_preferred_collection()
+            except KEYRING_EXCEPTIONS:
+                logger.warning("Falling back to file based storage")
+                keyring.set_keyring(FileKeyring(application_name))
+                self._keyring = keyring.get_keyring()
+        elif isinstance(self._keyring, keyring.backends.fail.Keyring):
             raise errors.NoKeyringError
 
         if environment_auth_value:

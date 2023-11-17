@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import sys
+from typing import List, Type
 from unittest.mock import ANY
 
 import keyring
@@ -22,7 +24,8 @@ import keyring.backends.fail
 import keyring.errors
 import pytest
 from craft_store import errors
-from craft_store.auth import Auth, MemoryKeyring
+from craft_store.auth import Auth, FileKeyring, MemoryKeyring
+from keyring.backends import SecretService
 
 
 def test_set_credentials(caplog, fake_keyring):
@@ -232,3 +235,82 @@ def test_memory_keyring_delete_empty():
 
     with pytest.raises(keyring.errors.PasswordDeleteError):
         k.delete_password("my-service", "my-user")
+
+
+@pytest.fixture(autouse=True)
+def _fake_basedirectory(mocker, tmp_path):
+    mocker.patch("craft_store.auth.BaseDirectory.save_data_path", return_value=tmp_path)
+
+
+def test_file_keyring_set_get():
+    k = FileKeyring("test-app")
+    k.set_password("my-service", "my-user", "my-password")
+
+    assert k.get_password("my-service", "my-user") == "my-password"
+
+
+def test_file_keyring_get_empty():
+    k = FileKeyring("test-app")
+
+    assert k.get_password("my-service", "my-user") is None
+
+
+def test_file_keyring_set_delete():
+    k = FileKeyring("test-app")
+    k.set_password("my-service", "my-user", "my-password")
+
+    assert k.get_password("my-service", "my-user") == "my-password"
+
+    k.delete_password("my-service", "my-user")
+
+    assert k.get_password("my-service", "my-user") is None
+
+
+def test_file_keyring_delete_empty():
+    k = FileKeyring("test-app")
+
+    with pytest.raises(keyring.errors.PasswordDeleteError):
+        k.delete_password("my-service", "my-user")
+
+
+def test_file_keyring_storage_path(tmp_path):
+    """Ensure the mock is used."""
+    k = FileKeyring("test-app")
+
+    assert k.credentials_file == tmp_path / "credentials.json"
+
+
+test_exceptions: List[Type[Exception]] = [keyring.errors.InitError]
+if sys.platform == "linux":
+    from secretstorage.exceptions import SecretServiceNotAvailableException
+
+    test_exceptions.append(SecretServiceNotAvailableException)
+
+
+@pytest.mark.disable_fake_keyring()
+@pytest.mark.parametrize("exception", test_exceptions)
+def test_secretservice_file_fallsback(mocker, exception):
+    # At one point in the code we run keyring.set_backend, there is no
+    # elegant way to reset this in the library.
+    keyring.set_keyring(SecretService.Keyring())
+    mocker.patch(
+        "keyring.backends.SecretService.Keyring.get_preferred_collection",
+        side_effect=exception,
+    )
+    auth = Auth(application_name="test-app", host="foo")
+
+    assert type(auth._keyring) == FileKeyring
+
+
+@pytest.mark.disable_fake_keyring()
+def test_secretservice_works(mocker):
+    # At one point in the code we run keyring.set_backend, there is no
+    # elegant way to reset this in the library.
+    keyring.set_keyring(SecretService.Keyring())
+    mocker.patch(
+        "keyring.backends.SecretService.Keyring.get_preferred_collection",
+        return_value=None,
+    )
+    auth = Auth(application_name="test-app", host="foo")
+
+    assert type(auth._keyring) == SecretService.Keyring
