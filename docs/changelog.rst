@@ -1,6 +1,14 @@
 *********
 Changelog
 *********
+2.5.0 (2023-11-23)
+------------------
+
+- Add a fallback mechanism for when the system keyring fails, such as
+  the Secret Service keyring (gnome-keyring). The fallback is to write
+  to a file based backend, provided by
+  :class:`craft_store.auth.FileKeyring`
+- Removed setup.cfg, fully using pyproject.toml
 
 2.4.0 (2023-04-13)
 ------------------
