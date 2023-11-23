@@ -15,3 +15,7 @@ ubuntu
 unregistering
 url
 whoami
+cfg
+pyproject
+toml
+backend
