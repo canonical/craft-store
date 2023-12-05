@@ -18,8 +18,6 @@
 import datetime
 from typing import Any, Dict, List, Optional
 
-from typing_extensions import Self
-
 from craft_store.models._base_model import MarshableModel
 from craft_store.models._charm_model import CharmBaseModel
 from craft_store.models._snap_models import Confinement, Grade, Type
@@ -53,7 +51,7 @@ class RevisionModel(MarshableModel):
     status: str
 
     @classmethod
-    def unmarshal(cls, data: Dict[str, Any]) -> Self:
+    def unmarshal(cls, data: Dict[str, Any]) -> "RevisionModel":
         """Unmarshal a revision model."""
         if "bases" in data:
             return CharmRevisionModel.parse_obj(data)
@@ -75,7 +73,7 @@ class CharmRevisionModel(RevisionModel):
     """A revision model for charm revisions."""
 
     bases: List[CharmBaseModel]
-    errors: Optional[List[ErrorModel]]
+    errors: Optional[List[ErrorModel]] = None
     size: int
     version: str
 
@@ -83,10 +81,10 @@ class CharmRevisionModel(RevisionModel):
 class SnapRevisionModel(RevisionModel):
     """A model for a snap revision."""
 
-    apps: Optional[List[str]]
+    apps: Optional[List[str]] = None
     architectures: List[str]
-    base: Optional[str]
-    build_url: Optional[str]
+    base: Optional[str] = None
+    build_url: Optional[str] = None
     confinement: Confinement
     created_by: str
     grade: Grade
