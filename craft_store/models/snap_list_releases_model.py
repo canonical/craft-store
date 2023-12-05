@@ -18,11 +18,11 @@
 
 
 from datetime import datetime
-from enum import Enum
 from typing import List, Optional
 
 from ._base_model import MarshableModel
 from ._common_list_releases_model import PackageModel, ProgressiveModel
+from .revisions_model import SnapRevisionModel as RevisionModel
 
 
 class ChannelMapModel(MarshableModel):
@@ -34,49 +34,6 @@ class ChannelMapModel(MarshableModel):
     progressive: ProgressiveModel
     revision: int
     when: datetime
-
-
-class Confinement(str, Enum):
-    """Snap confinement."""
-
-    CLASSIC = "classic"
-    STRICT = "strict"
-    DEVMODE = "devmode"
-
-
-class Grade(str, Enum):
-    """Snap grade."""
-
-    DEVEL = "devel"
-    STABLE = "stable"
-
-
-class Type(str, Enum):
-    """Type of snap."""
-
-    APP = "app"
-    GADGET = "gadget"
-    KERNEL = "kernel"
-    BASE = "base"
-    SNAPD = "snapd"
-
-
-class RevisionModel(MarshableModel):
-    """Model for a revision entry from list_releases."""
-
-    architectures: List[str]
-    base: Optional[str]
-    build_url: Optional[str]
-    confinement: Confinement
-    created_at: datetime
-    created_by: str
-    grade: Grade
-    revision: int
-    sha3_384: str
-    size: int
-    status: str
-    type: Type
-    version: str
 
 
 class ListReleasesModel(MarshableModel):
