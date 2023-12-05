@@ -20,23 +20,8 @@ from datetime import datetime
 from typing import Any, List, Optional
 
 from ._base_model import MarshableModel
+from ._charm_model import CharmBaseModel, ResourceModel
 from ._common_list_releases_model import PackageModel, ProgressiveModel
-
-
-class CharmBaseModel(MarshableModel):
-    """Base entries for the channel-map entry from the list_releases endpoint."""
-
-    architecture: str
-    channel: str
-    name: str
-
-
-class ResourceModel(MarshableModel):
-    """Resource entries for the channel-map entry from the list_releases endpoint."""
-
-    name: str
-    revision: Optional[int]
-    type: str
 
 
 class ChannelMapModel(MarshableModel):
