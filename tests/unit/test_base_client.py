@@ -15,12 +15,20 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for methods in the BaseClient class."""
+import datetime
 from unittest.mock import Mock
 
 import pytest
 import requests
 from craft_store import BaseClient, endpoints
 from craft_store.models import AccountModel, RegisteredNameModel
+from craft_store.models._charm_model import CharmBaseModel
+from craft_store.models._snap_models import Confinement, Grade, Type
+from craft_store.models.revisions_model import (
+    CharmRevisionModel,
+    GitRevisionModel,
+    SnapRevisionModel,
+)
 
 SAMPLE_REAL_REGISTERED_NAMES = b"""{
   "results": [
@@ -107,6 +115,102 @@ def test_list_registered_names(charm_client, content, expected):
     charm_client.http_client.request.return_value = response = requests.Response()
     response._content = content
     actual = charm_client.list_registered_names()
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ("content", "expected"),
+    [
+        pytest.param(b'{"revisions":[]}', [], id="empty"),
+        pytest.param(
+            b"""{"revisions":[{
+                "commit-id": "abc",
+                "created-at": "2000-01-01T00:00:00",
+                "created-by": "lengau",
+                "revision": 1,
+                "sha3-384": "its_a_fake",
+                "status": "statusy"
+            }]}""",
+            [
+                GitRevisionModel(
+                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    revision=1,
+                    sha3_384="its_a_fake",
+                    status="statusy",
+                    commit_id="abc",
+                    created_by="lengau",
+                )
+            ],
+            id="git-revision",
+        ),
+        pytest.param(
+            b"""{"revisions":[{
+                "created_at": "2000-01-01T00:00:00",
+                "revision": 1,
+                "sha3-384": "its_a_fake",
+                "status": "statusy",
+                "bases": [{"name": "all", "channel": "all", "architecture": "all"}],
+                "size": 1234,
+                "version": "1.0.0-0-0"
+            }]}""",
+            [
+                CharmRevisionModel(
+                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    revision=1,
+                    sha3_384="its_a_fake",
+                    status="statusy",
+                    size=1234,
+                    version="1.0.0-0-0",
+                    bases=[
+                        CharmBaseModel(name="all", channel="all", architecture="all")
+                    ],
+                )
+            ],
+            id="charm-revision",
+        ),
+        pytest.param(
+            b"""{"revisions":[{
+                "created_at": "2000-01-01T00:00:00",
+                "revision": 1,
+                "sha3-384": "its_a_fake",
+                "status": "statusy",
+                "apps": ["appy-mc-app-face"],
+                "architectures": ["riscv64"],
+                "base": "core24",
+                "confinement": "strict",
+                "created-by": "lengau",
+                "grade": "stable",
+                "size": 54321,
+                "type": "app",
+                "version": "1.2.3"
+            }]}""",
+            [
+                SnapRevisionModel(
+                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    revision=1,
+                    sha3_384="its_a_fake",
+                    status="statusy",
+                    apps=["appy-mc-app-face"],
+                    architectures=["riscv64"],
+                    base="core24",
+                    confinement=Confinement.STRICT,
+                    created_by="lengau",
+                    grade=Grade.STABLE,
+                    size=54321,
+                    type=Type.APP,
+                    version="1.2.3",
+                )
+            ],
+            id="snap-revision",
+        ),
+    ],
+)
+def test_list_revisions(charm_client, content, expected):
+    charm_client.http_client.request.return_value = response = requests.Response()
+    response._content = content
+
+    actual = charm_client.list_revisions("my_name")
 
     assert actual == expected
 

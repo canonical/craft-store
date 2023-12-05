@@ -31,6 +31,7 @@ from requests_toolbelt import (  # type: ignore[import]
 from . import endpoints, errors, models
 from .auth import Auth
 from .http_client import HTTPClient
+from .models.revisions_model import RevisionModel
 
 logger = logging.getLogger(__name__)
 
@@ -277,12 +278,25 @@ class BaseClient(metaclass=ABCMeta):
 
         This request usually takes place after a successful :attr:`.upload`.
         """
-        endpoint = f"/v1/{self._endpoints.namespace}/{name}/revisions"
+        endpoint = self._endpoints.get_revisions_endpoint(name)
         response = self.request(
             "POST", self._base_url + endpoint, json=revision_request.marshal()
         ).json()
 
         return models.revisions_model.RevisionsResponseModel.unmarshal(response)
+
+    def list_revisions(self, name: str) -> List[RevisionModel]:
+        """Get the list of existing revisions for a package.
+
+        :param name: the package to lookup.
+        :returns: a list of revisions that have been uploaded for this package.
+
+        Charmhub example: https://api.charmhub.io/docs/default.html#list_revisions
+        """
+        endpoint = self._endpoints.get_revisions_endpoint(name)
+        response = self.request("GET", self._base_url + endpoint).json()
+
+        return [RevisionModel.unmarshal(r) for r in response["revisions"]]
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""
