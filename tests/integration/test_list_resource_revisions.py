@@ -20,7 +20,6 @@ from typing import cast
 import pydantic
 from craft_store.models.resource_revision_model import (
     CharmResourceBase,
-    CharmResourceBaseList,
     CharmResourceRevision,
     CharmResourceType,
 )
@@ -46,7 +45,7 @@ def test_charm_list_resource_revisions(charm_client, charmhub_charm_name):
 
     expected = CharmResourceRevision(
         name="empty-file",
-        bases=CharmResourceBaseList([CharmResourceBase()]),
+        bases=[CharmResourceBase()],
         type=CharmResourceType.FILE,
         # These values are for an empty file.
         size=pydantic.ByteSize(0),
@@ -57,5 +56,7 @@ def test_charm_list_resource_revisions(charm_client, charmhub_charm_name):
         # Copy the actual revision properties.
         created_at=actual.created_at,
         revision=actual.revision,
+        updated_at=actual.updated_at,
+        updated_by=actual.updated_by,
     )
     assert actual == expected

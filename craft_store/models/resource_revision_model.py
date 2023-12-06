@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2022 Canonical Ltd.
+# Copyright 2023 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,20 +16,11 @@
 """Resource revision response models for the Store."""
 import datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional, Union
 
 import pydantic
 
 from craft_store.models._base_model import MarshableModel
-
-
-class ArchitectureList(pydantic.ConstrainedList):
-    """A list of architectures."""
-
-    __args__ = (str,)
-    item_type = str
-    min_items = 1
-    unique_items = True
 
 
 class CharmResourceType(str, Enum):
@@ -44,22 +35,13 @@ class CharmResourceBase(MarshableModel):
 
     name: str = "all"
     channel: str = "all"
-    architectures: ArchitectureList = ArchitectureList(["all"])
-
-
-class CharmResourceBaseList(pydantic.ConstrainedList):
-    """A list of charm resource bases."""
-
-    __args__ = (CharmResourceBase,)
-    item_type = CharmResourceBase
-    min_items = 1
-    unique_items = True
+    architectures: List[str] = ["all"]
 
 
 class CharmResourceRevision(MarshableModel):
     """A basic resource revision."""
 
-    bases: CharmResourceBaseList
+    bases: List[CharmResourceBase]
     created_at: datetime.datetime
     name: str
     revision: int
@@ -68,6 +50,6 @@ class CharmResourceRevision(MarshableModel):
     sha384: str
     sha512: str
     size: pydantic.ByteSize
-    type: CharmResourceType
+    type: Union[CharmResourceType, str]
     updated_at: Optional[datetime.datetime] = None
     updated_by: Optional[str] = None

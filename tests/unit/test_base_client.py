@@ -27,7 +27,6 @@ from craft_store.models._charm_model import CharmBaseModel
 from craft_store.models._snap_models import Confinement, Grade, Type
 from craft_store.models.resource_revision_model import (
     CharmResourceBase,
-    CharmResourceBaseList,
     CharmResourceRevision,
     CharmResourceType,
 )
@@ -243,7 +242,7 @@ def test_list_revisions(charm_client, content, expected):
             }]}""",
             [
                 CharmResourceRevision(
-                    bases=CharmResourceBaseList([CharmResourceBase()]),
+                    bases=[CharmResourceBase()],
                     created_at=datetime.datetime(1970, 1, 1),
                     name="resource",
                     revision=1,
@@ -256,6 +255,45 @@ def test_list_revisions(charm_client, content, expected):
                     updated_at=datetime.datetime(2020, 3, 14),
                     updated_by="lengau",
                 )
+            ],
+        ),
+        # Invalid data from the store that we should accept anyway.
+        pytest.param(
+            b"""{"revisions":[{
+                "bases": [
+                    {"name": "all", "channel": "all", "architectures": ["all", "all"]},
+                    {"name": "all", "channel": "all", "architectures": ["all", "all"]}
+                ],
+                "created-at": "1970-01-01T00:00:00",
+                "name": "",
+                "revision": -1,
+                "sha256": "",
+                "sha3-384": "",
+                "sha384": "",
+                "sha512": "",
+                "size": 0,
+                "type": "invalid",
+                "updated-at": "2020-03-14T00:00:00",
+                "updated-by": ""
+            }]}""",
+            [
+                CharmResourceRevision(
+                    bases=[
+                        CharmResourceBase(architectures=["all", "all"]),
+                        CharmResourceBase(architectures=["all", "all"]),
+                    ],
+                    created_at=datetime.datetime(1970, 1, 1),
+                    name="",
+                    revision=-1,
+                    sha256="",
+                    sha3_384="",
+                    sha384="",
+                    sha512="",
+                    size=pydantic.ByteSize(0),
+                    type="invalid",
+                    updated_at=datetime.datetime(2020, 3, 14),
+                    updated_by="",
+                ),
             ],
         ),
     ],
