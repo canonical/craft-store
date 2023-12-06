@@ -146,7 +146,7 @@ def test_list_registered_names(charm_client, content, expected):
         ),
         pytest.param(
             b"""{"revisions":[{
-                "created_at": "2000-01-01T00:00:00",
+                "created-at": "2000-01-01T00:00:00",
                 "revision": 1,
                 "sha3-384": "its_a_fake",
                 "status": "statusy",
@@ -171,7 +171,7 @@ def test_list_registered_names(charm_client, content, expected):
         ),
         pytest.param(
             b"""{"revisions":[{
-                "created_at": "2000-01-01T00:00:00",
+                "created-at": "2000-01-01T00:00:00",
                 "revision": 1,
                 "sha3-384": "its_a_fake",
                 "status": "statusy",
