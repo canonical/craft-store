@@ -31,6 +31,7 @@ from requests_toolbelt import (  # type: ignore[import]
 from . import endpoints, errors, models
 from .auth import Auth
 from .http_client import HTTPClient
+from .models.resource_revision_model import CharmResourceRevision
 from .models.revisions_model import RevisionModel
 
 logger = logging.getLogger(__name__)
@@ -297,6 +298,21 @@ class BaseClient(metaclass=ABCMeta):
         response = self.request("GET", self._base_url + endpoint).json()
 
         return [RevisionModel.unmarshal(r) for r in response["revisions"]]
+
+    def list_resource_revisions(
+        self, name: str, resource_name: str
+    ) -> List[CharmResourceRevision]:
+        """List the revisions for a specific resource of a specific name."""
+        namespace = self._endpoints.namespace
+        if namespace != "charm":
+            raise NotImplementedError(
+                f"Cannot get resource revisions in namespace {namespace}."
+            )
+        endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
+        response = self.request("GET", self._base_url + endpoint)
+        model = response.json()
+
+        return [CharmResourceRevision.unmarshal(r) for r in model["revisions"]]
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""
