@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, cast
 from urllib.parse import urlparse
 
 import requests
@@ -31,7 +31,11 @@ from requests_toolbelt import (  # type: ignore[import]
 from . import endpoints, errors, models
 from .auth import Auth
 from .http_client import HTTPClient
-from .models.resource_revision_model import CharmResourceRevision
+from .models.resource_revision_model import (
+    CharmResourceRevision,
+    CharmResourceRevisionUpdateRequest,
+    RequestCharmResourceBaseList,
+)
 from .models.revisions_model import RevisionModel
 
 logger = logging.getLogger(__name__)
@@ -313,6 +317,49 @@ class BaseClient(metaclass=ABCMeta):
         model = response.json()
 
         return [CharmResourceRevision.unmarshal(r) for r in model["revisions"]]
+
+    def update_resource_revisions(
+        self,
+        *updates: CharmResourceRevisionUpdateRequest,
+        name: str,
+        resource_name: str,
+    ) -> int:
+        """Update one or more resource revisions.
+
+        :param name: The package.
+        :param resource_name: The resource name to update.
+        :param *updates: The updates to make of any revisions
+        :returns: The number of revisions updated.
+
+        """
+        if not updates:
+            raise ValueError("Need at least one resource revision to update.")
+        if (namespace := self._endpoints.namespace) != "charm":
+            raise NotImplementedError(
+                f"Cannot update resource revisions in namespace {namespace}."
+            )
+        endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
+
+        body = {"resource-revision-updates": [update.marshal() for update in updates]}
+
+        response = self.request("PATCH", self._base_url + endpoint, json=body).json()
+
+        return cast(int, response["num-resource-revisions-updated"])
+
+    def update_resource_revision(
+        self,
+        name: str,
+        resource_name: str,
+        *,
+        revision: int,
+        bases: RequestCharmResourceBaseList,
+    ) -> int:
+        """Update a single resource revision."""
+        return self.update_resource_revisions(
+            CharmResourceRevisionUpdateRequest(revision=revision, bases=bases),
+            name=name,
+            resource_name=resource_name,
+        )
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""

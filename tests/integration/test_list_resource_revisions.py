@@ -19,9 +19,9 @@ from typing import cast
 
 import pydantic
 from craft_store.models.resource_revision_model import (
-    CharmResourceBase,
     CharmResourceRevision,
     CharmResourceType,
+    ResponseCharmResourceBase,
 )
 
 from .conftest import needs_charmhub_credentials
@@ -45,7 +45,7 @@ def test_charm_list_resource_revisions(charm_client, charmhub_charm_name):
 
     expected = CharmResourceRevision(
         name="empty-file",
-        bases=[CharmResourceBase()],
+        bases=[ResponseCharmResourceBase()],
         type=CharmResourceType.FILE,
         # These values are for an empty file.
         size=pydantic.ByteSize(0),
