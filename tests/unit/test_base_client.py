@@ -18,12 +18,18 @@
 import datetime
 from unittest.mock import Mock
 
+import pydantic
 import pytest
 import requests
 from craft_store import BaseClient, endpoints
 from craft_store.models import AccountModel, RegisteredNameModel
 from craft_store.models._charm_model import CharmBaseModel
 from craft_store.models._snap_models import Confinement, Grade, Type
+from craft_store.models.resource_revision_model import (
+    CharmResourceBase,
+    CharmResourceRevision,
+    CharmResourceType,
+)
 from craft_store.models.revisions_model import (
     CharmRevisionModel,
     GitRevisionModel,
@@ -213,6 +219,107 @@ def test_list_revisions(charm_client, content, expected):
     actual = charm_client.list_revisions("my_name")
 
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ("content", "expected"),
+    [
+        pytest.param(b'{"revisions":[]}', [], id="empty"),
+        pytest.param(
+            b"""{"revisions":[{
+                "bases": [{"name": "all", "channel": "all", "architectures": ["all"]}],
+                "created-at": "1970-01-01T00:00:00",
+                "name": "resource",
+                "revision": 1,
+                "sha256": "a-sha256",
+                "sha3-384": "a 384-bit sha3",
+                "sha384": "a sha384",
+                "sha512": "a sha512",
+                "size": 17,
+                "type": "file",
+                "updated-at": "2020-03-14T00:00:00",
+                "updated-by": "lengau"
+            }]}""",
+            [
+                CharmResourceRevision(
+                    bases=[CharmResourceBase()],
+                    created_at=datetime.datetime(1970, 1, 1),
+                    name="resource",
+                    revision=1,
+                    sha256="a-sha256",
+                    sha3_384="a 384-bit sha3",
+                    sha384="a sha384",
+                    sha512="a sha512",
+                    size=pydantic.ByteSize(17),
+                    type=CharmResourceType.FILE,
+                    updated_at=datetime.datetime(2020, 3, 14),
+                    updated_by="lengau",
+                )
+            ],
+        ),
+        # Invalid data from the store that we should accept anyway.
+        pytest.param(
+            b"""{"revisions":[{
+                "bases": [
+                    {"name": "all", "channel": "all", "architectures": ["all", "all"]},
+                    {"name": "all", "channel": "all", "architectures": ["all", "all"]}
+                ],
+                "created-at": "1970-01-01T00:00:00",
+                "name": "",
+                "revision": -1,
+                "sha256": "",
+                "sha3-384": "",
+                "sha384": "",
+                "sha512": "",
+                "size": 0,
+                "type": "invalid",
+                "updated-at": "2020-03-14T00:00:00",
+                "updated-by": ""
+            }]}""",
+            [
+                CharmResourceRevision(
+                    bases=[
+                        CharmResourceBase(architectures=["all", "all"]),
+                        CharmResourceBase(architectures=["all", "all"]),
+                    ],
+                    created_at=datetime.datetime(1970, 1, 1),
+                    name="",
+                    revision=-1,
+                    sha256="",
+                    sha3_384="",
+                    sha384="",
+                    sha512="",
+                    size=pydantic.ByteSize(0),
+                    type="invalid",
+                    updated_at=datetime.datetime(2020, 3, 14),
+                    updated_by="",
+                ),
+            ],
+        ),
+    ],
+)
+def test_list_resource_revisions_success(charm_client, content, expected):
+    charm_client.http_client.request.return_value = response = requests.Response()
+    response._content = content
+
+    actual = charm_client.list_resource_revisions("my-charm", "resource")
+
+    assert actual == expected
+
+
+def test_list_resource_revisions_not_implemented():
+    """list_resource_revisions is not implemented for non-charm namespaces."""
+    client = ConcreteTestClient(
+        base_url="https://staging.example.com",
+        storage_base_url="https://storage.staging.example.com",
+        endpoints=endpoints.SNAP_STORE,
+        application_name="testcraft",
+        user_agent="craft-store unit tests, should not be hitting a real server",
+    )
+    client.http_client = Mock(spec=client.http_client)
+
+    with pytest.raises(NotImplementedError):
+        client.list_resource_revisions("my-snap", "my-resource")
 
 
 @pytest.mark.parametrize(
