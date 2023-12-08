@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
+import pathlib
 import shutil
 import uuid
 from pathlib import Path
+from typing import List
 
 import pytest
 import yaml
@@ -47,20 +49,30 @@ def charmhub_charm_name():
 
 
 @pytest.fixture()
-def fake_charm_file(tmpdir, charmhub_charm_name):
+def fake_charm_file(tmp_path, charmhub_charm_name):
     """Provide a fake charm to upload to charmhub."""
-    # Make tmpdir Path instead of Path-like.
-    prime_dir = Path(tmpdir) / "prime"
+    return _make_charm(tmp_path, charmhub_charm_name, ["amd64"])
+
+
+def _make_charm(
+    dest_dir: pathlib.Path, name: str, architectures: List[str]
+) -> pathlib.Path:
+    """Make a fake charm on disk."""
+    prime_dir = dest_dir / f"prime_{name}_{'_'.join(architectures)}"
     prime_dir.mkdir()
 
-    medadata_path = prime_dir / "metadata.yaml"
-    with medadata_path.open("w") as metadata_file:
+    metadata_path = prime_dir / "metadata.yaml"
+    with metadata_path.open("w") as metadata_file:
         yaml.safe_dump(
             data={
-                "name": charmhub_charm_name,
+                "name": name,
                 "display-name": "display",
                 "description": "description",
                 "summary": "summary",
+                "resources": {
+                    "my-rock": {"type": "oci-image"},
+                    "my-file": {"type": "file", "filename": "my-file"},
+                },
             },
             stream=metadata_file,
         )
@@ -83,7 +95,7 @@ def fake_charm_file(tmpdir, charmhub_charm_name):
                 },
                 "bases": [
                     {
-                        "architectures": ["amd64"],
+                        "architectures": architectures,
                         "channel": "22.04",
                         "name": "ubuntu",
                     }
@@ -94,12 +106,25 @@ def fake_charm_file(tmpdir, charmhub_charm_name):
             stream=manifest_file,
         )
 
-        charm_file = Path(tmpdir) / "test.charm"
+        charm_file = dest_dir / f"{name}_{'_'.join(architectures)}.charm"
         Path(shutil.make_archive(str(charm_file), "zip", str(prime_dir))).rename(
             charm_file
         )
 
+        shutil.rmtree(prime_dir)
+
         return charm_file
+
+
+@pytest.fixture()
+def fake_charms(
+    tmp_path, charmhub_charm_name, architectures=("amd64", "arm64", "riscv64")
+):
+    files = [
+        _make_charm(tmp_path, charmhub_charm_name, [arch]) for arch in architectures
+    ]
+    files.append(_make_charm(tmp_path, charmhub_charm_name, architectures))
+    return files
 
 
 @pytest.fixture()
