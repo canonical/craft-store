@@ -20,14 +20,23 @@ from craft_store.models import CharmResourceRevisionUpdateRequest
 
 
 @pytest.mark.parametrize(
-    "request_dict",
+    ("request_dict", "match"),
     [
-        {"revision": 1},
-        {"revision": 1, "bases": []},
-        {"revision": 1, "bases": [{"architectures": ["all", "all"]}]},
-        {"revision": 1, "bases": [{"architectures": []}]},
+        ({"revision": 1}, r"bases[:\s]+field required"),
+        (
+            {"revision": 1, "bases": []},
+            r"bases[:\s]+ensure this value has at least 1 item",
+        ),
+        (
+            {"revision": 1, "bases": [{"architectures": ["all", "all"]}]},
+            r"bases -> 0 -> architectures[:\s]+the list has duplicated items",
+        ),
+        (
+            {"revision": 1, "bases": [{"architectures": []}]},
+            r"bases -> 0 -> architectures[:\s]+ensure this value has at least 1 item",
+        ),
     ],
 )
-def test_charmresourcerevisionupdaterequest_invalid_bases(request_dict):
-    with pytest.raises(pydantic.ValidationError):
+def test_charmresourcerevisionupdaterequest_invalid_bases(request_dict, match):
+    with pytest.raises(pydantic.ValidationError, match=match):
         CharmResourceRevisionUpdateRequest.unmarshal(request_dict)
