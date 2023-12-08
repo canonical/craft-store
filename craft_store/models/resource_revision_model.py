@@ -13,14 +13,21 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Resource revision response models for the Store."""
+"""Resource revision models for the Store."""
 import datetime
 from enum import Enum
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import pydantic
 
 from craft_store.models._base_model import MarshableModel
+
+if TYPE_CHECKING:
+    RequestArchitectureList = List[str]
+else:
+    RequestArchitectureList = pydantic.conlist(
+        item_type=str, min_items=1, unique_items=True
+    )
 
 
 class CharmResourceType(str, Enum):
@@ -30,7 +37,7 @@ class CharmResourceType(str, Enum):
     FILE = "file"
 
 
-class CharmResourceBase(MarshableModel):
+class ResponseCharmResourceBase(MarshableModel):
     """A base for a charm resource."""
 
     name: str = "all"
@@ -41,7 +48,7 @@ class CharmResourceBase(MarshableModel):
 class CharmResourceRevision(MarshableModel):
     """A basic resource revision."""
 
-    bases: List[CharmResourceBase]
+    bases: List[ResponseCharmResourceBase]
     created_at: datetime.datetime
     name: str
     revision: int
@@ -53,3 +60,24 @@ class CharmResourceRevision(MarshableModel):
     type: Union[CharmResourceType, str]
     updated_at: Optional[datetime.datetime] = None
     updated_by: Optional[str] = None
+
+
+class RequestCharmResourceBase(ResponseCharmResourceBase):
+    """A base for a charm resource for use in requests."""
+
+    architectures: RequestArchitectureList = ["all"]
+
+
+if TYPE_CHECKING:
+    RequestCharmResourceBaseList = List[RequestCharmResourceBase]
+else:
+    RequestCharmResourceBaseList = pydantic.conlist(
+        item_type=RequestCharmResourceBase, min_items=1
+    )
+
+
+class CharmResourceRevisionUpdateRequest(MarshableModel):
+    """A charm resource revision update request."""
+
+    revision: pydantic.PositiveInt
+    bases: RequestCharmResourceBaseList

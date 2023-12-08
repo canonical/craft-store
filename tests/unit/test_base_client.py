@@ -26,9 +26,11 @@ from craft_store.models import AccountModel, RegisteredNameModel
 from craft_store.models._charm_model import CharmBaseModel
 from craft_store.models._snap_models import Confinement, Grade, Type
 from craft_store.models.resource_revision_model import (
-    CharmResourceBase,
     CharmResourceRevision,
+    CharmResourceRevisionUpdateRequest,
     CharmResourceType,
+    RequestCharmResourceBase,
+    ResponseCharmResourceBase,
 )
 from craft_store.models.revisions_model import (
     CharmRevisionModel,
@@ -242,7 +244,7 @@ def test_list_revisions(charm_client, content, expected):
             }]}""",
             [
                 CharmResourceRevision(
-                    bases=[CharmResourceBase()],
+                    bases=[ResponseCharmResourceBase()],
                     created_at=datetime.datetime(1970, 1, 1),
                     name="resource",
                     revision=1,
@@ -279,8 +281,8 @@ def test_list_revisions(charm_client, content, expected):
             [
                 CharmResourceRevision(
                     bases=[
-                        CharmResourceBase(architectures=["all", "all"]),
-                        CharmResourceBase(architectures=["all", "all"]),
+                        ResponseCharmResourceBase(architectures=["all", "all"]),
+                        ResponseCharmResourceBase(architectures=["all", "all"]),
                     ],
                     created_at=datetime.datetime(1970, 1, 1),
                     name="",
@@ -320,6 +322,70 @@ def test_list_resource_revisions_not_implemented():
 
     with pytest.raises(NotImplementedError):
         client.list_resource_revisions("my-snap", "my-resource")
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        [
+            CharmResourceRevisionUpdateRequest(
+                revision=1,
+                bases=[RequestCharmResourceBase()],
+            ),
+        ],
+    ],
+)
+def test_update_resource_revisions(charm_client, updates):
+    charm_client.http_client.request.return_value.json.return_value = {
+        "num-resource-revisions-updated": len(updates)
+    }
+
+    actual = charm_client.update_resource_revisions(
+        *updates,
+        name="my-charm",
+        resource_name="my-resource",
+    )
+
+    assert actual == len(updates)
+
+
+def test_update_resource_revisions_empty(charm_client):
+    with pytest.raises(
+        ValueError, match=r"^Need at least one resource revision to update\.$"
+    ):
+        charm_client.update_resource_revisions(
+            name="my-charm", resource_name="my-resource"
+        )
+
+
+def test_update_resource_revisions_not_implemented():
+    """list_resource_revisions is not implemented for non-charm namespaces."""
+    client = ConcreteTestClient(
+        base_url="https://staging.example.com",
+        storage_base_url="https://storage.staging.example.com",
+        endpoints=endpoints.SNAP_STORE,
+        application_name="testcraft",
+        user_agent="craft-store unit tests, should not be hitting a real server",
+    )
+    client.http_client = Mock(spec=client.http_client)
+
+    with pytest.raises(NotImplementedError):
+        client.update_resource_revisions(
+            CharmResourceRevisionUpdateRequest(
+                revision=1, bases=[RequestCharmResourceBase()]
+            ),
+            name="my-snap",
+            resource_name="my-resource",
+        )
+
+
+def test_update_resource_revision_success(charm_client):
+    charm_client.http_client.request.return_value.json.return_value = {
+        "num-resource-revisions-updated": 1
+    }
+    assert charm_client.update_resource_revision(
+        "my-charm", "my-resource", revision=1, bases=[RequestCharmResourceBase()]
+    )
 
 
 @pytest.mark.parametrize(

@@ -28,6 +28,11 @@ from .account_model import AccountModel
 from .charm_list_releases_model import ListReleasesModel as CharmListReleasesModel
 from .registered_name_model import RegisteredNameModel
 from .release_request_model import ReleaseRequestModel
+from .resource_revision_model import (
+    ResponseCharmResourceBase,
+    CharmResourceRevisionUpdateRequest,
+    RequestCharmResourceBase,
+)
 from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
 from .snap_list_releases_model import ListReleasesModel as SnapListReleasesModel
 from .track_guardrail_model import TrackGuardrailModel
@@ -39,6 +44,9 @@ __all__ = [
     "MarshableModel",
     "RegisteredNameModel",
     "ReleaseRequestModel",
+    "ResponseCharmResourceBase",
+    "RequestCharmResourceBase",
+    "CharmResourceRevisionUpdateRequest",
     "RevisionsRequestModel",
     "RevisionsResponseModel",
     "SnapListReleasesModel",
