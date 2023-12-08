@@ -1,6 +1,10 @@
 {
   // Configuration file for RenovateBot: https://docs.renovatebot.com/configuration-options
   extends: ["config:base"],
+  ignoreDeps: [
+    "pydantic",  // We need to update everything to pydantic 2 simultaneously.
+    "protobuf",  // See: https://github.com/canonical/craft-store/issues/132
+  ],
   labels: ["dependencies"],  // For convenient searching in GitHub
   pip_requirements: {
     fileMatch: ["^tox.ini$", "(^|/)requirements([\\w-]*)\\.txt$"]
