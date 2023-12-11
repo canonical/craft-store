@@ -23,7 +23,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 
 @needs_charmhub_credentials()
 def test_full_charm_workflow(charm_client, charmhub_charm_name, fake_charms):
-    """A workflow test for uploading a full charm.
+    """A full workflow test for uploading a charm.
 
     Steps include:
     1. Check if charm name is registered.
