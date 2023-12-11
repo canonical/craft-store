@@ -19,7 +19,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, cast
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Union, cast
 from urllib.parse import urlparse
 
 import requests
@@ -34,6 +34,7 @@ from .http_client import HTTPClient
 from .models.resource_revision_model import (
     CharmResourceRevision,
     CharmResourceRevisionUpdateRequest,
+    CharmResourceType,
     RequestCharmResourceBaseList,
 )
 from .models.revisions_model import RevisionModel
@@ -290,6 +291,45 @@ class BaseClient(metaclass=ABCMeta):
 
         return models.revisions_model.RevisionsResponseModel.unmarshal(response)
 
+    def push_resource(
+        self,
+        name: str,
+        resource_name: str,
+        *,
+        upload_id: str,
+        resource_type: Optional[CharmResourceType] = None,
+        bases: Optional[RequestCharmResourceBaseList] = None,
+    ) -> str:
+        """Push a resource revision to the server.
+
+        :param name: the (snap, charm, etc.) name to attach the upload to
+        :param resource_name: The name of the resource.
+        :param upload_id: The ID of the upload (the output of :attr:`.upload`)
+        :param resource_type: If necessary for the namespace, the type of resource.
+        :param bases: A list of bases that this file supports.
+
+        :returns: The path and query string (as a single string) of the status URL.
+
+        API docs: http://api.staging.charmhub.io/docs/default.html#push_resource
+
+        The status URL returned is likely a pointer to ``list_upload_reviews``:
+        http://api.staging.charmhub.io/docs/default.html#list_upload_reviews
+        """
+        endpoint = self._base_url + self._endpoints.get_resource_revisions_endpoint(
+            name, resource_name
+        )
+        request_model: Dict[str, Union[str, List[Dict[str, Any]]]] = {
+            "upload-id": upload_id,
+        }
+        if resource_type:
+            request_model["type"] = resource_type
+        if bases:
+            request_model["bases"] = [base.dict(skip_defaults=False) for base in bases]
+
+        response = self.request("POST", endpoint, json=request_model)
+        response_model = response.json()
+        return str(response_model["status-url"])
+
     def list_revisions(self, name: str) -> List[RevisionModel]:
         """Get the list of existing revisions for a package.
 
@@ -340,7 +380,7 @@ class BaseClient(metaclass=ABCMeta):
             )
         endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
 
-        body = {"resource-revision-updates": [update.marshal() for update in updates]}
+        body = {"resource-revision-updates": [update.dict() for update in updates]}
 
         response = self.request("PATCH", self._base_url + endpoint, json=body).json()
 

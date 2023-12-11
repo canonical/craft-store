@@ -127,6 +127,51 @@ def test_list_registered_names(charm_client, content, expected):
     assert actual == expected
 
 
+@pytest.mark.parametrize("resource_type", list(CharmResourceType))
+@pytest.mark.parametrize(
+    "bases",
+    [
+        [RequestCharmResourceBase()],
+        [
+            RequestCharmResourceBase(
+                name="ubuntu",
+                channel="22.04",
+                architectures=["amd64", "arm64", "riscv64"],
+            )
+        ],
+    ],
+)
+def test_push_resource(charm_client, resource_type, bases):
+    name = "my-charm"
+    resource_name = "my-resource"
+    charm_client.http_client.request.return_value.json.return_value = {
+        "status-url": "I am a status URL",
+    }
+
+    request_model = {
+        "upload-id": "I am an upload",
+        "type": resource_type,
+        "bases": bases,
+    }
+
+    status_url = charm_client.push_resource(
+        name,
+        resource_name,
+        upload_id="I am an upload",
+        resource_type=resource_type,
+        bases=bases,
+    )
+    assert status_url == "I am a status URL"
+
+    charm_client.http_client.request.assert_called_once_with(
+        "POST",
+        "https://staging.example.com/v1/charm/my-charm/resources/my-resource/revisions",
+        params=None,
+        headers={"Authorization": "I am authorised."},
+        json=request_model,
+    )
+
+
 @pytest.mark.parametrize(
     ("content", "expected"),
     [
