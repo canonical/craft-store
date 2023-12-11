@@ -121,6 +121,14 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
         """Return the slug to the revisions endpoint."""
         return f"/v1/{self.namespace}/{name}/revisions"
 
+    def get_resources_endpoint(self, name: str) -> str:
+        """Return the slug to the resourcess endpoint."""
+        return f"/v1/{self.namespace}/{name}/resources"
+
+    def get_resource_revisions_endpoint(self, name: str, resource_name: str) -> str:
+        """Return the slug to the resource revisions endpoint."""
+        return self.get_resources_endpoint(name) + f"/{resource_name}/revisions"
+
 
 @dataclasses.dataclass(repr=True)
 class _SnapStoreEndpoints(Endpoints):
@@ -170,6 +178,14 @@ class _SnapStoreEndpoints(Endpoints):
 
     @overrides
     def get_revisions_endpoint(self, name: str) -> str:
+        raise NotImplementedError
+
+    @overrides
+    def get_resources_endpoint(self, name: str) -> str:
+        raise NotImplementedError
+
+    @overrides
+    def get_resource_revisions_endpoint(self, name: str, resource_name: str) -> str:
         raise NotImplementedError
 
 

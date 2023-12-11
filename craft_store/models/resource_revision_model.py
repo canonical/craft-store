@@ -62,9 +62,11 @@ class CharmResourceRevision(MarshableModel):
     updated_by: Optional[str] = None
 
 
-class RequestCharmResourceBase(ResponseCharmResourceBase):
+class RequestCharmResourceBase(MarshableModel):
     """A base for a charm resource for use in requests."""
 
+    name: str = "all"
+    channel: str = "all"
     architectures: RequestArchitectureList = ["all"]
 
 
