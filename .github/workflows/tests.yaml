@@ -109,7 +109,7 @@ jobs:
       - name: Test with tox
         run: tox run --skip-pkg-install --no-list-dependencies --result-json results/tox-${{ matrix.platform }}.json -m integration-tests
         env:
-          PYTEST_ADDOPTS: "--no-header -vv -rN"
+          PYTEST_ADDOPTS: "--no-header -vv -rN -n 4"
       - name: Upload test results
         if: success() || failure()
         uses: actions/upload-artifact@v3
