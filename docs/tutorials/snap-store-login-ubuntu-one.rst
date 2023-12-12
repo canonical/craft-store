@@ -6,7 +6,7 @@ Login to the Snap Store using Ubuntu One
 At the end of this tutorial you will have successfully written a
 script that can log you into the Snap Store using Ubuntu One
 (https://login.ubuntu.com) and have those credentials stored for the
-combination of Dashboard endpoint (https://dashboard.snapcraft.io) and
+combination of the `Snapcraft Dashboard`_ and
 application name (``ubuntu1-dashboard``).
 
 Prerequisites
@@ -91,3 +91,5 @@ Run
 Run the saved python module to login::
 
   $ python snap_store_login_ubuntu_one.py
+
+.. _Snapcraft Dashboard: https://dashboard.snapcraft.io/stores/snaps/
