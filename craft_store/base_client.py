@@ -328,7 +328,7 @@ class BaseClient(metaclass=ABCMeta):
 
         :param name: The package.
         :param resource_name: The resource name to update.
-        :param *updates: The updates to make of any revisions
+        :param updates: The updates to make of any revisions
         :returns: The number of revisions updated.
 
         """
