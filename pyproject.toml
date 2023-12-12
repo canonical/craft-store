@@ -200,7 +200,7 @@ exclude = [
     "build",
     "tests",
     "results",
-    "docs/sphinx-docs-starter-pack",
+    "docs",
 ]
 warn_unused_configs = true
 warn_redundant_casts = true
