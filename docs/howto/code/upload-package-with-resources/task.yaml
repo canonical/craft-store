@@ -1,0 +1,24 @@
+###########################################
+# IMPORTANT
+# Comments matter!
+# The docs use the wrapping comments as
+# markers for including said instructions
+# as snippets in the docs.
+###########################################
+summary: Doc test for uploading a package with resources.
+
+prepare: |
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install $PROJECT_PATH
+
+execute: |
+  source venv/bin/activate
+  my_charm=$CRAFT_STORE_TEST_CHARM
+  # [docs:run]
+  python3 upload_package.py \
+    --charm=test.charm \
+    --resource=empty-file \
+    $my_charm \
+    my-file
+  # [docs:run-end]

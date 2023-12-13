@@ -19,3 +19,5 @@ cfg
 pyproject
 toml
 backend
+CharmHub
+Kraken
