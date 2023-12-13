@@ -1,7 +1,7 @@
 .. _howto-upload_package_with_resources:
 
-Uploading a package with resources
-==================================
+Uploading and releasing a package with resources
+================================================
 
 One of the most common workflows when communicating with the store API is to
 release a package. This guide explains how to upload a package and an associated
