@@ -1,0 +1,21 @@
+###########################################
+# IMPORTANT
+# Comments matter!
+# The docs use the wrapping comments as
+# markers for including said instructions
+# as snippets in the docs.
+###########################################
+summary: test for the craft-cli upload howto.
+
+prepare: |
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install craft-cli $PROJECT_PATH
+
+execute: |
+  source venv/bin/activate
+  snap download hello-world
+  mv *.snap test.snap
+  # [docs:run]
+  python3 craft_cli_upload.py test.snap
+  # [docs:run-end]
