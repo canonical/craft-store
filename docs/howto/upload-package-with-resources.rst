@@ -4,8 +4,8 @@ Uploading and releasing a package with resources
 ================================================
 
 One of the most common workflows when communicating with the store API is to
-release a package. This guide explains how to upload a package and an associated
-resource and then release that. We will use a charm as an example.
+release a package. This guide explains how to upload and release a package with
+an associated resource. We will use a charm as an example.
 
 This performs roughly the same store operations as running:
 
