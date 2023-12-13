@@ -27,10 +27,11 @@ from ._base_model import MarshableModel
 from .account_model import AccountModel
 from .charm_list_releases_model import ListReleasesModel as CharmListReleasesModel
 from .registered_name_model import RegisteredNameModel
-from .release_request_model import ReleaseRequestModel
+from .release_request_model import ReleaseRequestModel, ResourceModel
 from .resource_revision_model import (
     ResponseCharmResourceBase,
     CharmResourceRevisionUpdateRequest,
+    CharmResourceType,
     RequestCharmResourceBase,
 )
 from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
@@ -44,9 +45,11 @@ __all__ = [
     "MarshableModel",
     "RegisteredNameModel",
     "ReleaseRequestModel",
+    "ResourceModel",
     "ResponseCharmResourceBase",
     "RequestCharmResourceBase",
     "CharmResourceRevisionUpdateRequest",
+    "CharmResourceType",
     "RevisionsRequestModel",
     "RevisionsResponseModel",
     "SnapListReleasesModel",

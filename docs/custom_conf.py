@@ -112,6 +112,7 @@ custom_linkcheck_anchors_ignore_for_url: List[str] = []
 # Add extensions
 custom_extensions: List[str] = [
     "sphinx.ext.autodoc",
+    "sphinx_toolbox.collapse",
 ]
 
 # Add files or directories that should be excluded from processing.
