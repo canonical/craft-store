@@ -56,7 +56,7 @@ lint = [
 ]
 types = [
     "mypy[reports]==1.7.1",
-    "pyright==1.1.338",
+    "pyright==1.1.339",
     "types-PyYAML",
     "types-Pygments",
     "types-colorama",
@@ -200,7 +200,7 @@ exclude = [
     "build",
     "tests",
     "results",
-    "docs/sphinx-docs-starter-pack",
+    "docs",
 ]
 warn_unused_configs = true
 warn_redundant_casts = true

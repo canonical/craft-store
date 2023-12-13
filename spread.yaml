@@ -1,0 +1,67 @@
+project: craft-store
+
+path: /craft-store
+environment:
+  PROJECT_PATH: /craft-store
+  PATH: /snap/bin:$PATH:$PROJECT_PATH/tools/spread
+  CRAFT_STORE_CHARMCRAFT_CREDENTIALS: '$(HOST: echo $CRAFT_STORE_CHARMCRAFT_CREDENTIALS)'
+  SNAPCRAFT_STORE_CREDENTIALS: '$(HOST: echo $SNAPCRAFT_STORE_CREDENTIALS)'
+
+backends:
+  google:
+    key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
+    location: snapd-spread/us-east1-b
+    halt-timeout: 2h
+    systems:
+      - ubuntu-22.04-64:
+          workers: 2
+          storage: 40G
+  multipass:
+    type: adhoc
+    allocate: |
+      sleep 0.$RANDOM  # Minimize chances of a race condition
+      if [[ ! -f $HOME/.spread/multipass-count ]]; then
+        mkdir -p $HOME/.spread
+        echo 0 > $HOME/.spread/multipass-count
+      fi
+      instance_num=$(< $HOME/.spread/multipass-count)
+      echo $(( $instance_num + 1 )) > $HOME/.spread/multipass-count
+      multipass_image=$(echo ${SPREAD_SYSTEM} | sed -e s/ubuntu-// -e s/-64//)
+
+      system=$(echo "${SPREAD_SYSTEM}" | tr . -)
+      instance_name="spread-${SPREAD_BACKEND}-${instance_num}-${system}"
+
+      multipass launch --cpus 2 --disk 20G --memory 2G --name "${instance_name}" "${multipass_image}"
+
+      # Enable PasswordAuthentication for root over SSH.
+      multipass exec "$instance_name" -- \
+        sudo sh -c "echo root:${SPREAD_PASSWORD} | sudo chpasswd"
+      multipass exec "$instance_name" -- \
+        sudo sh -c \
+        "sed -i /etc/ssh/sshd_config -e 's/^PasswordAuthentication.*/PasswordAuthentication yes/' -e 's/^#PermitRootLogin.*/PermitRootLogin yes/'"
+      multipass exec "$instance_name" -- \
+        sudo systemctl restart ssh
+
+      # Get the IP from the instance
+      ip=$(multipass info --format csv "$instance_name" | tail -1 | cut -d\, -f3)
+      ADDRESS "$ip"
+    discard: |
+      instance_name=$(multipass list --format csv | grep $SPREAD_SYSTEM_ADDRESS | cut -f1 -d\,)
+      multipass delete --purge "${instance_name}"
+    systems:
+      - ubuntu-22.04-64:
+          workers: 2
+
+prepare: |
+  apt-get update
+  apt-get --yes install python3.10-venv
+
+suites:
+#  docs/tutorials/code/:
+#    summary: tests basic tutorials from the docs
+
+  docs/howto/code/:
+    summary: tests how-to guides from the docs
+
+#  docs/reference/code/:
+#    summary: tests reference code from the docs
