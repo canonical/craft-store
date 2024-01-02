@@ -1,6 +1,25 @@
 *********
 Changelog
 *********
+2.6.0 (2024-01-02)
+------------------
+
+- Add support for `listing revisions
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/reference/
+  auto-generated/#craft_store.BaseClient.list_revisions>`_ for a name
+- Add support for `listing resource revisions
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/reference/
+  auto-generated/#craft_store.BaseClient.list_resource_revisions>`_
+- Add support for `updating metadata for resource revisions
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/reference/
+  auto-generated/#craft_store.BaseClient.update_resource_revisions>`_
+- Add support for `uploading a resource
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/reference/
+  auto-generated/#craft_store.BaseClient.push_resource>`_
+- Document the `workflow for uploading and releasing a package
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/howto/
+  upload-package-with-resources/>`_
+
 2.5.0 (2023-11-23)
 ------------------
 
