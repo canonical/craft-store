@@ -78,7 +78,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.platform }}
+          name: unit-test-results-${{ matrix.platform }}
           path: results/
   integration:
     strategy:
@@ -114,5 +114,5 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.platform }}
+          name: integration-test-results-${{ matrix.platform }}
           path: results/
