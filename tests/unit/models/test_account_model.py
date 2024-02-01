@@ -35,7 +35,7 @@ FULL_ACCOUNT = {
         pytest.param(
             FULL_ACCOUNT,
             AccountModel(
-                display_name="Display Name",  # pyright: ignore[reportGeneralTypeIssues]
+                display_name="Display Name",  # pyright: ignore[reportCallIssue]
                 # bug https://github.com/pydantic/pydantic/discussions/3986
                 id="abc123",
                 username="usso-username",
