@@ -6,7 +6,7 @@ authors = [
     {name = "Canonical Ltd.", email = "snapcraft@lists.snapcraft.io"},
 ]
 dependencies = [
-    "keyring>=23.0",
+    "keyring>=23.0,<25.0",  # https://github.com/canonical/craft-store/issues/162
     "overrides>=7.0.0",
     "requests>=2.27.0",
     "requests-toolbelt>=1.0.0",
