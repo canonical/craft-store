@@ -1,6 +1,12 @@
 *********
 Changelog
 *********
+2.6.1 (2024-03-26)
+------------------
+
+- Remove dependency on ``protobuf``
+- Explicitly note incompatibility with ``keyring`` v25.0
+
 2.6.0 (2024-01-02)
 ------------------
 
