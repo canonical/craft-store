@@ -86,7 +86,7 @@ release = [
 
 [build-system]
 requires = [
-    "setuptools==69.0.3",
+    "setuptools==69.2.0",
     "setuptools_scm[toml]>=7.1"
 ]
 build-backend = "setuptools.build_meta"
