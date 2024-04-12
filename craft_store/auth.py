@@ -190,6 +190,8 @@ class Auth:
         if isinstance(self._keyring, SecretService.Keyring):
             try:
                 self._keyring.get_preferred_collection()
+            except keyring.errors.KeyringLocked as err:
+                raise errors.KeyringUnlockError from err
             except KEYRING_EXCEPTIONS:
                 logger.warning("Falling back to file based storage")
                 keyring.set_keyring(FileKeyring(application_name))
