@@ -30,10 +30,13 @@ import keyring.backend
 import keyring.backends.fail
 import keyring.errors
 from keyring._compat import properties
-from keyring.backends import SecretService
 from xdg import BaseDirectory  # type: ignore[import]
 
 from . import errors
+
+# workaround to prevent legacy provider loading in focal
+os.environ["CRYPTOGRAPHY_OPENSSL_NO_LEGACY"] = "1"
+from keyring.backends import SecretService  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
