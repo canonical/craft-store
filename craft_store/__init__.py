@@ -16,7 +16,7 @@
 
 """Interact with Canonical services such as Charmhub and the Snap Store."""
 
-__version__ = "2.6.1"
+__version__ = "2.6.2"
 
 
 from . import creds, endpoints, errors, models

@@ -1,6 +1,13 @@
 *********
 Changelog
 *********
+
+2.6.2 (2024-05-06)
+------------------
+
+- Disable legacy libssl providers. This is a workaround to prevent a crash
+  when loading cryptography in focal.
+
 2.6.1 (2024-03-26)
 ------------------
 
