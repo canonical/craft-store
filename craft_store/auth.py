@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import cast
 
 import keyring
 import keyring.backend
@@ -50,7 +50,7 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a dictionary."""
 
     @properties.classproperty  #  type: ignore[misc]
-    def priority(self) -> Union[int, float]:
+    def priority(self) -> int | float:
         """Supply a priority.
 
         Indicating the priority of the backend relative to all other backends.
@@ -61,13 +61,13 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
     def __init__(self) -> None:
         super().__init__()
 
-        self._credentials: Dict[Tuple[str, str], str] = {}
+        self._credentials: dict[tuple[str, str], str] = {}
 
     def set_password(self, service: str, username: str, password: str) -> None:
         """Set the service password for username in memory."""
         self._credentials[service, username] = password
 
-    def get_password(self, service: str, username: str) -> Optional[str]:
+    def get_password(self, service: str, username: str) -> str | None:
         """Get the service password for username from memory."""
         return self._credentials.get((service, username))
 
@@ -83,7 +83,7 @@ class FileKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a file."""
 
     @properties.classproperty  #  type: ignore[misc]
-    def priority(self) -> Union[int, float]:
+    def priority(self) -> int | float:
         """Supply a priority.
 
         Indicating the priority of the backend relative to all other backends.
@@ -127,7 +127,7 @@ class FileKeyring(keyring.backend.KeyringBackend):
             self._credentials[service][username] = password
         self._write_credentials()
 
-    def get_password(self, service: str, username: str) -> Optional[str]:
+    def get_password(self, service: str, username: str) -> str | None:
         """Get the service password for username from memory."""
         try:
             return cast(str, self._credentials[service][username])
@@ -164,7 +164,7 @@ class Auth:
         application_name: str,
         host: str,
         ephemeral: bool = False,
-        environment_auth: Optional[str] = None,
+        environment_auth: str | None = None,
     ) -> None:
         """Initialize Auth.
 
@@ -265,7 +265,7 @@ class Auth:
             encoded_credentials_string = self._keyring.get_password(
                 self.application_name, self.host
             )
-        except Exception as unknown_error:  # noqa: BLE001
+        except Exception as unknown_error:
             logger.debug(
                 "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,

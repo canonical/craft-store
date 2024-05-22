@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Registered Names models for the Store."""
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import AnyHttpUrl, Field
 
@@ -35,21 +35,21 @@ class MediaModel(MarshableModel):
 class RegisteredNameModel(MarshableModel):
     """Resource model for a registered name."""
 
-    authority: Optional[str] = None
-    contact: Optional[str] = None
-    default_track: Optional[str] = None
-    description: Optional[str] = None
+    authority: str | None = None
+    contact: str | None = None
+    default_track: str | None = None
+    description: str | None = None
     id: str
-    links: Dict[str, Any] = Field(default_factory=dict)
-    media: List[MediaModel] = Field(default_factory=list)
-    name: Optional[str] = None
+    links: dict[str, Any] = Field(default_factory=dict)
+    media: list[MediaModel] = Field(default_factory=list)
+    name: str | None = None
     private: bool
     publisher: AccountModel
     status: str
     store: str
-    summary: Optional[str] = None
-    title: Optional[str] = None
-    track_guardrails: List[TrackGuardrailModel] = Field(default_factory=list)
-    tracks: List[TrackModel] = Field(default_factory=list)
+    summary: str | None = None
+    title: str | None = None
+    track_guardrails: list[TrackGuardrailModel] = Field(default_factory=list)
+    tracks: list[TrackModel] = Field(default_factory=list)
     type: str
-    website: Optional[AnyHttpUrl] = None
+    website: AnyHttpUrl | None = None

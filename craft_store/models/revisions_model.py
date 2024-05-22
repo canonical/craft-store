@@ -16,7 +16,7 @@
 
 """Revisions response models for the Store."""
 import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from craft_store.models._base_model import MarshableModel
 from craft_store.models._charm_model import CharmBaseModel
@@ -51,7 +51,7 @@ class RevisionModel(MarshableModel):
     status: str
 
     @classmethod
-    def unmarshal(cls, data: Dict[str, Any]) -> "RevisionModel":
+    def unmarshal(cls, data: dict[str, Any]) -> "RevisionModel":
         """Unmarshal a revision model."""
         if "bases" in data:
             return CharmRevisionModel.parse_obj(data)
@@ -72,8 +72,8 @@ class GitRevisionModel(RevisionModel):
 class CharmRevisionModel(RevisionModel):
     """A revision model for charm revisions."""
 
-    bases: List[CharmBaseModel]
-    errors: Optional[List[ErrorModel]] = None
+    bases: list[CharmBaseModel]
+    errors: list[ErrorModel] | None = None
     size: int
     version: str
 
@@ -81,10 +81,10 @@ class CharmRevisionModel(RevisionModel):
 class SnapRevisionModel(RevisionModel):
     """A model for a snap revision."""
 
-    apps: Optional[List[str]] = None
-    architectures: List[str]
-    base: Optional[str] = None
-    build_url: Optional[str] = None
+    apps: list[str] | None = None
+    architectures: list[str]
+    base: str | None = None
+    build_url: str | None = None
     confinement: Confinement
     created_by: str
     grade: Grade

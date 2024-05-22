@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Account model for the Store."""
-from typing import Optional
 
 from pydantic import Field
 
@@ -25,8 +24,8 @@ from ._base_model import MarshableModel
 class AccountModel(MarshableModel):
     """A Store account."""
 
-    display_name: Optional[str] = Field(default=None, alias="display-name")
-    email: Optional[str] = None
+    display_name: str | None = Field(default=None, alias="display-name")
+    email: str | None = None
     id: str
-    username: Optional[str] = None
-    validation: Optional[str] = None
+    username: str | None = None
+    validation: str | None = None
