@@ -16,7 +16,6 @@
 
 import logging
 import sys
-from typing import List, Type
 from unittest.mock import ANY
 
 import keyring
@@ -280,7 +279,7 @@ def test_file_keyring_storage_path(tmp_path):
     assert k.credentials_file == tmp_path / "credentials.json"
 
 
-test_exceptions: List[Type[Exception]] = [keyring.errors.InitError]
+test_exceptions: list[type[Exception]] = [keyring.errors.InitError]
 if sys.platform == "linux":
     from secretstorage.exceptions import SecretServiceNotAvailableException
 

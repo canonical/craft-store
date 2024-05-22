@@ -18,7 +18,7 @@
 
 import contextlib
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 import urllib3
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class CraftStoreError(Exception):
     """Base class error for craft-store."""
 
-    def __init__(self, message: str, resolution: Optional[str] = None) -> None:
+    def __init__(self, message: str, resolution: str | None = None) -> None:
         super().__init__(message)
         self.resolution = resolution
 
@@ -63,7 +63,7 @@ class StoreErrorList:
         return len(self._error_list)
 
     def __str__(self) -> str:
-        error_list: List[str] = []
+        error_list: list[str] = []
         for error in self._error_list:
             error_list.append(f"- {error['code']}: {error['message']}")
         return "\n".join(error_list).strip()
@@ -80,14 +80,14 @@ class StoreErrorList:
     def __contains__(self, error_code: str) -> bool:
         return any(error.get("code") == error_code for error in self._error_list)
 
-    def __getitem__(self, error_code: str) -> Dict[str, str]:
+    def __getitem__(self, error_code: str) -> dict[str, str]:
         for error in self._error_list:
             if error.get("code") == error_code:
                 return error
 
         raise KeyError(error_code)
 
-    def __init__(self, error_list: List[Dict[str, str]]) -> None:
+    def __init__(self, error_list: list[dict[str, str]]) -> None:
         self._error_list = error_list
 
 
@@ -100,11 +100,11 @@ class StoreServerError(CraftStoreError):
     :ivar error_list: list of errors returned by the Store :class:`StoreErrorList`.
     """
 
-    def _get_raw_error_list(self) -> List[Dict[str, str]]:
-        response_json: Dict[str, Any] = self.response.json()
+    def _get_raw_error_list(self) -> list[dict[str, str]]:
+        response_json: dict[str, Any] = self.response.json()
         try:
             # Charmhub uses error-list.
-            error_list: List[Dict[str, str]] = response_json["error-list"]
+            error_list: list[dict[str, str]] = response_json["error-list"]
         except KeyError:
             # Snap Store uses error_list.
             error_list = response_json["error_list"]
@@ -115,13 +115,13 @@ class StoreServerError(CraftStoreError):
         self.response = response
 
         try:
-            raw_error_list: List[Dict[str, str]] = self._get_raw_error_list()
+            raw_error_list: list[dict[str, str]] = self._get_raw_error_list()
         except (KeyError, JSONDecodeError):
             raw_error_list = []
 
         self.error_list = StoreErrorList(raw_error_list)
 
-        message: Optional[str] = None
+        message: str | None = None
         if self.error_list:
             with contextlib.suppress(KeyError):
                 message = "Store operation failed:\n" + str(self.error_list)

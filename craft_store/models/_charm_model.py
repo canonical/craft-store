@@ -18,7 +18,6 @@
 These should only be used to import in other model files. External applications
 should point to those imports in case the models change.
 """
-from typing import Optional
 
 from craft_store.models._base_model import MarshableModel
 
@@ -35,5 +34,5 @@ class ResourceModel(MarshableModel):
     """Resource entries for the channel-map entry from the list_releases endpoint."""
 
     name: str
-    revision: Optional[int]
+    revision: int | None
     type: str

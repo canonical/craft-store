@@ -18,7 +18,6 @@
 
 
 from datetime import datetime
-from typing import List, Optional
 
 from ._base_model import MarshableModel
 from ._common_list_releases_model import PackageModel, ProgressiveModel
@@ -30,7 +29,7 @@ class ChannelMapModel(MarshableModel):
 
     architecture: str
     channel: str
-    expiration_date: Optional[datetime]
+    expiration_date: datetime | None
     progressive: ProgressiveModel
     revision: int
     when: datetime
@@ -39,6 +38,6 @@ class ChannelMapModel(MarshableModel):
 class ListReleasesModel(MarshableModel):
     """Model for the list_releases endpoint."""
 
-    channel_map: List[ChannelMapModel]
+    channel_map: list[ChannelMapModel]
     package: PackageModel
-    revisions: List[RevisionModel]
+    revisions: list[RevisionModel]

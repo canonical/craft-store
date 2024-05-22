@@ -16,7 +16,6 @@
 #
 """Track model for Craft Store packages."""
 from datetime import datetime
-from typing import Optional
 
 from craft_store.models._base_model import MarshableModel
 
@@ -24,7 +23,7 @@ from craft_store.models._base_model import MarshableModel
 class TrackModel(MarshableModel):
     """A track that a package can be published on."""
 
-    automatic_phasing_percentage: Optional[int]
+    automatic_phasing_percentage: int | None
     created_at: datetime
     name: str
-    version_pattern: Optional[str]
+    version_pattern: str | None

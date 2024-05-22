@@ -18,7 +18,6 @@ import pathlib
 import shutil
 import uuid
 from pathlib import Path
-from typing import List
 
 import pytest
 import yaml
@@ -55,7 +54,7 @@ def fake_charm_file(tmp_path, charmhub_charm_name):
 
 
 def _make_charm(
-    dest_dir: pathlib.Path, name: str, architectures: List[str]
+    dest_dir: pathlib.Path, name: str, architectures: list[str]
 ) -> pathlib.Path:
     """Make a fake charm on disk."""
     prime_dir = dest_dir / f"prime_{name}_{'_'.join(architectures)}"

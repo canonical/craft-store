@@ -18,7 +18,6 @@
 
 import base64
 import json
-from typing import Optional
 
 from macaroonbakery import bakery, httpbakery  # type: ignore[import]
 from overrides import overrides
@@ -52,7 +51,7 @@ class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):  # type: ign
 
     # TODO: transfer implementation to macaroonbakery.
     def _wait_for_token(
-        self, ctx: Optional[str], wait_token_url: str  # noqa: ARG002
+        self, ctx: str | None, wait_token_url: str  # noqa: ARG002
     ) -> httpbakery._interactor.DischargeToken:
         request_client = HTTPClient(user_agent=self.user_agent)
         resp = request_client.request("GET", wait_token_url)
@@ -87,7 +86,7 @@ class StoreClient(BaseClient):
         endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
-        environment_auth: Optional[str] = None,
+        environment_auth: str | None = None,
         ephemeral: bool = False,
     ) -> None:
         super().__init__(

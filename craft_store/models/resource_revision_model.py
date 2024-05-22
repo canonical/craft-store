@@ -16,14 +16,14 @@
 """Resource revision models for the Store."""
 import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 import pydantic
 
 from craft_store.models._base_model import MarshableModel
 
 if TYPE_CHECKING:
-    RequestArchitectureList = List[str]
+    RequestArchitectureList = list[str]
 else:
     RequestArchitectureList = pydantic.conlist(
         item_type=str, min_items=1, unique_items=True
@@ -42,13 +42,13 @@ class ResponseCharmResourceBase(MarshableModel):
 
     name: str = "all"
     channel: str = "all"
-    architectures: List[str] = ["all"]
+    architectures: list[str] = ["all"]
 
 
 class CharmResourceRevision(MarshableModel):
     """A basic resource revision."""
 
-    bases: List[ResponseCharmResourceBase]
+    bases: list[ResponseCharmResourceBase]
     created_at: datetime.datetime
     name: str
     revision: int
@@ -57,9 +57,9 @@ class CharmResourceRevision(MarshableModel):
     sha384: str
     sha512: str
     size: pydantic.ByteSize
-    type: Union[CharmResourceType, str]
-    updated_at: Optional[datetime.datetime] = None
-    updated_by: Optional[str] = None
+    type: CharmResourceType | str
+    updated_at: datetime.datetime | None = None
+    updated_by: str | None = None
 
 
 class RequestCharmResourceBase(MarshableModel):
@@ -71,7 +71,7 @@ class RequestCharmResourceBase(MarshableModel):
 
 
 if TYPE_CHECKING:
-    RequestCharmResourceBaseList = List[RequestCharmResourceBase]
+    RequestCharmResourceBaseList = list[RequestCharmResourceBase]
 else:
     RequestCharmResourceBaseList = pydantic.conlist(
         item_type=RequestCharmResourceBase, min_items=1

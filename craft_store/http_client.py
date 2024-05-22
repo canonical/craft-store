@@ -18,7 +18,6 @@
 
 import logging
 import os
-from typing import Dict, Optional
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -115,8 +114,8 @@ class HTTPClient:
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, str]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
         **kwargs,
     ) -> requests.Response:
         """Send a request to url.

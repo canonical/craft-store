@@ -16,7 +16,6 @@
 
 """Craft Store StoreClient."""
 
-from typing import Dict, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -41,7 +40,7 @@ class UbuntuOneStoreClient(BaseClient):
         endpoints: endpoints.Endpoints,  # pylint: disable=W0621
         application_name: str,
         user_agent: str,
-        environment_auth: Optional[str] = None,
+        environment_auth: str | None = None,
         ephemeral: bool = False,
     ) -> None:
         super().__init__(
@@ -98,7 +97,7 @@ class UbuntuOneStoreClient(BaseClient):
         raise errors.CraftStoreError("Invalid root macaroon")
 
     def _discharge(
-        self, email: str, password: str, otp: Optional[str], caveat_id: str
+        self, email: str, password: str, otp: str | None, caveat_id: str
     ) -> str:
         data = {"email": email, "password": password, "caveat_id": caveat_id}
         if otp:
@@ -136,8 +135,8 @@ class UbuntuOneStoreClient(BaseClient):
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, str]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
         **kwargs,
     ) -> requests.Response:
         """Make a request to the store."""

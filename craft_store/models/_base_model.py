@@ -16,7 +16,7 @@
 
 """BaseModel with marshaling capabilities."""
 
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -35,7 +35,7 @@ class MarshableModel(BaseModel):
         allow_population_by_field_name = True
 
     @classmethod
-    def unmarshal(cls: Type[Model], data: Dict[str, Any]) -> Model:
+    def unmarshal(cls: type[Model], data: dict[str, Any]) -> Model:
         """Create and populate a new ``MarshableModel`` from a dict.
 
         The unmarshal method validates entries in the input dictionary, populating
@@ -52,7 +52,7 @@ class MarshableModel(BaseModel):
 
         return cls(**data)
 
-    def marshal(self) -> Dict[str, Any]:
+    def marshal(self) -> dict[str, Any]:
         """Create a dictionary containing the part specification data.
 
         :return: The newly created dictionary.
