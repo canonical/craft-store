@@ -265,7 +265,7 @@ class Auth:
             encoded_credentials_string = self._keyring.get_password(
                 self.application_name, self.host
             )
-        except Exception as unknown_error:  # noqa: BLE001
+        except Exception as unknown_error:
             logger.debug(
                 "Unhandled exception raised when retrieving credentials: %r",
                 unknown_error,
