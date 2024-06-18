@@ -48,7 +48,7 @@ class FakeKeyring:
         self.delete_password_calls.append(args)
         if self.delete_error is not None:
             # https://www.logilab.org/ticket/3207
-            raise self.delete_error  # pylint: disable=raising-bad-type
+            raise self.delete_error
 
 
 @pytest.fixture()

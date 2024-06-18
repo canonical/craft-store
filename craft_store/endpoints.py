@@ -39,7 +39,7 @@ class Package:
 
 
 @dataclasses.dataclass(repr=True)
-class Endpoints:  # pylint: disable=too-many-instance-attributes
+class Endpoints:
     """Endpoints used to make requests to a store.
 
     :param namespace: the namespace to use for endpoints.

@@ -195,7 +195,7 @@ def test_ensure_no_credentials_unlock_error(fake_keyring, mocker):
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
 
-    assert isinstance(auth._keyring, MemoryKeyring)  # pylint: disable=protected-access
+    assert isinstance(auth._keyring, MemoryKeyring)
 
 
 def test_no_keyring_get(fake_keyring_get):

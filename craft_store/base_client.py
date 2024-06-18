@@ -62,7 +62,7 @@ class BaseClient(metaclass=ABCMeta):
         *,
         base_url: str,
         storage_base_url: str,
-        endpoints: endpoints.Endpoints,  # pylint: disable=W0621
+        endpoints: endpoints.Endpoints,
         application_name: str,
         user_agent: str,
         environment_auth: str | None = None,
