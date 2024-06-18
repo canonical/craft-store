@@ -25,7 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 
 [project.urls]
 "Documentation" = "https://craft-store.readthedocs.io/en/latest/"
@@ -118,7 +118,7 @@ include = ["*craft*"]
 namespaces = false
 
 [tool.black]
-target-version = ["py38"]
+target-version = ["py310"]
 
 [tool.codespell]
 ignore-words-list = "buildd,crate,keyserver,comandos,ro,dedent,dedented"
@@ -219,13 +219,15 @@ strict = false
 
 [tool.ruff]
 line-length = 88
-target-version = "py38"
+target-version = "py310"
 src = ["craft_store", "tests"]
 extend-exclude = [
     "docs",
     "__pycache__",
     "docs/sphinx-docs-starter-pack",
 ]
+
+[tool.ruff.lint]
 # Follow ST063 - Maintaining and updating linting specifications for updating these.
 select = [  # Base linting rule selections.
     # See the internal document for discussion:
@@ -310,7 +312,7 @@ ignore = [
     "TRY003",  # Avoid specifying long messages outside the exception class
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/**.py" = [  # Some things we want for the moin project are unnecessary in tests.
     "D",  # Ignore docstring rules in tests
     "ANN", # Ignore type annotations in tests
