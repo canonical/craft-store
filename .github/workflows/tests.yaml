@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
       - name: Configure environment
         run: |
@@ -42,7 +42,7 @@ jobs:
   unit:
     strategy:
       matrix:
-        platform: [ubuntu-20.04, ubuntu-22.04, windows-latest, macos-latest]
+        platform: [ubuntu-22.04, ubuntu-24.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -52,10 +52,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: |
-            3.8
             3.10
             3.11
-            3.12-dev
+            3.12
           cache: 'pip'
       - name: Configure environment
         run: |
@@ -83,7 +82,7 @@ jobs:
   integration:
     strategy:
       matrix:
-        platform: [ubuntu-20.04, ubuntu-22.04, windows-latest, macos-latest]
+        platform: [ubuntu-22.04, ubuntu-24.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -93,10 +92,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: |
-            3.8
             3.10
             3.11
-            3.12-dev
+            3.12
           cache: 'pip'
       - name: Configure environment
         run: |
