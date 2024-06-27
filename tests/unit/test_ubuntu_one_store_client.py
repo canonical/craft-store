@@ -86,7 +86,7 @@ def authorization():
 
 @pytest.fixture()
 def http_client_request_mock(root_macaroon, discharged_macaroon):
-    def request(*args, **kwargs):  # pylint: disable=W0613
+    def request(*args, **kwargs):
         if args[1] == "POST" and "tokens/discharge" in args[2]:
             email = kwargs["json"]["email"]
             otp = kwargs["json"].get("otp")

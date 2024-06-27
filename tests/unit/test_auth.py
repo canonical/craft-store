@@ -16,7 +16,6 @@
 
 import logging
 import sys
-from typing import List, Type
 from unittest.mock import ANY
 
 import keyring
@@ -196,7 +195,7 @@ def test_ensure_no_credentials_unlock_error(fake_keyring, mocker):
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
 
-    assert isinstance(auth._keyring, MemoryKeyring)  # pylint: disable=protected-access
+    assert isinstance(auth._keyring, MemoryKeyring)
 
 
 def test_no_keyring_get(fake_keyring_get):
@@ -280,7 +279,7 @@ def test_file_keyring_storage_path(tmp_path):
     assert k.credentials_file == tmp_path / "credentials.json"
 
 
-test_exceptions: List[Type[Exception]] = [keyring.errors.InitError]
+test_exceptions: list[type[Exception]] = [keyring.errors.InitError]
 if sys.platform == "linux":
     from secretstorage.exceptions import SecretServiceNotAvailableException
 

@@ -17,8 +17,9 @@
 """Endpoint definitions for different services."""
 
 import dataclasses
+from collections.abc import Sequence
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Final, Optional, Sequence, Type
+from typing import Any, Final
 
 from overrides import overrides
 
@@ -38,7 +39,7 @@ class Package:
 
 
 @dataclasses.dataclass(repr=True)
-class Endpoints:  # pylint: disable=too-many-instance-attributes
+class Endpoints:
     """Endpoints used to make requests to a store.
 
     :param namespace: the namespace to use for endpoints.
@@ -54,10 +55,10 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
     whoami: str
     tokens: str
     tokens_exchange: str
-    list_releases_model: Type[MarshableModel]
+    list_releases_model: type[MarshableModel]
     valid_package_types: Sequence[str]
     upload: str = "/unscanned-upload/"
-    tokens_refresh: Optional[str] = None
+    tokens_refresh: str | None = None
 
     def _validate_packages(self, packages: Sequence[Package]) -> None:
         unknown_packages = [
@@ -75,9 +76,9 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
         permissions: Sequence[str],
         description: str,
         ttl: int,
-        channels: Optional[Sequence[str]] = None,
-        packages: Optional[Sequence[Package]] = None,
-    ) -> Dict[str, Any]:
+        channels: Sequence[str] | None = None,
+        packages: Sequence[Package] | None = None,
+    ) -> dict[str, Any]:
         """Return a properly formatted request for a token request.
 
         Permissions can be selected from :data:`craft_store.attenuations`
@@ -106,7 +107,7 @@ class Endpoints:  # pylint: disable=too-many-instance-attributes
         return token_request
 
     @staticmethod
-    def get_upload_id(result: Dict[str, Any]) -> str:
+    def get_upload_id(result: dict[str, Any]) -> str:
         """Return the upload ID for a given result.
 
         :param result: the result from an upload request.
@@ -140,15 +141,15 @@ class _SnapStoreEndpoints(Endpoints):
         permissions: Sequence[str],
         description: str,
         ttl: int,
-        channels: Optional[Sequence[str]] = None,
-        packages: Optional[Sequence[Package]] = None,
-    ) -> Dict[str, Any]:
+        channels: Sequence[str] | None = None,
+        packages: Sequence[Package] | None = None,
+    ) -> dict[str, Any]:
         expires = (
             datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc)
             + timedelta(seconds=ttl)
         ).isoformat()
 
-        token_request: Dict[str, Any] = {
+        token_request: dict[str, Any] = {
             "permissions": permissions,
             "description": description,
             "expires": expires,
@@ -169,7 +170,7 @@ class _SnapStoreEndpoints(Endpoints):
         return token_request
 
     @staticmethod
-    def get_upload_id(result: Dict[str, Any]) -> str:
+    def get_upload_id(result: dict[str, Any]) -> str:
         return str(result["upload_id"])
 
     @overrides
