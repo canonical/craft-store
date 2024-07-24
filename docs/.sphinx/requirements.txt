@@ -1,8 +1,8 @@
-furo==2024.5.6
+furo==2024.7.18
 lxd-sphinx-extensions==0.0.16
 myst-parser==3.0.1
 pyspelling==2.10
-sphinx==7.3.7
+sphinx==7.4.7
 sphinx-autobuild==2024.4.16
 sphinxcontrib-jquery==4.1
 sphinx-copybutton==0.5.2
@@ -10,6 +10,6 @@ sphinx-design==0.6.0
 sphinxext-opengraph==0.9.1
 sphinx-lint==0.9.1
 sphinx-notfound-page==1.0.2
-sphinx-reredirects==0.1.4
+sphinx-reredirects==0.1.5
 sphinx-tabs==3.4.5
-sphinx-toolbox==3.5.0
+sphinx-toolbox==3.7.0
