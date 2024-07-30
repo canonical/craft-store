@@ -16,18 +16,20 @@
 """Resource revision models for the Store."""
 import datetime
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 import pydantic
 
 from craft_store.models._base_model import MarshableModel
+from pydantic import Field
+from typing_extensions import Annotated
 
 if TYPE_CHECKING:
     RequestArchitectureList = list[str]
 else:
-    RequestArchitectureList = pydantic.conlist(
-        item_type=str, min_items=1, unique_items=True
-    )
+    RequestArchitectureList = Annotated[List[str], Field(
+        min_items=1, unique_items=True
+    )]
 
 
 class CharmResourceType(str, Enum):
@@ -73,9 +75,9 @@ class RequestCharmResourceBase(MarshableModel):
 if TYPE_CHECKING:
     RequestCharmResourceBaseList = list[RequestCharmResourceBase]
 else:
-    RequestCharmResourceBaseList = pydantic.conlist(
-        item_type=RequestCharmResourceBase, min_items=1
-    )
+    RequestCharmResourceBaseList = Annotated[List[RequestCharmResourceBase], Field(
+        min_items=1
+    )]
 
 
 class CharmResourceRevisionUpdateRequest(MarshableModel):

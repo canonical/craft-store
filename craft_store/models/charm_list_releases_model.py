@@ -29,7 +29,7 @@ class ChannelMapModel(MarshableModel):
 
     base: CharmBaseModel
     channel: str
-    expiration_date: datetime | None
+    expiration_date: datetime | None = None
     progressive: ProgressiveModel
     resources: list[ResourceModel]
     revision: int
@@ -41,7 +41,7 @@ class RevisionModel(MarshableModel):
 
     bases: list[CharmBaseModel]
     created_at: datetime
-    errors: Any
+    errors: Any = None
     revision: int
     sha3_384: str
     size: int

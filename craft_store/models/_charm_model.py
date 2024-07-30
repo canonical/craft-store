@@ -34,5 +34,5 @@ class ResourceModel(MarshableModel):
     """Resource entries for the channel-map entry from the list_releases endpoint."""
 
     name: str
-    revision: int | None
+    revision: int | None = None
     type: str

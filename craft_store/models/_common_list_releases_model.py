@@ -27,8 +27,8 @@ class ProgressiveModel(MarshableModel):
     :param percentage: the progress of a progressive release on a channel.
     """
 
-    paused: bool | None
-    percentage: float | None
+    paused: bool | None = None
+    percentage: float | None = None
 
 
 class ChannelsModel(MarshableModel):
@@ -41,8 +41,8 @@ class ChannelsModel(MarshableModel):
     :param track: the channel track.
     """
 
-    branch: str | None
-    fallback: str | None
+    branch: str | None = None
+    fallback: str | None = None
     name: str
     risk: str
     track: str

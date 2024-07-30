@@ -18,21 +18,16 @@
 
 from typing import Any, TypeVar
 
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 Model = TypeVar("Model")
 
 
 class MarshableModel(BaseModel):
     """A BaseModel that can be marshaled and unmarshaled."""
-
-    class Config:  # pylint: disable=too-few-public-methods
-        """Pydantic model configuration."""
-
-        validate_assignment = True
-        allow_mutation = False
-        alias_generator = lambda s: s.replace("_", "-")  # noqa: E731
-        allow_population_by_field_name = True
+    # TODO[pydantic]: The following keys were removed: `allow_mutation`.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
+    model_config = ConfigDict(validate_assignment=True, allow_mutation=False, alias_generator=lambda s: s.replace("_", "-"), populate_by_name=True)
 
     @classmethod
     def unmarshal(cls: type[Model], data: dict[str, Any]) -> Model:

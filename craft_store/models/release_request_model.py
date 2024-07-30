@@ -29,7 +29,7 @@ class ResourceModel(MarshableModel):
     """
 
     name: str
-    revision: int | None
+    revision: int | None = None
 
 
 class ReleaseRequestModel(MarshableModel):
