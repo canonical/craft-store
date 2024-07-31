@@ -325,7 +325,7 @@ class BaseClient(metaclass=ABCMeta):
         if resource_type:
             request_model["type"] = resource_type
         if bases:
-            request_model["bases"] = [base.dict(skip_defaults=False) for base in bases]
+            request_model["bases"] = [base.model_dump(exclude_defaults=False) for base in bases]
 
         response = self.request("POST", endpoint, json=request_model)
         response_model = response.json()
