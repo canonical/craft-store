@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2022 Canonical Ltd.
+# Copyright 2022,2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -86,12 +86,12 @@ def expires():
     Provides a function for creating expected iso formatted expires datetime
     values.
     """
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
 
     def offset_iso_dt(seconds=0):
         return (now + datetime.timedelta(seconds=seconds)).replace(
             microsecond=0
-        ).isoformat() + "+00:00"
+        ).isoformat()
 
     with patch("craft_store.endpoints.datetime", wraps=datetime.datetime) as dt_mock:
         dt_mock.utcnow.return_value = now

@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2021-2022 Canonical Ltd.
+# Copyright 2021-2022,2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -145,7 +145,7 @@ class _SnapStoreEndpoints(Endpoints):
         packages: Sequence[Package] | None = None,
     ) -> dict[str, Any]:
         expires = (
-            datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc)
+            datetime.now(tz=timezone.utc).replace(microsecond=0)
             + timedelta(seconds=ttl)
         ).isoformat()
 
