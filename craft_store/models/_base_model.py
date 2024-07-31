@@ -16,15 +16,21 @@
 
 """BaseModel with marshaling capabilities."""
 
-from typing import Any, TypeVar
-from typing_extensions import Self
+from typing import Any
 
-from pydantic import ConfigDict, BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing_extensions import Self
 
 
 class MarshableModel(BaseModel):
     """A BaseModel that can be marshaled and unmarshaled."""
-    model_config = ConfigDict(validate_assignment=True, frozen=True, alias_generator=lambda s: s.replace("_", "-"), populate_by_name=True)
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        frozen=True,
+        alias_generator=lambda s: s.replace("_", "-"),
+        populate_by_name=True,
+    )
 
     @classmethod
     def unmarshal(cls, data: dict[str, Any]) -> Self:

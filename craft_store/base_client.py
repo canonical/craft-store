@@ -325,7 +325,9 @@ class BaseClient(metaclass=ABCMeta):
         if resource_type:
             request_model["type"] = resource_type
         if bases:
-            request_model["bases"] = [base.model_dump(exclude_defaults=False) for base in bases]
+            request_model["bases"] = [
+                base.model_dump(exclude_defaults=False) for base in bases
+            ]
 
         response = self.request("POST", endpoint, json=request_model)
         response_model = response.json()
@@ -381,7 +383,9 @@ class BaseClient(metaclass=ABCMeta):
             )
         endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
 
-        body = {"resource-revision-updates": [update.model_dump() for update in updates]}
+        body = {
+            "resource-revision-updates": [update.model_dump() for update in updates]
+        }
 
         response = self.request("PATCH", self._base_url + endpoint, json=body).json()
 

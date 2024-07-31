@@ -17,7 +17,7 @@
 import collections
 import datetime
 from enum import Enum
-from typing import Annotated, List, TYPE_CHECKING, TypeVar
+from typing import Annotated, TypeVar
 
 import pydantic
 
@@ -78,12 +78,13 @@ class RequestCharmResourceBase(MarshableModel):
 
     name: str = "all"
     channel: str = "all"
-    architectures: UniqueList[str] = pydantic.Field(default_factory=lambda: ["all"], min_length=1)
+    architectures: UniqueList[str] = pydantic.Field(
+        default_factory=lambda: ["all"], min_length=1
+    )
 
 
 RequestCharmResourceBaseList = Annotated[
-    List[RequestCharmResourceBase],
-    pydantic.Field(min_length=1)
+    list[RequestCharmResourceBase], pydantic.Field(min_length=1)
 ]
 
 

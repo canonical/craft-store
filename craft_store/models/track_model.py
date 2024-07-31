@@ -30,9 +30,8 @@ class TrackModel(MarshableModel):
     created_at: Annotated[  # Prevents pydantic from setting UTC as "...Z"
         datetime,
         pydantic.WrapSerializer(
-            lambda dt, _: dt.isoformat(),
-            when_used="json-unless-none"
-        )
+            lambda dt, _: dt.isoformat(), when_used="json-unless-none"
+        ),
     ]
     name: str
     version_pattern: str | None = None

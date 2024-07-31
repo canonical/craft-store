@@ -15,10 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for RegisteredNameModel."""
-import re
-from datetime import datetime
 
-import pydantic
 import pydantic_core
 import pytest
 from craft_store.models import (

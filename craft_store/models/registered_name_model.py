@@ -17,8 +17,8 @@
 """Registered Names models for the Store."""
 from typing import Any, Literal
 
-from pydantic import AnyHttpUrl, Field
 import pydantic
+from pydantic import AnyHttpUrl, Field
 
 from ._base_model import MarshableModel
 from .account_model import AccountModel

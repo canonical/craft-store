@@ -141,7 +141,11 @@ def test_list_registered_names(charm_client, content, expected):
         ],
     ],
 )
-def test_push_resource(charm_client, resource_type: CharmResourceType, bases: list[RequestCharmResourceBase]):
+def test_push_resource(
+    charm_client,
+    resource_type: CharmResourceType,
+    bases: list[RequestCharmResourceBase],
+):
     name = "my-charm"
     resource_name = "my-resource"
     charm_client.http_client.request.return_value.json.return_value = {

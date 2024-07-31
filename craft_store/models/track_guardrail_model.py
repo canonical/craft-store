@@ -16,8 +16,8 @@
 #
 """Track guardrails for craft store packages."""
 
-from datetime import datetime
 import re
+from datetime import datetime
 from typing import Annotated
 
 import pydantic
@@ -32,7 +32,6 @@ class TrackGuardrailModel(MarshableModel):
     created_at: Annotated[  # Prevents pydantic from setting UTC as "...Z"
         datetime,
         pydantic.WrapSerializer(
-            lambda dt, _: dt.isoformat(),
-            when_used="json-unless-none"
-        )
+            lambda dt, _: dt.isoformat(), when_used="json-unless-none"
+        ),
     ]

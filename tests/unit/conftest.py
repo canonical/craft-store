@@ -89,9 +89,11 @@ def expires():
     now = datetime.datetime.now(tz=datetime.timezone.utc)
 
     def offset_iso_dt(seconds=0):
-        return (now + datetime.timedelta(seconds=seconds)).replace(
-            microsecond=0
-        ).isoformat()
+        return (
+            (now + datetime.timedelta(seconds=seconds))
+            .replace(microsecond=0)
+            .isoformat()
+        )
 
     with patch("craft_store.endpoints.datetime", wraps=datetime.datetime) as dt_mock:
         dt_mock.utcnow.return_value = now
