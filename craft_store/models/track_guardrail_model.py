@@ -28,7 +28,7 @@ from craft_store.models._base_model import MarshableModel
 class TrackGuardrailModel(MarshableModel):
     """A guardrail regular expression for tracks that can be created."""
 
-    pattern: re.Pattern
+    pattern: re.Pattern[str]
     created_at: Annotated[  # Prevents pydantic from setting UTC as "...Z"
         datetime,
         pydantic.WrapSerializer(
