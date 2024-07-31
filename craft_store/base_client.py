@@ -381,7 +381,7 @@ class BaseClient(metaclass=ABCMeta):
             )
         endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
 
-        body = {"resource-revision-updates": [update.dict() for update in updates]}
+        body = {"resource-revision-updates": [update.model_dump() for update in updates]}
 
         response = self.request("PATCH", self._base_url + endpoint, json=body).json()
 

@@ -31,14 +31,14 @@ class CandidModel(BaseModel):
     token_type: Literal["macaroon"] = Field("macaroon", alias="t")
     value: str = Field(..., alias="v")
 
-    def marshal(self) -> dict[str, Any]:
+    def marshal(self) -> dict[str, str]:
         """Create a dictionary containing the Candid credentials."""
-        return self.dict(by_alias=True)
+        return self.model_dump(by_alias=True)
 
     @classmethod
     def unmarshal(cls, data: dict[str, Any]) -> "CandidModel":
         """Create Candid model from dictionary data."""
-        return cls(**data)
+        return cls.model_validate(data)
 
 
 def marshal_candid_credentials(candid_creds: str) -> str:
@@ -106,7 +106,7 @@ class UbuntuOneMacaroons(BaseModel):
 
     def with_discharge(self, discharge: str) -> "UbuntuOneMacaroons":
         """Create a copy of this UbuntuOneMacaroons with a different discharge macaroon."""
-        return self.copy(update={"d": discharge})
+        return self.model_copy(update={"d": discharge})
 
 
 class UbuntuOneModel(BaseModel):
@@ -117,12 +117,12 @@ class UbuntuOneModel(BaseModel):
 
     def marshal(self) -> dict[str, Any]:
         """Create a dictionary containing the Ubuntu One credentials."""
-        return self.dict(by_alias=True)
+        return self.model_dump(by_alias=True)
 
     @classmethod
     def unmarshal(cls, data: dict[str, Any]) -> "UbuntuOneModel":
         """Create Candid model from dictionary data."""
-        return cls(**data)
+        return cls.model_validate(data)
 
 
 def marshal_u1_credentials(u1_creds: UbuntuOneMacaroons) -> str:

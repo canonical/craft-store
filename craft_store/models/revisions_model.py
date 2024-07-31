@@ -54,12 +54,12 @@ class RevisionModel(MarshableModel):
     def unmarshal(cls, data: dict[str, Any]) -> "RevisionModel":
         """Unmarshal a revision model."""
         if "bases" in data:
-            return CharmRevisionModel.parse_obj(data)
+            return CharmRevisionModel.model_validate(data)
         if "apps" in data:
-            return SnapRevisionModel.parse_obj(data)
+            return SnapRevisionModel.model_validate(data)
         if "commit-id" in data:
-            return GitRevisionModel.parse_obj(data)
-        return RevisionModel.parse_obj(data)
+            return GitRevisionModel.model_validate(data)
+        return RevisionModel.model_validate(data)
 
 
 class GitRevisionModel(RevisionModel):
