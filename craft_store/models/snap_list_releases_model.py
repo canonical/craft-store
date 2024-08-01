@@ -29,7 +29,7 @@ class ChannelMapModel(MarshableModel):
 
     architecture: str
     channel: str
-    expiration_date: datetime | None
+    expiration_date: datetime | None = None
     progressive: ProgressiveModel
     revision: int
     when: datetime

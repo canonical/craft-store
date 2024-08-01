@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2023 Canonical Ltd.
+# Copyright 2023-2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,7 @@
 """Registered Names models for the Store."""
 from typing import Any, Literal
 
+import pydantic
 from pydantic import AnyHttpUrl, Field
 
 from ._base_model import MarshableModel
@@ -53,3 +54,9 @@ class RegisteredNameModel(MarshableModel):
     tracks: list[TrackModel] = Field(default_factory=list)
     type: str
     website: AnyHttpUrl | None = None
+
+    @pydantic.field_serializer("website")
+    def _serialize_website(self, website: AnyHttpUrl | None) -> str | None:
+        if not website:
+            return None
+        return str(website)

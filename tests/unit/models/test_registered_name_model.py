@@ -1,6 +1,6 @@
 #  -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*
 #
-#  Copyright 2023 Canonical Ltd.
+#  Copyright 2023-2024 Canonical Ltd.
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -15,9 +15,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for RegisteredNameModel."""
-import re
-from datetime import datetime
 
+import pydantic_core
 import pytest
 from craft_store.models import (
     AccountModel,
@@ -57,7 +56,7 @@ REGISTERED_NAME_ALL_FIELDS = {
     ],
     "tracks": [{"created-at": "2023-03-28T18:50:44+00:00", "name": "1.0/stable"}],
     "type": "charm",
-    "website": "https://canonical.com",
+    "website": "https://canonical.com/",
 }
 
 
@@ -91,7 +90,10 @@ def test_unmarshal(check, json_dict):
         actual.tracks, [TrackModel.unmarshal(t) for t in json_dict.get("tracks", [])]
     )
     check.equal(actual.type, json_dict.get("type"))
-    check.equal(actual.website, json_dict.get("website"))
+    if actual.website is None:
+        check.is_none(json_dict.get("website"))
+    else:
+        check.equal(actual.website, pydantic_core.Url(json_dict.get("website")))
     check.equal(
         actual.track_guardrails,
         [
@@ -101,7 +103,13 @@ def test_unmarshal(check, json_dict):
     )
 
 
-@pytest.mark.parametrize("payload", [BASIC_REGISTERED_NAME, REGISTERED_NAME_ALL_FIELDS])
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param(BASIC_REGISTERED_NAME, id="basic"),
+        pytest.param(REGISTERED_NAME_ALL_FIELDS, id="all_fields"),
+    ],
+)
 def test_unmarshal_and_marshal(payload, check):
     marshalled = RegisteredNameModel.unmarshal(payload).marshal()
     not_set = [[["NOT SET"]]]
@@ -115,8 +123,4 @@ def test_unmarshal_and_marshal(payload, check):
             expected = payload[field].lower() == "true"
         elif field in ("track-guardrails", "tracks"):
             expected = payload[field].copy()
-            for item in expected:
-                item["created-at"] = datetime.fromisoformat(item["created-at"])
-                if field == "track-guardrails":
-                    item["pattern"] = re.compile(item["pattern"])
         check.equal(actual, expected)

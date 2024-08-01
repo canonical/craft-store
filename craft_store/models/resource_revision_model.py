@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2023 Canonical Ltd.
+# Copyright 2023-2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -14,20 +14,31 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Resource revision models for the Store."""
+import collections
 import datetime
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import Annotated, TypeVar
 
 import pydantic
 
 from craft_store.models._base_model import MarshableModel
 
-if TYPE_CHECKING:
-    RequestArchitectureList = list[str]
-else:
-    RequestArchitectureList = pydantic.conlist(
-        item_type=str, min_items=1, unique_items=True
-    )
+T = TypeVar("T")
+
+
+def _validate_list_is_unique(value: list[T]) -> list[T]:
+    value_set = set(value)
+    if len(value_set) == len(value):
+        return value
+    dupes = [item for item, count in collections.Counter(value).items() if count > 1]
+    raise ValueError(f"Duplicate values in list: {dupes}")
+
+
+UniqueList = Annotated[
+    list[T],
+    pydantic.AfterValidator(_validate_list_is_unique),
+    pydantic.Field(json_schema_extra={"uniqueItems": True}),
+]
 
 
 class CharmResourceType(str, Enum):
@@ -67,15 +78,14 @@ class RequestCharmResourceBase(MarshableModel):
 
     name: str = "all"
     channel: str = "all"
-    architectures: RequestArchitectureList = ["all"]
-
-
-if TYPE_CHECKING:
-    RequestCharmResourceBaseList = list[RequestCharmResourceBase]
-else:
-    RequestCharmResourceBaseList = pydantic.conlist(
-        item_type=RequestCharmResourceBase, min_items=1
+    architectures: UniqueList[str] = pydantic.Field(
+        default_factory=lambda: ["all"], min_length=1
     )
+
+
+RequestCharmResourceBaseList = Annotated[
+    list[RequestCharmResourceBase], pydantic.Field(min_length=1)
+]
 
 
 class CharmResourceRevisionUpdateRequest(MarshableModel):

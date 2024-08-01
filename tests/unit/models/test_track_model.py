@@ -1,6 +1,6 @@
 #  -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-#  Copyright 2023 Canonical Ltd.
+#  Copyright 2023-2024 Canonical Ltd.
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -52,7 +52,7 @@ def test_unmarshal(check, json_dict):
 def test_unmarshal_and_marshal(payload, check):
     marshalled = TrackModel.unmarshal(payload).marshal()
 
-    check.equal(marshalled["created-at"].isoformat(), payload["created-at"])
+    check.equal(marshalled["created-at"], payload["created-at"])
     check.equal(marshalled["name"], payload["name"])
     check.equal(
         "automatic-phasing-percentage" in marshalled,
