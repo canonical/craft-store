@@ -1,6 +1,6 @@
 #  -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*
 #
-#  Copyright 2023 Canonical Ltd.
+#  Copyright 2023-2024 Canonical Ltd.
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -50,5 +50,5 @@ def test_unmarshal(json_dict, expected):
 def test_unmarshal_and_marshal(payload, check):
     marshalled = TrackGuardrailModel.unmarshal(payload).marshal()
 
-    check.equal(payload["pattern"], marshalled["pattern"].pattern)
-    check.equal(payload["created-at"], marshalled["created-at"].isoformat())
+    check.equal(payload["pattern"], marshalled["pattern"])
+    check.equal(payload["created-at"], marshalled["created-at"])

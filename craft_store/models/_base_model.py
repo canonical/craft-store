@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2022 Canonical Ltd.
+# Copyright 2022,2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,26 +16,24 @@
 
 """BaseModel with marshaling capabilities."""
 
-from typing import Any, Dict, Type, TypeVar
+from typing import Any
 
-from pydantic import BaseModel
-
-Model = TypeVar("Model")
+from pydantic import BaseModel, ConfigDict
+from typing_extensions import Self
 
 
 class MarshableModel(BaseModel):
     """A BaseModel that can be marshaled and unmarshaled."""
 
-    class Config:  # pylint: disable=too-few-public-methods
-        """Pydantic model configuration."""
-
-        validate_assignment = True
-        allow_mutation = False
-        alias_generator = lambda s: s.replace("_", "-")  # noqa: E731
-        allow_population_by_field_name = True
+    model_config = ConfigDict(
+        validate_assignment=True,
+        frozen=True,
+        alias_generator=lambda s: s.replace("_", "-"),
+        populate_by_name=True,
+    )
 
     @classmethod
-    def unmarshal(cls: Type[Model], data: Dict[str, Any]) -> Model:
+    def unmarshal(cls, data: dict[str, Any]) -> Self:
         """Create and populate a new ``MarshableModel`` from a dict.
 
         The unmarshal method validates entries in the input dictionary, populating
@@ -50,12 +48,12 @@ class MarshableModel(BaseModel):
         if not isinstance(data, dict):
             raise TypeError("part data is not a dictionary")
 
-        return cls(**data)
+        return cls.model_validate(data)
 
-    def marshal(self) -> Dict[str, Any]:
+    def marshal(self) -> dict[str, Any]:
         """Create a dictionary containing the part specification data.
 
         :return: The newly created dictionary.
 
         """
-        return self.dict(by_alias=True, exclude_unset=True)
+        return self.model_dump(mode="json", by_alias=True, exclude_unset=True)

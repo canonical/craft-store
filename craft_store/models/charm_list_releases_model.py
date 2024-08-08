@@ -17,7 +17,7 @@
 """List Releases Models for Charmhub responses."""
 
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
 
 from ._base_model import MarshableModel
 from ._charm_model import CharmBaseModel, ResourceModel
@@ -29,9 +29,9 @@ class ChannelMapModel(MarshableModel):
 
     base: CharmBaseModel
     channel: str
-    expiration_date: Optional[datetime]
+    expiration_date: datetime | None = None
     progressive: ProgressiveModel
-    resources: List[ResourceModel]
+    resources: list[ResourceModel]
     revision: int
     when: datetime
 
@@ -39,9 +39,9 @@ class ChannelMapModel(MarshableModel):
 class RevisionModel(MarshableModel):
     """Model for a revision entry from list_releases."""
 
-    bases: List[CharmBaseModel]
+    bases: list[CharmBaseModel]
     created_at: datetime
-    errors: Any
+    errors: Any = None
     revision: int
     sha3_384: str
     size: int
@@ -52,6 +52,6 @@ class RevisionModel(MarshableModel):
 class ListReleasesModel(MarshableModel):
     """Model for the list_releases endpoint."""
 
-    channel_map: List[ChannelMapModel]
+    channel_map: list[ChannelMapModel]
     package: PackageModel
-    revisions: List[RevisionModel]
+    revisions: list[RevisionModel]

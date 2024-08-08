@@ -18,8 +18,9 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Union, cast
+from typing import Any, Literal, cast
 from urllib.parse import urlparse
 
 import requests
@@ -61,10 +62,10 @@ class BaseClient(metaclass=ABCMeta):
         *,
         base_url: str,
         storage_base_url: str,
-        endpoints: endpoints.Endpoints,  # pylint: disable=W0621
+        endpoints: endpoints.Endpoints,
         application_name: str,
         user_agent: str,
-        environment_auth: Optional[str] = None,
+        environment_auth: str | None = None,
         ephemeral: bool = False,
     ) -> None:
         """Initialize the Store Client."""
@@ -91,7 +92,7 @@ class BaseClient(metaclass=ABCMeta):
     def _get_authorization_header(self) -> str:
         """Return the authorization header content to use."""
 
-    def _get_macaroon(self, token_request: Dict[str, Any]) -> str:
+    def _get_macaroon(self, token_request: dict[str, Any]) -> str:
         token_response = self.http_client.request(
             "POST",
             self._base_url + self._endpoints.tokens,
@@ -107,8 +108,8 @@ class BaseClient(metaclass=ABCMeta):
         permissions: Sequence[str],
         description: str,
         ttl: int,
-        packages: Optional[Sequence[endpoints.Package]] = None,
-        channels: Optional[Sequence[str]] = None,
+        packages: Sequence[endpoints.Package] | None = None,
+        channels: Sequence[str] | None = None,
         **kwargs,
     ) -> str:
         """Obtain credentials to perform authenticated requests.
@@ -161,8 +162,8 @@ class BaseClient(metaclass=ABCMeta):
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, str]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
         **kwargs,
     ) -> requests.Response:
         """Perform an authenticated request if auth_headers are True.
@@ -191,7 +192,7 @@ class BaseClient(metaclass=ABCMeta):
             **kwargs,
         )
 
-    def whoami(self) -> Dict[str, Any]:
+    def whoami(self) -> dict[str, Any]:
         """Return whoami json data queyring :attr:`.endpoints.Endpoints.whoami`."""
         return dict(self.request("GET", self._base_url + self._endpoints.whoami).json())
 
@@ -206,7 +207,7 @@ class BaseClient(metaclass=ABCMeta):
         self,
         *,
         filepath: Path,
-        monitor_callback: Optional[Callable] = None,  # type: ignore[type-arg]
+        monitor_callback: Callable | None = None,  # type: ignore[type-arg]
     ) -> str:
         """Upload filepath to storage.
 
@@ -297,8 +298,8 @@ class BaseClient(metaclass=ABCMeta):
         resource_name: str,
         *,
         upload_id: str,
-        resource_type: Optional[CharmResourceType] = None,
-        bases: Optional[RequestCharmResourceBaseList] = None,
+        resource_type: CharmResourceType | None = None,
+        bases: RequestCharmResourceBaseList | None = None,
     ) -> str:
         """Push a resource revision to the server.
 
@@ -318,19 +319,21 @@ class BaseClient(metaclass=ABCMeta):
         endpoint = self._base_url + self._endpoints.get_resource_revisions_endpoint(
             name, resource_name
         )
-        request_model: Dict[str, Union[str, List[Dict[str, Any]]]] = {
+        request_model: dict[str, str | list[dict[str, Any]]] = {
             "upload-id": upload_id,
         }
         if resource_type:
             request_model["type"] = resource_type
         if bases:
-            request_model["bases"] = [base.dict(skip_defaults=False) for base in bases]
+            request_model["bases"] = [
+                base.model_dump(exclude_defaults=False) for base in bases
+            ]
 
         response = self.request("POST", endpoint, json=request_model)
         response_model = response.json()
         return str(response_model["status-url"])
 
-    def list_revisions(self, name: str) -> List[RevisionModel]:
+    def list_revisions(self, name: str) -> list[RevisionModel]:
         """Get the list of existing revisions for a package.
 
         :param name: the package to lookup.
@@ -345,7 +348,7 @@ class BaseClient(metaclass=ABCMeta):
 
     def list_resource_revisions(
         self, name: str, resource_name: str
-    ) -> List[CharmResourceRevision]:
+    ) -> list[CharmResourceRevision]:
         """List the revisions for a specific resource of a specific name."""
         namespace = self._endpoints.namespace
         if namespace != "charm":
@@ -380,7 +383,9 @@ class BaseClient(metaclass=ABCMeta):
             )
         endpoint = f"/v1/{namespace}/{name}/resources/{resource_name}/revisions"
 
-        body = {"resource-revision-updates": [update.dict() for update in updates]}
+        body = {
+            "resource-revision-updates": [update.model_dump() for update in updates]
+        }
 
         response = self.request("PATCH", self._base_url + endpoint, json=body).json()
 
@@ -429,7 +434,7 @@ class BaseClient(metaclass=ABCMeta):
 
     def list_registered_names(
         self, *, include_collaborations: bool = False
-    ) -> List[models.RegisteredNameModel]:
+    ) -> list[models.RegisteredNameModel]:
         """List the registered names available to the logged in account.
 
         :param include_collaborations: if True, includes names the user is a
@@ -447,9 +452,9 @@ class BaseClient(metaclass=ABCMeta):
         self,
         name: str,
         *,
-        entity_type: Optional[Literal["charm", "bundle", "snap"]] = None,
+        entity_type: Literal["charm", "bundle", "snap"] | None = None,
         private: bool = False,
-        team: Optional[str] = None,
+        team: str | None = None,
     ) -> str:
         """Register a name on the store.
 

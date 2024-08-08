@@ -15,7 +15,6 @@
 
 """Release request models for the Store."""
 
-from typing import List, Optional
 
 from pydantic import Field
 
@@ -30,7 +29,7 @@ class ResourceModel(MarshableModel):
     """
 
     name: str
-    revision: Optional[int]
+    revision: int | None = None
 
 
 class ReleaseRequestModel(MarshableModel):
@@ -42,5 +41,5 @@ class ReleaseRequestModel(MarshableModel):
     """
 
     channel: str
-    resources: Optional[List[ResourceModel]] = Field(default_factory=list)
-    revision: Optional[int] = Field(...)
+    resources: list[ResourceModel] | None = Field(default_factory=list)
+    revision: int | None = Field(...)

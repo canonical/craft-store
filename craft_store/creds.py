@@ -17,7 +17,7 @@
 """Functions to serialize/deserialize credentials for Candid and Ubuntu One SSO."""
 
 import json
-from typing import Any, Dict, Literal
+from typing import Any, Literal
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -31,14 +31,14 @@ class CandidModel(BaseModel):
     token_type: Literal["macaroon"] = Field("macaroon", alias="t")
     value: str = Field(..., alias="v")
 
-    def marshal(self) -> Dict[str, Any]:
+    def marshal(self) -> dict[str, str]:
         """Create a dictionary containing the Candid credentials."""
-        return self.dict(by_alias=True)
+        return self.model_dump(by_alias=True)
 
     @classmethod
-    def unmarshal(cls, data: Dict[str, Any]) -> "CandidModel":
+    def unmarshal(cls, data: dict[str, Any]) -> "CandidModel":
         """Create Candid model from dictionary data."""
-        return cls(**data)
+        return cls.model_validate(data)
 
 
 def marshal_candid_credentials(candid_creds: str) -> str:
@@ -75,7 +75,7 @@ def unmarshal_candid_credentials(marshalled_creds: str) -> str:
     :param marshalled_creds: The credentials retrieved from auth storage.
     :return: The actual Candid credentials.
     """
-    data: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
     try:
         creds = json.loads(marshalled_creds)
     except json.JSONDecodeError:
@@ -106,7 +106,7 @@ class UbuntuOneMacaroons(BaseModel):
 
     def with_discharge(self, discharge: str) -> "UbuntuOneMacaroons":
         """Create a copy of this UbuntuOneMacaroons with a different discharge macaroon."""
-        return self.copy(update={"d": discharge})
+        return self.model_copy(update={"d": discharge})
 
 
 class UbuntuOneModel(BaseModel):
@@ -115,14 +115,14 @@ class UbuntuOneModel(BaseModel):
     token_type: Literal["u1-macaroon"] = Field("u1-macaroon", alias="t")
     value: UbuntuOneMacaroons = Field(..., alias="v")
 
-    def marshal(self) -> Dict[str, Any]:
+    def marshal(self) -> dict[str, Any]:
         """Create a dictionary containing the Ubuntu One credentials."""
-        return self.dict(by_alias=True)
+        return self.model_dump(by_alias=True)
 
     @classmethod
-    def unmarshal(cls, data: Dict[str, Any]) -> "UbuntuOneModel":
+    def unmarshal(cls, data: dict[str, Any]) -> "UbuntuOneModel":
         """Create Candid model from dictionary data."""
-        return cls(**data)
+        return cls.model_validate(data)
 
 
 def marshal_u1_credentials(u1_creds: UbuntuOneMacaroons) -> str:
@@ -159,7 +159,7 @@ def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
     :param marshalled_creds: The credentials retrieved from auth storage.
     :return: The actual Ubuntu One credentials.
     """
-    data: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
 
     try:
         creds = json.loads(marshalled_creds)

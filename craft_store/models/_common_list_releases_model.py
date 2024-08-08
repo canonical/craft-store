@@ -17,8 +17,6 @@
 """Common Models between namespaces for List Releases responses."""
 
 
-from typing import List, Optional
-
 from ._base_model import MarshableModel
 
 
@@ -29,8 +27,8 @@ class ProgressiveModel(MarshableModel):
     :param percentage: the progress of a progressive release on a channel.
     """
 
-    paused: Optional[bool]
-    percentage: Optional[float]
+    paused: bool | None = None
+    percentage: float | None = None
 
 
 class ChannelsModel(MarshableModel):
@@ -43,8 +41,8 @@ class ChannelsModel(MarshableModel):
     :param track: the channel track.
     """
 
-    branch: Optional[str]
-    fallback: Optional[str]
+    branch: str | None = None
+    fallback: str | None = None
     name: str
     risk: str
     track: str
@@ -56,4 +54,4 @@ class PackageModel(MarshableModel):
     :param channels: list of :attr:`ChannelsModel`.
     """
 
-    channels: List[ChannelsModel]
+    channels: list[ChannelsModel]

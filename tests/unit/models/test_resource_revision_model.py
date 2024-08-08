@@ -1,6 +1,6 @@
 # -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2023 Canonical Ltd.
+# Copyright 2023-2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,18 @@ from craft_store.models import CharmResourceRevisionUpdateRequest
 @pytest.mark.parametrize(
     ("request_dict", "match"),
     [
-        ({"revision": 1}, r"bases[:\s]+field required"),
+        ({"revision": 1}, r"bases[:\s]+Field required"),
         (
             {"revision": 1, "bases": []},
-            r"bases[:\s]+ensure this value has at least 1 item",
+            r"bases[:\s]+List should have at least 1 item",
         ),
         (
             {"revision": 1, "bases": [{"architectures": ["all", "all"]}]},
-            r"bases -> 0 -> architectures[:\s]+the list has duplicated items",
+            r"bases.0.architectures[:\s]+Value error, Duplicate values in list:",
         ),
         (
             {"revision": 1, "bases": [{"architectures": []}]},
-            r"bases -> 0 -> architectures[:\s]+ensure this value has at least 1 item",
+            r"bases.0.architectures[:\s]+List should have at least 1 item",
         ),
     ],
 )
