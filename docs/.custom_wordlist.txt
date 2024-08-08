@@ -16,6 +16,7 @@ unregistering
 url
 whoami
 cfg
+Pydantic
 pyproject
 toml
 backend
