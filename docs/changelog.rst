@@ -1,6 +1,16 @@
 *********
 Changelog
 *********
+3.0.0 (2024-08-08)
+------------------
+
+Breaking changes:
+- Set minimum Python version to 3.10
+- Migrate to Pydantic 2
+
+Bug fixes:
+- Better error message when the keyring is locked.
+
 2.6.1 (2024-03-26)
 ------------------
 
