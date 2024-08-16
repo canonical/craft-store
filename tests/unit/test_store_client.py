@@ -34,7 +34,7 @@ def _fake_response(status_code, reason=None, json=None):
     return response
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_macaroon():
     return json.dumps(
         {
@@ -53,7 +53,7 @@ def real_macaroon():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def http_client_request_mock(real_macaroon):
     def request(*args, **kwargs):  # noqa: ARG001
         if args[1] == "POST" and "tokens" in args[2]:
@@ -86,7 +86,7 @@ def http_client_request_mock(real_macaroon):
     patched_http_client.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def _bakery_discharge_mock(monkeypatch):
     token_response_mock = _fake_response(
         200, json={"kind": "kind", "token": "TOKEN", "token64": b"VE9LRU42NA=="}
@@ -106,7 +106,7 @@ def _bakery_discharge_mock(monkeypatch):
     monkeypatch.setattr(bakery, "discharge_all", mock_discharge)
 
 
-@pytest.fixture()
+@pytest.fixture
 def auth_mock(real_macaroon, new_auth):
     patched_auth = patch("craft_store.base_client.Auth", autospec=True)
     mocked_auth = patched_auth.start()

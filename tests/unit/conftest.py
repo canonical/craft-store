@@ -51,7 +51,7 @@ class FakeKeyring:
             raise self.delete_error
 
 
-@pytest.fixture()
+@pytest.fixture
 def keyring_set_keyring_mock():
     """Mock setting the keyring."""
 
@@ -61,7 +61,7 @@ def keyring_set_keyring_mock():
     patched_keyring.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_keyring():
     return FakeKeyring()
 
@@ -79,7 +79,7 @@ def fake_keyring_get(fake_keyring, request):
         patched_keyring.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def expires():
     """Mocks/freezes utcnow() in craft_store.endpoints module.
 

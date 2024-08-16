@@ -36,7 +36,7 @@ def _fake_error_response(status_code, reason, json_raises=False):
     return response
 
 
-@pytest.fixture()
+@pytest.fixture
 def session_mock():
     patched_session = patch("requests.Session", autospec=True)
     mocked_session = patched_session.start()
@@ -45,7 +45,7 @@ def session_mock():
     patched_session.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def retry_mock():
     patched_retry = patch("craft_store.http_client.Retry", autospec=True)
     yield patched_retry.start()

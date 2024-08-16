@@ -47,9 +47,9 @@ def test_set_credentials_log_debug(caplog, fake_keyring):
     assert fake_keyring.set_password_calls == [
         ("fakeclient", "fakestore.com", "eydwYXNzd29yZCc6ICdzZWNyZXQnfQ=="),
     ]
-    assert [
+    assert [rec.message for rec in caplog.records] == [
         "Storing credentials for 'fakeclient' on 'fakestore.com' in keyring 'Fake Keyring'."
-    ] == [rec.message for rec in caplog.records]
+    ]
 
 
 @pytest.mark.usefixtures("fake_keyring")
@@ -93,9 +93,9 @@ def test_get_credentials_log_debug(caplog, fake_keyring):
 
     assert auth.get_credentials() == "{'password': 'secret'}"
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
-    assert [
+    assert [rec.message for rec in caplog.records] == [
         "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'."
-    ] == [rec.message for rec in caplog.records]
+    ]
 
 
 def test_get_credentials_no_credentials_in_keyring(caplog, fake_keyring):
@@ -128,10 +128,10 @@ def test_del_credentials_log_debug(caplog, fake_keyring):
     auth.del_credentials()
 
     assert fake_keyring.delete_password_calls == [("fakeclient", "fakestore.com")]
-    assert [
+    assert [rec.message for rec in caplog.records] == [
         "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
         "Deleting credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
-    ] == [rec.message for rec in caplog.records]
+    ]
 
 
 def test_del_credentials_delete_error_in_keyring(caplog, fake_keyring):
@@ -156,10 +156,10 @@ def test_del_credentials_gets_no_credential(caplog, fake_keyring):
         auth.del_credentials()
 
     assert fake_keyring.get_password_calls == [("fakeclient", "fakestore.com")]
-    assert [
+    assert [rec.message for rec in caplog.records] == [
         "Retrieving credentials for 'fakeclient' on 'fakestore.com' from keyring 'Fake Keyring'.",
         "Credentials not found in the keyring 'Fake Keyring'",
-    ] == [rec.message for rec in caplog.records]
+    ]
 
 
 def test_credentials_not_parseable_error(monkeypatch):
@@ -191,7 +191,7 @@ def test_ensure_no_credentials_unlock_error(fake_keyring, mocker):
         auth.ensure_no_credentials()
 
 
-@pytest.mark.disable_fake_keyring()
+@pytest.mark.disable_fake_keyring
 def test_ephemeral_set_memory_keyring():
     auth = Auth("fakeclient", "fakestore.com", ephemeral=True)
 
@@ -286,7 +286,7 @@ if sys.platform == "linux":
     test_exceptions.append(SecretServiceNotAvailableException)
 
 
-@pytest.mark.disable_fake_keyring()
+@pytest.mark.disable_fake_keyring
 @pytest.mark.parametrize("exception", test_exceptions)
 def test_secretservice_file_fallsback(mocker, exception):
     # At one point in the code we run keyring.set_backend, there is no
@@ -301,7 +301,7 @@ def test_secretservice_file_fallsback(mocker, exception):
     assert type(auth._keyring) == FileKeyring
 
 
-@pytest.mark.disable_fake_keyring()
+@pytest.mark.disable_fake_keyring
 def test_secretservice_works(mocker):
     # At one point in the code we run keyring.set_backend, there is no
     # elegant way to reset this in the library.

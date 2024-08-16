@@ -86,7 +86,7 @@ class ConcreteTestClient(BaseClient):
         return "The voltmeter reads 0V over this macaroon."
 
 
-@pytest.fixture()
+@pytest.fixture
 def charm_client():
     client = ConcreteTestClient(
         base_url="https://staging.example.com",

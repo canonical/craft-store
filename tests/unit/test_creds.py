@@ -20,7 +20,7 @@ import pytest
 from craft_store import creds, errors
 
 
-@pytest.fixture()
+@pytest.fixture
 def stored_candid_creds(new_auth: bool) -> str:
     """Fixture that generates Candid credentials in the format read from storage.
 
@@ -34,7 +34,7 @@ def stored_candid_creds(new_auth: bool) -> str:
     return candid_creds
 
 
-@pytest.fixture()
+@pytest.fixture
 def stored_u1_creds(new_auth: bool) -> str:
     """Fixture that generates Ubuntu One credentials in the format read from storage.
 
