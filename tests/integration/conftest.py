@@ -24,7 +24,7 @@ import yaml
 from craft_store import StoreClient, endpoints
 
 
-@pytest.fixture()
+@pytest.fixture
 def charm_client():
     """A common StoreClient for charms"""
     return StoreClient(
@@ -37,7 +37,7 @@ def charm_client():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def charmhub_charm_name():
     """Allow overriding the user to override the test charm.
 
@@ -47,7 +47,7 @@ def charmhub_charm_name():
     return os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test")
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_charm_file(tmp_path, charmhub_charm_name):
     """Provide a fake charm to upload to charmhub."""
     return _make_charm(tmp_path, charmhub_charm_name, ["amd64"])
@@ -115,7 +115,7 @@ def _make_charm(
         return charm_file
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_charms(
     tmp_path, charmhub_charm_name, architectures=("amd64", "arm64", "riscv64")
 ):
@@ -126,7 +126,7 @@ def fake_charms(
     return files
 
 
-@pytest.fixture()
+@pytest.fixture
 def unregistered_charm_name(charm_client):
     """Get an unregistered name for use in tests"""
     account_id = charm_client.whoami().get("account", {}).get("id", "").lower()

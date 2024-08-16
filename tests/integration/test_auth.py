@@ -24,7 +24,7 @@ from craft_store.auth import Auth, MemoryKeyring
 pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
-@pytest.fixture()
+@pytest.fixture
 def _test_keyring():
     """In memory keyring backend for testing."""
     current_keyring = keyring.get_keyring()
