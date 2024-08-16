@@ -298,7 +298,7 @@ def test_secretservice_file_fallsback(mocker, exception):
     )
     auth = Auth(application_name="test-app", host="foo")
 
-    assert type(auth._keyring) == FileKeyring
+    assert type(auth._keyring) is FileKeyring
 
 
 @pytest.mark.disable_fake_keyring
@@ -312,4 +312,4 @@ def test_secretservice_works(mocker):
     )
     auth = Auth(application_name="test-app", host="foo")
 
-    assert type(auth._keyring) == SecretService.Keyring
+    assert type(auth._keyring) is SecretService.Keyring
