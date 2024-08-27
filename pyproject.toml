@@ -47,12 +47,12 @@ dev = [
 lint = [
     "black==24.8.0",
     "codespell[toml]==2.3.0",
-    "ruff==0.6.1",
+    "ruff==0.6.2",
     "yamllint==1.35.1"
 ]
 types = [
-    "mypy[reports]==1.11.1",
-    "pyright==1.1.375",
+    "mypy[reports]==1.11.2",
+    "pyright==1.1.377",
     "types-PyYAML",
     "types-Pygments",
     "types-colorama",
