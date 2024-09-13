@@ -384,7 +384,7 @@ def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_moc
     filepath = tmp_path / "artifact.thing"
     filepath.write_text("file to upload")
 
-    def callback(monitor):  # noqa: ARG001
+    def callback(monitor):
         pass
 
     def monitor(encoder):  # noqa: ARG001
