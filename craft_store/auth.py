@@ -29,7 +29,7 @@ import keyring
 import keyring.backend
 import keyring.backends.fail
 import keyring.errors
-from keyring._compat import properties
+from jaraco.classes import properties
 from keyring.backends import SecretService
 from xdg import BaseDirectory  # type: ignore[import]
 
