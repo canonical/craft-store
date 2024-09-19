@@ -106,7 +106,7 @@ class UbuntuOneMacaroons(BaseModel):
 
     def with_discharge(self, discharge: str) -> "UbuntuOneMacaroons":
         """Create a copy of this UbuntuOneMacaroons with a different discharge macaroon."""
-        return self.model_copy(update={"d": discharge})
+        return self.model_copy(update={"discharge": discharge})
 
 
 class UbuntuOneModel(BaseModel):

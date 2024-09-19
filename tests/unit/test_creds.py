@@ -83,6 +83,19 @@ def test_u1_creds_marshal():
     assert loaded["v"]["d"] == "fake discharge"
 
 
+def test_u1_creds_with_discharge():
+    """Return new credentials with an updated discharge macaroon."""
+    original_creds = creds.UbuntuOneMacaroons(r="original root", d="original discharge")
+
+    new_creds = original_creds.with_discharge("new discharge")
+
+    assert original_creds.root == "original root"
+    assert original_creds.discharge == "original discharge"
+    assert new_creds.root == "original root"
+    assert new_creds.discharge == "new discharge"
+
+
+
 def test_u1_creds_unmarshal_failure():
     with pytest.raises(errors.CredentialsNotParseable):
         creds.unmarshal_u1_credentials("not a valid json string")
