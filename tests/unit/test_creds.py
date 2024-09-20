@@ -95,7 +95,6 @@ def test_u1_creds_with_discharge():
     assert new_creds.discharge == "new discharge"
 
 
-
 def test_u1_creds_unmarshal_failure():
     with pytest.raises(errors.CredentialsNotParseable):
         creds.unmarshal_u1_credentials("not a valid json string")
