@@ -1,6 +1,13 @@
 *********
 Changelog
 *********
+
+3.0.1 (2024-09-20)
+------------------
+
+- Fix a regression where Ubuntu One macaroons could not be refreshed
+- Make craft-store compatible with ``keyring`` v25
+
 3.0.0 (2024-08-08)
 ------------------
 
