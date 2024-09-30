@@ -6,6 +6,7 @@ https
 io
 initialization
 initialized
+libssl
 NotLoggedIn
 keyring
 StoreClient
