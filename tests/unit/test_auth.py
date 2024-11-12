@@ -16,20 +16,30 @@
 
 import logging
 import sys
+from typing import cast
 from unittest.mock import ANY
 
 import keyring
 import keyring.backends.fail
 import keyring.errors
 import pytest
+import pytest_mock
 from craft_store import errors
 from craft_store.auth import Auth, FileKeyring, MemoryKeyring
 from keyring.backends import SecretService
 
 
-def test_set_credentials(caplog, fake_keyring):
-    auth = Auth("fakeclient", "fakestore.com")
+@pytest.fixture(params=[True, False], ids=["file_fallback", "no_file_fallback"])
+def file_fallback(request: pytest.FixtureRequest) -> bool:
+    return cast(bool, request.param)
 
+
+@pytest.fixture
+def auth(file_fallback: bool) -> Auth:
+    return Auth("fakeclient", "fakestore.com", file_fallback=file_fallback)
+
+
+def test_set_credentials(caplog, fake_keyring, auth: Auth):
     auth.set_credentials("{'password': 'secret'}")
 
     assert fake_keyring.set_password_calls == [
@@ -38,9 +48,8 @@ def test_set_credentials(caplog, fake_keyring):
     assert caplog.records == []
 
 
-def test_set_credentials_log_debug(caplog, fake_keyring):
+def test_set_credentials_log_debug(caplog, fake_keyring, auth: Auth):
     caplog.set_level(logging.DEBUG)
-    auth = Auth("fakeclient", "fakestore.com")
 
     auth.set_credentials("{'password': 'secret'}")
 
@@ -53,9 +62,7 @@ def test_set_credentials_log_debug(caplog, fake_keyring):
 
 
 @pytest.mark.usefixtures("fake_keyring")
-def test_double_set_credentials_fails():
-    auth = Auth("fakeclient", "fakestore.com")
-
+def test_double_set_credentials_fails(auth: Auth):
     auth.set_credentials("{'password': 'secret'}")
 
     with pytest.raises(errors.CredentialsAlreadyAvailable):
@@ -202,7 +209,27 @@ def test_no_keyring_get(fake_keyring_get):
     fake_keyring_get.return_value = keyring.backends.fail.Keyring()
 
     with pytest.raises(errors.NoKeyringError):
-        Auth("fakeclient", "fakestore.com")
+        Auth("fakeclient", "fakestore.com", file_fallback=False)
+
+
+def test_no_keyring_fallback_to_file(
+    fake_keyring_get,
+    mocker: pytest_mock.MockerFixture,
+):
+    set_keyring_mock = mocker.patch("keyring.set_keyring")
+    # First one should fail as on the system without SecretService provider
+    # Next one will return FileKeyring set previously by Auth fallback mechanism
+    fake_keyring_get.side_effect = [
+        keyring.backends.fail.Keyring(),
+        FileKeyring("test-app"),
+    ]
+
+    auth = Auth("fakeclient", "fakestore.com", file_fallback=True)
+    assert isinstance(auth._keyring, FileKeyring)
+    set_keyring_mock.assert_called_once_with(ANY)
+    assert isinstance(
+        set_keyring_mock.call_args.args[0], FileKeyring
+    ), "Keyring should be set to FileKeyring"
 
 
 def test_memory_keyring_set_get():
