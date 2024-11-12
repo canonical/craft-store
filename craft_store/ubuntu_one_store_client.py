@@ -42,6 +42,7 @@ class UbuntuOneStoreClient(BaseClient):
         user_agent: str,
         environment_auth: str | None = None,
         ephemeral: bool = False,
+        file_fallback: bool = False,
     ) -> None:
         super().__init__(
             base_url=base_url,
@@ -51,6 +52,7 @@ class UbuntuOneStoreClient(BaseClient):
             user_agent=user_agent,
             environment_auth=environment_auth,
             ephemeral=ephemeral,
+            file_fallback=file_fallback,
         )
         self._auth_url = auth_url
 
