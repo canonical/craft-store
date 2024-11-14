@@ -2,6 +2,15 @@
 Changelog
 *********
 
+3.1.0 (XXXX-XX-XX)
+------------------
+
+- Add opt-in ``FileKeyring`` fallback for ``Auth`` in the case of missing
+  ``SecretService`` provider on a system.
+
+..
+  For a complete list of commits, check out the `3.1.0`_ release on GitHub.
+
 3.0.2 (2024-09-30)
 ------------------
 
@@ -175,3 +184,6 @@ Bug fixes:
 ------------------
 
 - Initial release
+
+
+.. _3.1.0: https://github.com/canonical/craft-store/releases/tag/3.1.0
