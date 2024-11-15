@@ -67,6 +67,7 @@ class BaseClient(metaclass=ABCMeta):
         user_agent: str,
         environment_auth: str | None = None,
         ephemeral: bool = False,
+        file_fallback: bool = False,
     ) -> None:
         """Initialize the Store Client."""
         self.http_client = HTTPClient(user_agent=user_agent)
@@ -80,6 +81,7 @@ class BaseClient(metaclass=ABCMeta):
             urlparse(base_url).netloc,
             environment_auth=environment_auth,
             ephemeral=ephemeral,
+            file_fallback=file_fallback,
         )
 
     @abstractmethod

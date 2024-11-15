@@ -168,6 +168,8 @@ class Auth:
         host: str,
         ephemeral: bool = False,
         environment_auth: str | None = None,
+        *,
+        file_fallback: bool = False,
     ) -> None:
         """Initialize Auth.
 
@@ -175,6 +177,7 @@ class Auth:
         :param host: specific host for the store used.
         :param environment_auth: environment variable used for authentication.
         :param ephemeral: keep everything in memory.
+        :param file_fallback: fallback to FileKeyring if SecretService is not available.
         """
         self.application_name = application_name
         self.host = host
@@ -196,14 +199,19 @@ class Auth:
             except keyring.errors.KeyringLocked as err:
                 raise errors.KeyringUnlockError from err
             except KEYRING_EXCEPTIONS:
-                logger.warning("Falling back to file based storage")
-                keyring.set_keyring(FileKeyring(application_name))
-                self._keyring = keyring.get_keyring()
+                self._fallback_to_file_keyring(application_name)
         elif isinstance(self._keyring, keyring.backends.fail.Keyring):
-            raise errors.NoKeyringError
+            if not file_fallback:
+                raise errors.NoKeyringError
+            self._fallback_to_file_keyring(application_name)
 
         if environment_auth_value:
             self.set_credentials(self.decode_credentials(environment_auth_value))
+
+    def _fallback_to_file_keyring(self, application_name: str) -> None:
+        logger.warning("Falling back to file based storage")
+        keyring.set_keyring(FileKeyring(application_name))
+        self._keyring = keyring.get_keyring()
 
     @staticmethod
     def decode_credentials(encoded_credentials: str) -> str:

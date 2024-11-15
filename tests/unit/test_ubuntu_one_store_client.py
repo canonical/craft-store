@@ -205,6 +205,7 @@ def test_store_client_login(
             "fake-server.com",
             environment_auth=environment_auth,
             ephemeral=False,
+            file_fallback=False,
         ),
         call().ensure_no_credentials(),
         call().set_credentials(new_credentials),
@@ -298,7 +299,13 @@ def test_store_client_login_otp(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         # First call without otp.
         call().ensure_no_credentials(),
         # Second call with otp.
@@ -373,7 +380,13 @@ def test_store_client_login_with_packages_and_channels(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         call().ensure_no_credentials(),
         call().set_credentials(new_credentials),
         call().encode_credentials(new_credentials),
@@ -393,7 +406,13 @@ def test_store_client_logout(auth_mock):
     store_client.logout()
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         call().del_credentials(),
     ]
 
@@ -421,7 +440,13 @@ def test_store_client_request(http_client_request_mock, authorization, auth_mock
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         call().get_credentials(),
     ]
 
@@ -486,7 +511,13 @@ def test_store_client_request_refresh(
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         call().get_credentials(),
         call().get_credentials(),
         call().set_credentials(new_credentials, force=True),
@@ -523,6 +554,12 @@ def test_store_client_whoami(http_client_request_mock, authorization, auth_mock)
     ]
 
     assert auth_mock.mock_calls == [
-        call("fakecraft", "fake-server.com", environment_auth=None, ephemeral=False),
+        call(
+            "fakecraft",
+            "fake-server.com",
+            environment_auth=None,
+            ephemeral=False,
+            file_fallback=False,
+        ),
         call().get_credentials(),
     ]
