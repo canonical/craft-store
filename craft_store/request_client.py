@@ -195,7 +195,7 @@ class StoreRequestClient:
         check_store_task_status: bool = False,
         **kwargs: Any,  # noqa: ANN401
     ) -> httpx.Response:
-        """Issue HTTP reqeust agains given URL."""
+        """Issue HTTP request against given URL."""
         if headers is None:
             headers = {}
         try:
@@ -229,7 +229,7 @@ class StoreRequestClient:
             return response
 
     def _check_response_code(self, response: httpx.Response) -> None:
-        """Check if requests has a succesfull HTTP code."""
+        """Check if requests has a successful HTTP code."""
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError as error:
