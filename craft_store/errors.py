@@ -191,3 +191,7 @@ class CandidTokenValueError(CraftStoreError):
 
     def __init__(self, url: str) -> None:
         super().__init__(f"Empty token value returned from {url!r}.")
+
+
+class DeveloperTokenUnavailableError(CraftStoreError):
+    """Raised when developer token is not set."""
