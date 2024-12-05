@@ -41,6 +41,7 @@ class DeveloperTokenAuth(httpx.Auth):
     ) -> None:
         self._auth = auth
         self._auth_type = auth_type
+        self._token: str | None = None
 
     def auth_flow(
         self,
@@ -48,7 +49,7 @@ class DeveloperTokenAuth(httpx.Auth):
     ) -> Generator[httpx.Request, httpx.Response, None]:
         """Update request to include Authorization header."""
         logger.debug("Adding developer token to authorize request")
-        if self._developer_token is None:
+        if self._token is None:
             self.get_token_from_keyring()
 
         self._update_headers(request)
@@ -58,12 +59,12 @@ class DeveloperTokenAuth(httpx.Auth):
         """Get token stored in the credentials storage."""
         logger.debug("Getting developer token from credential storage")
         dev_token = creds.DeveloperToken.from_json_string(self._auth.get_credentials())
-        self._developer_token = dev_token.macaroon
+        self._token = dev_token.macaroon
 
     def _update_headers(self, request: httpx.Request) -> None:
         """Add token to the request."""
         logger.debug("Adding ephemeral token to request headers")
-        if self._developer_token is None:
+        if self._token is None:
             raise errors.DeveloperTokenUnavailableError(
                 message="Developer token is not available"
             )
@@ -71,8 +72,8 @@ class DeveloperTokenAuth(httpx.Auth):
 
     def _format_auth_header(self) -> str:
         if self._auth_type == "bearer":
-            return f"Bearer {self._developer_token}"
-        return f"Macaroon {self._developer_token}"
+            return f"Bearer {self._token}"
+        return f"Macaroon {self._token}"
 
 
 class StoreOperationStatus(str, Enum):
