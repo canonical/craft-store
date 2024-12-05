@@ -16,7 +16,7 @@
 #
 """Tests for RegisteredNameModel."""
 
-import pydantic_core
+import pydantic
 import pytest
 from craft_store.models import (
     AccountModel,
@@ -93,7 +93,9 @@ def test_unmarshal(check, json_dict):
     if actual.website is None:
         check.is_none(json_dict.get("website"))
     else:
-        check.equal(actual.website, pydantic_core.Url(json_dict.get("website")))
+        check.equal(
+            actual.website, pydantic.networks.AnyHttpUrl(json_dict.get("website"))
+        )
     check.equal(
         actual.track_guardrails,
         [
