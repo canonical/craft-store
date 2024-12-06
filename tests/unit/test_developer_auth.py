@@ -93,15 +93,11 @@ def test_auth_if_token_unavailable() -> None:
         httpx_client.request("GET", "https://fake-testcraft-url.localhost")
 
 
-def test_auth_if_token_unset(mocker: pytest_mock.MockerFixture) -> None:
-    app_name = "testcraft"
-    host = "test-host.localhost"
-    auth = Auth(
-        application_name=app_name,
-        host=host,
-        ephemeral=True,
-    )
-    developer_token_auth = DeveloperTokenAuth(auth=auth)
+def test_auth_if_token_unset(
+    developer_token_auth: DeveloperTokenAuth,
+    mocker: pytest_mock.MockerFixture,
+) -> None:
+    # do not set token that is available in keyring
     mocker.patch.object(developer_token_auth, "get_token_from_keyring")
     httpx_client = httpx.Client(auth=developer_token_auth)
 
