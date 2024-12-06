@@ -201,23 +201,18 @@ class DeveloperToken(BaseModel):
             return cls.model_validate(data)
         except pydantic.ValidationError as err:
             raise errors.CredentialsNotParseable(
-                "Expected valid developer token"
+                "Expected valid Ubuntu One credentials"
             ) from err
 
-    def to_json_string(self) -> str:
-        """Serialize developer token for storage.
-
-        This function creates a string that contains JSON-serialized credentials.
-
-        :return: A payload string ready to be stored in the keyring.
-        """
-        return self.model_dump_json(by_alias=True)
-
     @classmethod
-    def from_json_string(cls, marshalled_creds: str) -> Self:
+    def model_validate_json(
+        cls,
+        json_data: str | bytes | bytearray,
+        **kwargs: Any,  # noqa: ANN401
+    ) -> Self:
         """Deserialize previously stored developer token."""
         try:
-            return cls.model_validate_json(marshalled_creds)
+            return super().model_validate_json(json_data, **kwargs)
         except pydantic.ValidationError as err:
             raise errors.CredentialsNotParseable(
                 "Expected valid developer token credentials"

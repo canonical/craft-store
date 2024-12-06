@@ -125,7 +125,7 @@ def test_mixed_creds():
 
 def test_developer_token_marshal():
     dev_token = creds.DeveloperToken(macaroon="test-cred")
-    json_dev_token = dev_token.to_json_string()
+    json_dev_token = dev_token.model_dump_json()
     loaded = json.loads(json_dev_token)
     assert len(loaded) == 1, "Dict with single key should be stored"
     assert (
@@ -134,13 +134,13 @@ def test_developer_token_marshal():
 
 
 def test_developer_token_unmarshal(stored_developer_token: str):
-    developer_token = creds.DeveloperToken.from_json_string(stored_developer_token)
+    developer_token = creds.DeveloperToken.model_validate_json(stored_developer_token)
     assert developer_token.macaroon == "test-dev-token"
 
 
 def test_developer_token_loading_failure():
     with pytest.raises(errors.CredentialsNotParseable):
-        creds.DeveloperToken.from_json_string("incorrect-creds")
+        creds.DeveloperToken.model_validate_json("incorrect-creds")
 
 
 def test_developer_token_incorrect_type():
