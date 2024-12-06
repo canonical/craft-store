@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-"""Tests for authorizing reuqests using DeveloperTokenAuth."""
+"""Tests for authorizing requests using DeveloperTokenAuth."""
 
 from typing import Literal, cast
 
