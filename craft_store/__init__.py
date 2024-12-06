@@ -1,5 +1,6 @@
+# -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-# Copyright 2021 Canonical Ltd.
+# Copyright 2021,2024 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,7 @@ __version__ = "3.0.0"
 from . import creds, endpoints, errors, models
 from .auth import Auth
 from .base_client import BaseClient
+from .developer_token_auth import DeveloperTokenAuth
 from .http_client import HTTPClient
 from .store_client import StoreClient
 from .ubuntu_one_store_client import UbuntuOneStoreClient
@@ -36,4 +38,5 @@ __all__ = [
     "HTTPClient",
     "StoreClient",
     "UbuntuOneStoreClient",
+    "DeveloperTokenAuth",
 ]

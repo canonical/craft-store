@@ -49,6 +49,13 @@ def stored_u1_creds(new_auth: bool) -> str:
     return json.dumps(u1_creds)
 
 
+@pytest.fixture
+def stored_developer_token() -> str:
+    """Fixture that generates developer token in the format read from storage."""
+    dev_token = {"macaroon": "test-dev-token"}
+    return json.dumps(dev_token)
+
+
 def test_candid_creds_unmarshal(stored_candid_creds):
     """Test that we can parse both types of stored Candid creds."""
     candid_creds = creds.unmarshal_candid_credentials(stored_candid_creds)
@@ -114,3 +121,28 @@ def test_mixed_creds():
     # Try to load Candid as Ubuntu One:
     with pytest.raises(errors.CredentialsNotParseable):
         creds.unmarshal_u1_credentials(stored_candid)
+
+
+def test_developer_token_marshal():
+    dev_token = creds.DeveloperToken(macaroon="test-cred")
+    json_dev_token = dev_token.model_dump_json()
+    loaded = json.loads(json_dev_token)
+    assert len(loaded) == 1, "Dict with single key should be stored"
+    assert (
+        loaded["macaroon"] == dev_token.macaroon
+    ), "Serialized and deserialized object should be the same as base one"
+
+
+def test_developer_token_unmarshal(stored_developer_token: str):
+    developer_token = creds.DeveloperToken.model_validate_json(stored_developer_token)
+    assert developer_token.macaroon == "test-dev-token"
+
+
+def test_developer_token_loading_failure():
+    with pytest.raises(errors.CredentialsNotParseable):
+        creds.DeveloperToken.model_validate_json("incorrect-creds")
+
+
+def test_developer_token_incorrect_type():
+    with pytest.raises(errors.CredentialsNotParseable):
+        creds.DeveloperToken.unmarshal({"incorrect-creds": "some"})

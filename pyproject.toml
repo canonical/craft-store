@@ -14,6 +14,8 @@ dependencies = [
     "pydantic~=2.8",
     "pyxdg",
     "jaraco-classes>=3.4.0",
+    "httpx>=0.28",
+    "typing_extensions>=4.12",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -44,6 +46,7 @@ dev = [
     "pytest-check>=2.0",
     "pytest-subprocess>=1.5",
     "pytest-timeout>=2.0",
+    "pytest-httpx>=0.35",
 ]
 lint = [
     "black==24.10.0",
