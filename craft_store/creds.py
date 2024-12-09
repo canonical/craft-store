@@ -21,6 +21,7 @@ from typing import Any, Literal
 
 import pydantic
 from pydantic import BaseModel, Field
+from typing_extensions import Self
 
 from . import errors
 
@@ -182,3 +183,37 @@ def unmarshal_u1_credentials(marshalled_creds: str) -> UbuntuOneMacaroons:
         raise errors.CredentialsNotParseable(
             "Expected valid Ubuntu One credentials"
         ) from err
+
+
+class DeveloperToken(BaseModel):
+    """Model for publisher gateway credentials."""
+
+    macaroon: str
+
+    def marshal(self) -> dict[str, Any]:
+        """Create a dictionary containing the developer token."""
+        return self.model_dump(by_alias=True)
+
+    @classmethod
+    def unmarshal(cls, data: dict[str, Any]) -> Self:
+        """Create DeveloperToken model from dictionary data."""
+        try:
+            return cls.model_validate(data)
+        except pydantic.ValidationError as err:
+            raise errors.CredentialsNotParseable(
+                "Expected valid Ubuntu One credentials"
+            ) from err
+
+    @classmethod
+    def model_validate_json(
+        cls,
+        json_data: str | bytes | bytearray,
+        **kwargs: Any,  # noqa: ANN401
+    ) -> Self:
+        """Deserialize previously stored developer token."""
+        try:
+            return super().model_validate_json(json_data, **kwargs)
+        except pydantic.ValidationError as err:
+            raise errors.CredentialsNotParseable(
+                "Expected valid developer token credentials"
+            ) from err
