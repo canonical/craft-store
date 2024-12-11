@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Track model for Craft Store packages."""
+
 from datetime import datetime
 from typing import Annotated
 

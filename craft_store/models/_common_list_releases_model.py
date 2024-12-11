@@ -16,7 +16,6 @@
 
 """Common Models between namespaces for List Releases responses."""
 
-
 from ._base_model import MarshableModel
 
 

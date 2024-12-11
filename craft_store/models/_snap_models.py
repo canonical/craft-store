@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Basic snap-related models."""
+
 from enum import Enum
 
 

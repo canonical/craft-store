@@ -16,7 +16,6 @@
 
 """List Releases Models for Snap Store responses."""
 
-
 from datetime import datetime
 
 from ._base_model import MarshableModel

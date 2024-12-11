@@ -15,7 +15,6 @@
 
 """Release request models for the Store."""
 
-
 from pydantic import Field
 
 from ._base_model import MarshableModel
