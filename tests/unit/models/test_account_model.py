@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for the store account model."""
+
 import pytest
 from craft_store.models.account_model import AccountModel
 

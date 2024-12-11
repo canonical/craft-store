@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Single-endpoint write tests (likely with a read query after)."""
 
-
 import contextlib
 import time
 

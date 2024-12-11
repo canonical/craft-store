@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Registered Names models for the Store."""
+
 from typing import Any, Literal
 
 import pydantic

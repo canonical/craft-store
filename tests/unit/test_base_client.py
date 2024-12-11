@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for methods in the BaseClient class."""
+
 import datetime
 from unittest.mock import Mock
 
@@ -81,7 +82,9 @@ class ConcreteTestClient(BaseClient):
         return "I am authorised."
 
     def _get_discharged_macaroon(
-        self, root_macaroon: str, **kwargs  # noqa: ARG002
+        self,
+        root_macaroon: str,
+        **kwargs,  # noqa: ARG002
     ) -> str:
         return "The voltmeter reads 0V over this macaroon."
 
