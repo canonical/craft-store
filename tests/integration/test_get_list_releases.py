@@ -27,6 +27,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     """Test list releases for a given charm.
 
