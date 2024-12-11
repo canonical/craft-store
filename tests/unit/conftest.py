@@ -16,8 +16,10 @@
 
 import datetime
 from typing import Any
+from unittest import mock
 from unittest.mock import patch
 
+import craft_store
 import pytest
 
 
@@ -108,3 +110,8 @@ def new_auth(request) -> bool:
     :see: base_client.wrap_credentials()
     """
     return request.param
+
+
+@pytest.fixture
+def mock_auth():
+    return mock.Mock(spec=craft_store.Auth)

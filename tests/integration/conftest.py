@@ -21,15 +21,20 @@ from pathlib import Path
 
 import pytest
 import yaml
-from craft_store import StoreClient, endpoints
+from craft_store import StoreClient, auth, endpoints, publishergateway
+
+
+@pytest.fixture(scope="session")
+def charmhub_base_url() -> str:
+    return os.getenv("CRAFT_STORE_CHARMHUB", "https://api.staging.charmhub.io")
 
 
 @pytest.fixture
-def charm_client():
+def charm_client(charmhub_base_url):
     """A common StoreClient for charms"""
     return StoreClient(
         application_name="integration-test",
-        base_url="https://api.staging.charmhub.io",
+        base_url=charmhub_base_url,
         storage_base_url="https://storage.staging.snapcraftcontent.com",
         endpoints=endpoints.CHARMHUB,
         user_agent="integration-tests",
@@ -45,6 +50,22 @@ def charmhub_charm_name():
     so overriding the test charm may cause test failures.
     """
     return os.getenv("CRAFT_STORE_TEST_CHARM", default="craft-store-test")
+
+
+@pytest.fixture
+def charmhub_auth(charmhub_base_url):
+    return auth.Auth(
+        application_name="craft-store-integration-tests",
+        host=charmhub_base_url,
+        environment_auth="CRAFT_STORE_CHARMCRAFT_CREDENTIALS",
+    )
+
+
+@pytest.fixture
+def publisher_gateway(charmhub_base_url, charmhub_auth):
+    return publishergateway.PublisherGateway(
+        base_url=charmhub_base_url, namespace="charm", auth=charmhub_auth
+    )
 
 
 @pytest.fixture

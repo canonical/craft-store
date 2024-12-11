@@ -20,9 +20,10 @@
 __version__ = "3.0.0"
 
 
-from . import creds, endpoints, errors, models
+from . import creds, endpoints, errors, models, publishergateway
 from .auth import Auth
 from .base_client import BaseClient
+from .candidauth import CandidAuth
 from .developer_token_auth import DeveloperTokenAuth
 from .http_client import HTTPClient
 from .store_client import StoreClient
@@ -33,8 +34,10 @@ __all__ = [
     "endpoints",
     "errors",
     "models",
+    "publishergateway",
     "Auth",
     "BaseClient",
+    "CandidAuth",
     "HTTPClient",
     "StoreClient",
     "UbuntuOneStoreClient",
