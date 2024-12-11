@@ -15,13 +15,20 @@ https://canonical-craft-store.readthedocs-hosted.com.
 
 # Contributing
 
+## Set up a development environment
+
+To install the necessary build tools, first run:
+
+```bash
+make setup
+```
 
 ## Running tests
 
 To run all tests in the suite run:
 
 ```
-tox
+make test
 ```
 
 ### Integration tests
@@ -32,51 +39,44 @@ charm package on the staging craft-store. These can be run by creating a pull re
 Other integration tests simply require a valid login to the staging charmhub store.
 These can be run by exporting charmhub staging credentials to the environment
 variable `CRAFT_STORE_CHARMCRAFT_CREDENTIALS`. An easy way to do this is to
-create a `charmcraft.yaml` file containing the lines:
+run the following command:
 
-    charmhub:
-      api-url: "https://api.staging.charmhub.io"
-      storage-url: "https://storage.staging.snapcraftcontent.com"
+```
+CHARMCRAFT_STORE_API_URL=https://api.staging.charmhub.io charmcraft login --export cc.cred
+```
 
-and then run `charmcraft login --export cc.cred` to login and
-`export CRAFT_STORE_CHARMCRAFT_CREDENTIALS=$(cat cc.cred)` to put the credentials
-into the environment variable. Note that if you do not have collaborator permissions
-on `craft-store-test-charm`, some tests will fail rather than being skipped.
+to login and `export CRAFT_STORE_CHARMCRAFT_CREDENTIALS=$(cat cc.cred)` to put the
+credentials into the environment variable. Note that if you do not have collaborator
+permissions on the charm `craft-store-test`, you can override the environment variable
+`CRAFT_STORE_TEST_CHARM` to point to a charm you do own.
 
 ## Adding new requirements
 
 If a new dependency is added to the project run:
 
-TODO
+```
+uv add '<dependency spec>'
+```
 
 
 ## Verifying documentation changes
 
 To locally verify documentation changes run:
 
-`tox run -e lint-docs,build-docs`
+```
+make lint-docs
+make docs
+```
 
 
 After running, newly generated documentation shall be available at
 `./docs/_build/html/`.
 
+While writing documentation, it may be useful to run `make docs-auto`, which will run
+sphinx-autobuild.
+
 ## Committing code
 
-Please follow these guidelines when committing code for this project:
-
-- Use a topic with a colon to start the subject
-- Separate subject from body with a blank line
-- Limit the subject line to 50 characters
-- Do not capitalize the subject line
-- Do not end the subject line with a period
-- Use the imperative mood in the subject line
-- Wrap the body at 72 characters
-- Use the body to explain what and why (instead of how)
-
-As an example:
-
-
-    endpoints: support package attenuations
-
-    Required in order to obtain credentials that apply only to a given package;
-    be it charm, snap or bundle.
+craft-store uses the code and commit conventions common to the Starcraft team, which
+can be found
+[in our common base project](https://github.com/canonical/starbase/blob/main/HACKING.rst)
