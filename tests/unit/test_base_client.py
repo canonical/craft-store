@@ -86,6 +86,7 @@ class ConcreteTestClient(BaseClient):
         root_macaroon: str,
         **kwargs,  # noqa: ARG002
     ) -> str:
+        _ = root_macaroon
         return "The voltmeter reads 0V over this macaroon."
 
 
