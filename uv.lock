@@ -230,11 +230,11 @@ wheels = [
 
 [[package]]
 name = "certifi"
-version = "2024.8.30"
+version = "2024.12.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b0/ee/9b19140fe824b367c04c5e1b369942dd754c4c5462d5674002f75c4dedc1/certifi-2024.8.30.tar.gz", hash = "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9", size = 168507 }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/bd/1d41ee578ce09523c81a15426705dd20969f5abf006d1afe8aeff0dd776a/certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db", size = 166010 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/90/3c9ff0512038035f59d279fddeb79f5f1eccd8859f06d6163c58798b9487/certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8", size = 167321 },
+    { url = "https://files.pythonhosted.org/packages/a5/32/8f6669fc4798494966bf446c8c4a162e0b5d893dff088afddf76414f70e1/certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56", size = 164927 },
 ]
 
 [[package]]
@@ -464,9 +464,10 @@ toml = [
 
 [[package]]
 name = "craft-store"
-version = "3.0.2.post20+g8ce9a77.d20241211"
+version = "3.0.2.post22+g697791a.d20241216"
 source = { editable = "." }
 dependencies = [
+    { name = "annotated-types" },
     { name = "httpx" },
     { name = "jaraco-classes" },
     { name = "keyring" },
@@ -480,18 +481,6 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-dev = [
-    { name = "build" },
-    { name = "coverage", extra = ["toml"] },
-    { name = "pytest" },
-    { name = "pytest-check" },
-    { name = "pytest-cov" },
-    { name = "pytest-httpx" },
-    { name = "pytest-mock" },
-    { name = "pytest-subprocess" },
-    { name = "pytest-timeout" },
-    { name = "pyyaml" },
-]
 docs = [
     { name = "furo" },
     { name = "lxd-sphinx-extensions" },
@@ -521,7 +510,6 @@ release = [
 ]
 types = [
     { name = "mypy", extra = ["reports"] },
-    { name = "pyright" },
     { name = "types-colorama" },
     { name = "types-docutils" },
     { name = "types-pygments" },
@@ -530,33 +518,37 @@ types = [
     { name = "types-setuptools" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "build" },
+    { name = "coverage", extra = ["toml"] },
+    { name = "pytest" },
+    { name = "pytest-check" },
+    { name = "pytest-cov" },
+    { name = "pytest-httpx" },
+    { name = "pytest-mock" },
+    { name = "pytest-subprocess" },
+    { name = "pytest-timeout" },
+    { name = "pyyaml" },
+]
+
 [package.metadata]
 requires-dist = [
+    { name = "annotated-types", specifier = ">=0.6.0" },
     { name = "black", marker = "extra == 'lint'", specifier = "==24.10.0" },
-    { name = "build", marker = "extra == 'dev'" },
     { name = "codespell", extras = ["toml"], marker = "extra == 'lint'", specifier = "==2.3.0" },
-    { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = "==7.6.2" },
     { name = "furo", marker = "extra == 'docs'", specifier = "==2024.8.6" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "jaraco-classes", specifier = ">=3.4.0" },
     { name = "keyring", specifier = ">=23.0" },
     { name = "lxd-sphinx-extensions", marker = "extra == 'docs'", specifier = "==0.0.16" },
     { name = "macaroonbakery", specifier = ">=1.3.0,!=1.3.3" },
-    { name = "mypy", extras = ["reports"], marker = "extra == 'types'", specifier = "==1.13.0" },
+    { name = "mypy", extras = ["reports"], marker = "extra == 'types'", specifier = "~=1.13" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "==4.0.0" },
     { name = "overrides", specifier = ">=7.0.0" },
     { name = "pydantic", specifier = "~=2.8" },
-    { name = "pyright", marker = "extra == 'types'", specifier = "==1.1.384" },
     { name = "pyspelling", marker = "extra == 'docs'", specifier = "==2.10" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = "==8.3.3" },
-    { name = "pytest-check", marker = "extra == 'dev'", specifier = ">=2.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = "==5.0.0" },
-    { name = "pytest-httpx", marker = "extra == 'dev'", specifier = ">=0.35" },
-    { name = "pytest-mock", marker = "extra == 'dev'", specifier = "==3.14.0" },
-    { name = "pytest-subprocess", marker = "extra == 'dev'", specifier = ">=1.5" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "pyxdg", specifier = ">=0.26" },
-    { name = "pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "requests", specifier = ">=2.27.0" },
     { name = "requests-toolbelt", specifier = ">=1.0.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = "==8.1.3" },
@@ -581,6 +573,20 @@ requires-dist = [
     { name = "typing-extensions", specifier = ">=4.12" },
     { name = "wheel", marker = "extra == 'release'" },
     { name = "yamllint", marker = "extra == 'lint'", specifier = "==1.35.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.6.2" },
+    { name = "pytest", specifier = "==8.3.3" },
+    { name = "pytest-check", specifier = ">=2.0" },
+    { name = "pytest-cov", specifier = "==5.0.0" },
+    { name = "pytest-httpx", specifier = ">=0.35" },
+    { name = "pytest-mock", specifier = "==3.14.0" },
+    { name = "pytest-subprocess", specifier = ">=1.5" },
+    { name = "pytest-timeout", specifier = ">=2.0" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
 ]
 
 [[package]]
@@ -1258,15 +1264,6 @@ wheels = [
 ]
 
 [[package]]
-name = "nodeenv"
-version = "1.9.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/43/16/fc88b08840de0e0a72a2f9d8c6bae36be573e475a6326ae854bcc549fc45/nodeenv-1.9.1.tar.gz", hash = "sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f", size = 47437 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/1d/1b658dbd2b9fa9c4c9f32accbfc0205d532c8c6194dc0f2a4c0428e7128a/nodeenv-1.9.1-py2.py3-none-any.whl", hash = "sha256:ba11c9782d29c27c70ffbdda2d7415098754709be8a7056d79a737cd901155c9", size = 22314 },
-]
-
-[[package]]
 name = "overrides"
 version = "7.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1502,19 +1499,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/00/52/75ea0ae249ba885c9429e421b4f94bc154df68484847f1ac164287d978d7/pyRFC3339-1.1.tar.gz", hash = "sha256:81b8cbe1519cdb79bed04910dd6fa4e181faf8c88dff1e1b987b5f7ab23a5b1a", size = 5290 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/7a/725f5c16756ec6211b1e7eeac09f469084595513917ea069bc023c40a5e2/pyRFC3339-1.1-py2.py3-none-any.whl", hash = "sha256:67196cb83b470709c580bb4738b83165e67c6cc60e1f2e4f286cfcb402a926f4", size = 5669 },
-]
-
-[[package]]
-name = "pyright"
-version = "1.1.384"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "nodeenv" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/84/00/a23114619f9d005f4b0f35e037c76cee029174d090a6f73a355749c74f4a/pyright-1.1.384.tar.gz", hash = "sha256:25e54d61f55cbb45f1195ff89c488832d7a45d59f3e132f178fdf9ef6cafc706", size = 21956 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/4a/e7f4d71d194ba675f3577d11eebe4e17a592c4d1c3f9986d4b321ba3c809/pyright-1.1.384-py3-none-any.whl", hash = "sha256:f0b6f4db2da38f27aeb7035c26192f034587875f751b847e9ad42ed0c704ac9e", size = 18578 },
 ]
 
 [[package]]
@@ -2250,14 +2234,14 @@ wheels = [
 
 [[package]]
 name = "starlette"
-version = "0.41.3"
+version = "0.42.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/4c/9b5764bd22eec91c4039ef4c55334e9187085da2d8a2df7bd570869aae18/starlette-0.41.3.tar.gz", hash = "sha256:0e4ab3d16522a255be6b28260b938eae2482f98ce5cc934cb08dce8dc3ba5835", size = 2574159 }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/ae/0c98794b248370ce30f71018d0f39889f1d90c73a631e68e2f47e5efda2f/starlette-0.42.0.tar.gz", hash = "sha256:91f1fbd612f3e3d821a8a5f46bf381afe2a9722a7b8bbde1c07fb83384c2882a", size = 2575136 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/00/2b325970b3060c7cecebab6d295afe763365822b1306a12eeab198f74323/starlette-0.41.3-py3-none-any.whl", hash = "sha256:44cedb2b7c77a9de33a8b74b2b90e9f50d11fcf25d8270ea525ad71a25374ff7", size = 73225 },
+    { url = "https://files.pythonhosted.org/packages/c0/38/f790c69b2cbfe9cd4a8a89db1ef50d0a10e5121c07ff8b1d7c16d7807f41/starlette-0.42.0-py3-none-any.whl", hash = "sha256:02f877201a3d6d301714b5c72f15cac305ea5cc9e213c4b46a5af7eecad0d625", size = 73356 },
 ]
 
 [[package]]
@@ -2409,16 +2393,16 @@ wheels = [
 
 [[package]]
 name = "uvicorn"
-version = "0.32.1"
+version = "0.34.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "h11" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/3c/21dba3e7d76138725ef307e3d7ddd29b763119b3aa459d02cc05fefcff75/uvicorn-0.32.1.tar.gz", hash = "sha256:ee9519c246a72b1c084cea8d3b44ed6026e78a4a309cbedae9c37e4cb9fbb175", size = 77630 }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/4d/938bd85e5bf2edeec766267a5015ad969730bb91e31b44021dfe8b22df6c/uvicorn-0.34.0.tar.gz", hash = "sha256:404051050cd7e905de2c9a7e61790943440b3416f49cb409f965d9dcd0fa73e9", size = 76568 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/50/c1/2d27b0a15826c2b71dcf6e2f5402181ef85acf439617bb2f1453125ce1f3/uvicorn-0.32.1-py3-none-any.whl", hash = "sha256:82ad92fd58da0d12af7482ecdb5f2470a04c9c9a53ced65b9bbb4a205377602e", size = 63828 },
+    { url = "https://files.pythonhosted.org/packages/61/14/33a3a1352cfa71812a3a21e8c9bfb83f60b0011f5e36f2b1399d51928209/uvicorn-0.34.0-py3-none-any.whl", hash = "sha256:023dc038422502fa28a09c7a30bf2b6991512da7dcdb8fd35fe57cfc154126f4", size = 62315 },
 ]
 
 [[package]]
