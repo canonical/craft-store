@@ -430,7 +430,7 @@ toml = [
 
 [[package]]
 name = "craft-store"
-version = "3.0.2.post24+ge492778.d20241211"
+version = "3.0.2.post26+g486209b.d20241211"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
