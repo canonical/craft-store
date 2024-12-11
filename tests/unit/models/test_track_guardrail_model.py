@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """Tests for TrackGuardrailModel"""
+
 import re
 from datetime import datetime, timezone
 
