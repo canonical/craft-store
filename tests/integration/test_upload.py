@@ -26,6 +26,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_charm_upload(charm_client, fake_charm_file, charmhub_charm_name):
     upload_id = charm_client.upload_file(filepath=fake_charm_file)
 

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Tests for update_resource_revisions."""
 
+import pytest
 from craft_store.models.resource_revision_model import (
     CharmResourceRevisionUpdateRequest,
     RequestCharmResourceBase,
@@ -24,6 +25,7 @@ from .conftest import needs_charmhub_credentials
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_charm_update_resource_revisions(charm_client, charmhub_charm_name):
     resource_name = "empty-file"
 

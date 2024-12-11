@@ -23,6 +23,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 @pytest.mark.parametrize("entity_type", ["charm", "bundle"])
 def test_register_unregister_cycle(charm_client, unregistered_charm_name, entity_type):
     try:
@@ -42,6 +43,7 @@ def test_register_unregister_cycle(charm_client, unregistered_charm_name, entity
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_unregister_nonexistent(charm_client, unregistered_charm_name):
     with pytest.raises(StoreServerError) as exc_info:
         charm_client.unregister_name(unregistered_charm_name)

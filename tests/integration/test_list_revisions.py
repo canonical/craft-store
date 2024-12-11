@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Tests for list_releases."""
+
 import datetime
 from typing import cast
 
+import pytest
 from craft_store.models import revisions_model
 from craft_store.models._charm_model import CharmBaseModel
 
@@ -24,6 +26,7 @@ from .conftest import needs_charmhub_credentials
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_charm_list_revisions(charm_client, charmhub_charm_name):
     revisions = charm_client.list_revisions(charmhub_charm_name)
 
