@@ -1,0 +1,41 @@
+# -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
+#
+# Copyright 2024 Canonical Ltd.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 3 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""Request models for the publisher gateway."""
+
+import re
+from typing import Annotated, TypedDict
+
+import annotated_types
+from typing_extensions import NotRequired
+
+TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
+"""A regular expression guarding track names.
+
+Retrieved from https://api.staging.charmhub.io/docs/default.html#create_tracks
+"""
+
+CreateTrackRequest = TypedDict(
+    "CreateTrackRequest",
+    {
+        "name": Annotated[
+            str,
+            annotated_types.Len(1, 28),
+            annotated_types.Predicate(lambda name: bool(TRACK_NAME_REGEX.match(name))),
+        ],
+        "version-pattern": NotRequired[str | None],
+        "automatic-phasing-percentage": NotRequired[str | None],
+    },
+)

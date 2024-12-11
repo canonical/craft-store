@@ -6,6 +6,7 @@ authors = [
     {name = "Canonical Ltd.", email = "snapcraft@lists.snapcraft.io"},
 ]
 dependencies = [
+    "annotated-types>=0.6.0",
     "keyring>=23.0",
     "overrides>=7.0.0",
     "requests>=2.27.0",
@@ -142,7 +143,8 @@ minversion = "7.0"
 testpaths = "tests"
 xfail_strict = true
 markers = [
-    "disable_fake_keyring"
+    "disable_fake_keyring",
+    "slow: tests that take a long time",
 ]
 
 [tool.coverage.run]
