@@ -14,10 +14,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Full workflow tests for charms."""
+
 import datetime
 import hashlib
 import time
 
+import pytest
 from craft_store.models import revisions_model
 from craft_store.models.resource_revision_model import (
     CharmResourceRevisionUpdateRequest,
@@ -30,6 +32,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 # This is intentionally long since it goes through a full workflow
 def test_full_charm_workflow(  # noqa: PLR0912, PLR0915
     tmp_path, charm_client, charmhub_charm_name, fake_charms

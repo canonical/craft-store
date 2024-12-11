@@ -22,6 +22,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_charm_release(charm_client, charmhub_charm_name):
     model = release_request_model.ReleaseRequestModel(
         channel="edge", revision=1, resources=[]

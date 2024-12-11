@@ -167,7 +167,8 @@ minversion = "7.0"
 testpaths = "tests"
 xfail_strict = true
 markers = [
-    "disable_fake_keyring"
+    "disable_fake_keyring",
+    "slow: tests that take a long time to run",
 ]
 
 [tool.coverage.run]
