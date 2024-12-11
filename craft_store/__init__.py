@@ -17,9 +17,6 @@
 
 """Interact with Canonical services such as Charmhub and the Snap Store."""
 
-__version__ = "3.0.0"
-
-
 from . import creds, endpoints, errors, models
 from ._httpx_auth import CandidAuth, DeveloperTokenAuth
 from .publisher import PublisherGateway
@@ -29,7 +26,20 @@ from .http_client import HTTPClient
 from .store_client import StoreClient
 from .ubuntu_one_store_client import UbuntuOneStoreClient
 
+
+try:
+    from ._version import __version__
+except ImportError:  # pragma: no cover
+    from importlib.metadata import version, PackageNotFoundError
+
+    try:
+        __version__ = version("craft-store")
+    except PackageNotFoundError:
+        __version__ = "dev"
+
+
 __all__ = [
+    "__version__",
     "creds",
     "endpoints",
     "errors",
