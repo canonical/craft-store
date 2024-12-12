@@ -14,31 +14,30 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Client for making requests towards publisher gateway."""
+"""Craft Store Authentication Store."""
 
+import abc
+import logging
 from collections.abc import Generator
-from logging import getLogger
 from typing import Literal
 
 import httpx
 
 from craft_store import auth, creds, errors
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class CandidAuth(httpx.Auth):
-    """Request authentication using developer token."""
+class _TokenAuth(httpx.Auth, metaclass=abc.ABCMeta):
+    """Base class for httpx token-based authenticators."""
 
     def __init__(
-        self,
-        *,
-        auth: auth.Auth,
-        auth_type: Literal["bearer", "macaroon"] = "bearer",
+        self, *, auth: auth.Auth, auth_type: Literal["bearer", "macaroon"] = "bearer"
     ) -> None:
+        super().__init__()
+        self._token: str | None = None
         self._auth = auth
         self._auth_type = auth_type
-        self._token: str | None = None
 
     def auth_flow(
         self,
@@ -46,23 +45,22 @@ class CandidAuth(httpx.Auth):
     ) -> Generator[httpx.Request, httpx.Response, None]:
         """Update request to include Authorization header."""
         if self._token is None:
-            logger.debug("Getting candid macaroon from keyring")
+            logger.debug("Getting token from keyring")
             self._token = self.get_token_from_keyring()
 
         self._update_headers(request)
         yield request
 
+    @abc.abstractmethod
     def get_token_from_keyring(self) -> str:
         """Get token stored in the credentials storage."""
-        logger.debug("Getting candid from credential storage")
-        return creds.unmarshal_candid_credentials(self._auth.get_credentials())
 
     def _update_headers(self, request: httpx.Request) -> None:
         """Add token to the request."""
         logger.debug("Adding ephemeral token to request headers")
         if self._token is None:
             raise errors.DeveloperTokenUnavailableError(
-                message="Candid token is not available"
+                message="Token is not available"
             )
         request.headers["Authorization"] = self._format_auth_header()
 
@@ -70,3 +68,23 @@ class CandidAuth(httpx.Auth):
         if self._auth_type == "bearer":
             return f"Bearer {self._token}"
         return f"Macaroon {self._token}"
+
+
+class CandidAuth(_TokenAuth):
+    """Candid based authentication class for httpx store clients."""
+
+    def get_token_from_keyring(self) -> str:
+        """Get token stored in the credentials storage."""
+        logger.debug("Getting candid from credential storage")
+        return creds.unmarshal_candid_credentials(self._auth.get_credentials())
+
+
+class DeveloperTokenAuth(_TokenAuth):
+    """Developer token based authentication class for httpx store clients."""
+
+    def get_token_from_keyring(self) -> str:
+        """Get token stored in the credentials storage."""
+        logger.debug("Getting developer token from credential storage")
+        return creds.DeveloperToken.model_validate_json(
+            self._auth.get_credentials()
+        ).macaroon

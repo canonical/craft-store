@@ -1,20 +1,18 @@
-#  -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*
+# -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
 #
-#  Copyright 2024 Canonical Ltd.
+# Copyright 2021,2024 Canonical Ltd.
 #
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License version 3 as published by the Free Software Foundation.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 3 as published by the Free Software Foundation.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  Lesser General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
 #
-#  You should have received a copy of the GNU Lesser General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-"""Tests for authorizing requests using DeveloperTokenAuth."""
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Literal, cast
 
@@ -22,8 +20,31 @@ import httpx
 import pytest
 import pytest_httpx
 import pytest_mock
-from craft_store import Auth, DeveloperTokenAuth, creds
-from craft_store.errors import CredentialsUnavailable, DeveloperTokenUnavailableError
+from craft_store import CandidAuth, DeveloperTokenAuth, creds, errors
+from craft_store.auth import Auth
+
+
+@pytest.fixture
+def candid_auth(mock_auth):
+    return CandidAuth(
+        auth=mock_auth,
+    )
+
+
+def test_candid_get_token_from_keyring(mock_auth, candid_auth):
+    mock_auth.get_credentials.return_value = "{}"
+
+    assert candid_auth.get_token_from_keyring() == "{}"
+
+
+def test_candid_auth_flow(mock_auth, candid_auth):
+    mock_auth.get_credentials.return_value = "{}"
+
+    request = httpx.Request("GET", "http://localhost")
+
+    next(candid_auth.auth_flow(request))
+
+    assert request.headers["Authorization"] == "Bearer {}"
 
 
 @pytest.fixture
@@ -87,7 +108,7 @@ def test_auth_if_token_unavailable() -> None:
     httpx_client = httpx.Client(auth=developer_token_auth)
 
     with pytest.raises(
-        CredentialsUnavailable,
+        errors.CredentialsUnavailable,
         match=f"No credentials found for {app_name!r} on {host!r}.",
     ):
         httpx_client.request("GET", "https://fake-testcraft-url.localhost")
@@ -98,11 +119,13 @@ def test_auth_if_token_unset(
     mocker: pytest_mock.MockerFixture,
 ) -> None:
     # do not set token that is available in keyring
-    mocker.patch.object(developer_token_auth, "get_token_from_keyring")
+    mocker.patch.object(
+        developer_token_auth, "get_token_from_keyring", return_value=None
+    )
     httpx_client = httpx.Client(auth=developer_token_auth)
 
     with pytest.raises(
-        DeveloperTokenUnavailableError,
-        match="Developer token is not available",
+        errors.DeveloperTokenUnavailableError,
+        match="Token is not available",
     ):
         httpx_client.request("GET", "https://fake-testcraft-url.localhost")

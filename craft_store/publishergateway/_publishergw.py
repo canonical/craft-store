@@ -19,7 +19,9 @@ from typing import cast
 
 import httpx
 
-from craft_store import auth, candidauth, errors
+from craft_store import errors
+from craft_store._httpx_auth import CandidAuth
+from craft_store.auth import Auth
 
 from . import _request, _response
 
@@ -33,11 +35,11 @@ class PublisherGateway:
     Each instance is only valid for one particular namespace.
     """
 
-    def __init__(self, base_url: str, namespace: str, auth: auth.Auth) -> None:
+    def __init__(self, base_url: str, namespace: str, auth: Auth) -> None:
         self._namespace = namespace
         self._client = httpx.Client(
             base_url=base_url,
-            auth=candidauth.CandidAuth(auth=auth, auth_type="macaroon"),
+            auth=CandidAuth(auth=auth, auth_type="macaroon"),
         )
 
     @staticmethod
