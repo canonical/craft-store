@@ -14,7 +14,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Client for the publisher gateway."""
+from __future__ import annotations
 
+from json import JSONDecodeError
 from typing import cast
 
 import httpx
@@ -48,7 +50,7 @@ class PublisherGateway:
             return
         try:
             error_response = response.json()
-        except Exception as exc:
+        except JSONDecodeError as exc:
             raise errors.CraftStoreError(
                 f"Invalid response from server ({response.status_code})",
                 details=response.text,
@@ -61,7 +63,8 @@ class PublisherGateway:
         if len(error_list) == 1:
             brief = f"{brief}: {error_list[0].get('message')}"
         else:
-            brief = f"{brief}. See log for details"
+            fancy_error_list = errors.StoreErrorList(error_list)
+            brief = f"{brief}.\n{fancy_error_list}"
         raise errors.CraftStoreError(
             brief, store_errors=errors.StoreErrorList(error_list)
         )
@@ -87,7 +90,7 @@ class PublisherGateway:
             to which this track will be attached.
         :param tracks: Each track is a dictionary mapping query values.
         :returns: The number of tracks created by the store.
-        :raises: ValueError if a track name is invalid.
+        :returns: InvalidRequestError if the name field of any passed track is invalid.
 
         API docs: https://api.charmhub.io/docs/default.html#create_tracks
         """
@@ -99,7 +102,10 @@ class PublisherGateway:
         }
         if bad_track_names:
             bad_tracks = ", ".join(sorted(bad_track_names))
-            raise ValueError(f"The following track names are invalid: {bad_tracks}")
+            raise errors.InvalidRequestError(
+                f"The following track names are invalid: {bad_tracks}",
+                resolution="Ensure all tracks have valid names.",
+            )
 
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/tracks", json=tracks

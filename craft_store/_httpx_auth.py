@@ -59,9 +59,7 @@ class _TokenAuth(httpx.Auth, metaclass=abc.ABCMeta):
         """Add token to the request."""
         logger.debug("Adding ephemeral token to request headers")
         if self._token is None:
-            raise errors.DeveloperTokenUnavailableError(
-                message="Token is not available"
-            )
+            raise errors.AuthTokenUnavailableError(message="Token is not available")
         request.headers["Authorization"] = self._format_auth_header()
 
     def _format_auth_header(self) -> str:
@@ -72,6 +70,11 @@ class _TokenAuth(httpx.Auth, metaclass=abc.ABCMeta):
 
 class CandidAuth(_TokenAuth):
     """Candid based authentication class for httpx store clients."""
+
+    def __init__(
+        self, *, auth: auth.Auth, auth_type: Literal["bearer", "macaroon"] = "macaroon"
+    ) -> None:
+        super().__init__(auth=auth, auth_type=auth_type)
 
     def get_token_from_keyring(self) -> str:
         """Get token stored in the credentials storage."""

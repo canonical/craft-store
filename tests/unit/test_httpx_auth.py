@@ -44,7 +44,7 @@ def test_candid_auth_flow(mock_auth, candid_auth):
 
     next(candid_auth.auth_flow(request))
 
-    assert request.headers["Authorization"] == "Bearer {}"
+    assert request.headers["Authorization"] == "Macaroon {}"
 
 
 @pytest.fixture
@@ -122,10 +122,9 @@ def test_auth_if_token_unset(
     mocker.patch.object(
         developer_token_auth, "get_token_from_keyring", return_value=None
     )
-    httpx_client = httpx.Client(auth=developer_token_auth)
-
+    client = httpx.Client(auth=developer_token_auth)
     with pytest.raises(
-        errors.DeveloperTokenUnavailableError,
+        errors.AuthTokenUnavailableError,
         match="Token is not available",
     ):
-        httpx_client.request("GET", "https://fake-testcraft-url.localhost")
+        client.request("GET", "https://fake-testcraft-url.localhost")

@@ -16,14 +16,14 @@
 """Tests that only involve reading from the store."""
 
 
-from craft_store import publishergateway
+from craft_store import publisher
 
 from tests.integration.conftest import needs_charmhub_credentials
 
 
 @needs_charmhub_credentials()
 def test_get_package_metadata(
-    publisher_gateway: publishergateway.PublisherGateway, charmhub_charm_name: str
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
 ):
     metadata = publisher_gateway.get_package_metadata(charmhub_charm_name)
     assert metadata.get("name") == charmhub_charm_name

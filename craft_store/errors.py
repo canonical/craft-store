@@ -41,11 +41,23 @@ class CraftStoreError(Exception):
         store_errors: StoreErrorList | None = None,
     ) -> None:
         super().__init__(message)
-        if not details:
+        if store_errors and not details:
             details = str(store_errors)
         self.details = details
         self.resolution = resolution
         self.store_errors = store_errors
+
+
+class InvalidRequestError(CraftStoreError, ValueError):
+    """Error when the request is invalid in a known way."""
+
+    def __init__(
+        self,
+        message: str,
+        details: str | None = None,
+        resolution: str | None = None,
+    ) -> None:
+        super().__init__(message, details, resolution)
 
 
 class NetworkError(CraftStoreError):
@@ -209,5 +221,5 @@ class CandidTokenValueError(CraftStoreError):
         super().__init__(f"Empty token value returned from {url!r}.")
 
 
-class DeveloperTokenUnavailableError(CraftStoreError):
-    """Raised when developer token is not set."""
+class AuthTokenUnavailableError(CraftStoreError):
+    """Raised when an authorization token is not available."""

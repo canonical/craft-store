@@ -15,11 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Unit tests for the publisher gateway."""
 
+import textwrap
 from unittest import mock
 
 import httpx
 import pytest
-from craft_store import errors, publishergateway
+from craft_store import errors, publisher
 
 
 @pytest.fixture
@@ -29,14 +30,14 @@ def mock_httpx_client():
 
 @pytest.fixture
 def publisher_gateway(mock_httpx_client):
-    gw = publishergateway.PublisherGateway("http://localhost", "charm", mock.Mock())
+    gw = publisher.PublisherGateway("http://localhost", "charm", mock.Mock())
     gw._client = mock_httpx_client
     return gw
 
 
 @pytest.mark.parametrize("response", [httpx.Response(status_code=204)])
 def test_check_error_on_success(response: httpx.Response):
-    assert publishergateway.PublisherGateway._check_error(response) is None
+    assert publisher.PublisherGateway._check_error(response) is None
 
 
 @pytest.mark.parametrize(
@@ -68,26 +69,31 @@ def test_check_error_on_success(response: httpx.Response):
                 418,
                 json={
                     "error-list": [
-                        {"code": "whelp", "message": "I am a teapot"},
+                        {"code": "good", "message": "I am a teapot"},
                         {
                             "code": "bad",
-                            "message": "Why would you ask me for a coffee?",
+                            "message": "Why would you ask me for coffee?",
                         },
                     ]
                 },
             ),
-            r"Error 418 returned from store. See log for details",
+            textwrap.dedent(
+                """\
+                Error 418 returned from store.
+                - good: I am a teapot
+                - bad: Why would you ask me for coffee?"""
+            ),
             id="multiple-client-errors",
         ),
     ],
 )
 def test_check_error(response: httpx.Response, match):
     with pytest.raises(errors.CraftStoreError, match=match):
-        publishergateway.PublisherGateway._check_error(response)
+        publisher.PublisherGateway._check_error(response)
 
 
 def test_get_package_metadata(
-    mock_httpx_client: mock.Mock, publisher_gateway: publishergateway.PublisherGateway
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
 ):
     mock_httpx_client.get.return_value = httpx.Response(
         200, json={"metadata": {"meta": "data"}}
@@ -110,7 +116,7 @@ def test_get_package_metadata(
     ],
 )
 def test_create_tracks_validation(
-    publisher_gateway: publishergateway.PublisherGateway,
+    publisher_gateway: publisher.PublisherGateway,
     tracks,
     match,
 ):
@@ -119,7 +125,7 @@ def test_create_tracks_validation(
 
 
 def test_create_tracks_success(
-    mock_httpx_client: mock.Mock, publisher_gateway: publishergateway.PublisherGateway
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
 ):
     mock_httpx_client.post.return_value = httpx.Response(
         200, json={"num-tracks-created": 0}

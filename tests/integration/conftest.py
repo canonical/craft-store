@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from craft_store import StoreClient, auth, endpoints, publishergateway
+from craft_store import StoreClient, auth, endpoints, publisher
 
 
 @pytest.fixture(scope="session")
@@ -63,7 +63,7 @@ def charmhub_auth(charmhub_base_url):
 
 @pytest.fixture
 def publisher_gateway(charmhub_base_url, charmhub_auth):
-    return publishergateway.PublisherGateway(
+    return publisher.PublisherGateway(
         base_url=charmhub_base_url, namespace="charm", auth=charmhub_auth
     )
 

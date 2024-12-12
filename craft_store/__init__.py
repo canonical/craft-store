@@ -20,8 +20,9 @@
 __version__ = "3.0.0"
 
 
-from . import creds, endpoints, errors, models, publishergateway
+from . import creds, endpoints, errors, models
 from ._httpx_auth import CandidAuth, DeveloperTokenAuth
+from .publisher import PublisherGateway
 from .auth import Auth
 from .base_client import BaseClient
 from .http_client import HTTPClient
@@ -33,7 +34,7 @@ __all__ = [
     "endpoints",
     "errors",
     "models",
-    "publishergateway",
+    "PublisherGateway",
     "Auth",
     "BaseClient",
     "CandidAuth",

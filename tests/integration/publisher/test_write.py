@@ -20,7 +20,7 @@ import contextlib
 import time
 
 import pytest
-from craft_store import errors, publishergateway
+from craft_store import errors, publisher
 
 from tests.integration.conftest import needs_charmhub_credentials
 
@@ -30,7 +30,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 @pytest.mark.parametrize("version_pattern", [None, r"\d+"])
 @pytest.mark.parametrize("percentages", [None, 50])
 def test_create_tracks(
-    publisher_gateway: publishergateway.PublisherGateway,
+    publisher_gateway: publisher.PublisherGateway,
     charmhub_charm_name: str,
     version_pattern,
     percentages,
@@ -64,7 +64,7 @@ def test_create_tracks(
 @pytest.mark.slow
 @needs_charmhub_credentials()
 def test_create_disallowed_track(
-    publisher_gateway: publishergateway.PublisherGateway, charmhub_charm_name: str
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
 ):
     track_name = "disallowed"
 
@@ -78,7 +78,7 @@ def test_create_disallowed_track(
 @pytest.mark.slow
 @needs_charmhub_credentials()
 def test_create_existing_track(
-    publisher_gateway: publishergateway.PublisherGateway, charmhub_charm_name: str
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
 ):
     track_name = "1"
 
