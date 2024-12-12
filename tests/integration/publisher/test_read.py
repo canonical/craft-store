@@ -22,6 +22,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 
 
 @needs_charmhub_credentials()
+@pytest.mark.slow
 def test_get_package_metadata(
     publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
 ):

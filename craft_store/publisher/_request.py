@@ -16,10 +16,10 @@
 """Request models for the publisher gateway."""
 
 import re
-from typing import Annotated, TypedDict
+from typing import Annotated
 
 import annotated_types
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, TypedDict
 
 TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 """A regular expression guarding track names.
