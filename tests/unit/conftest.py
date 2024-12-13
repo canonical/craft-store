@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 import craft_store
 import pytest
-from craft_store.models.registered_name_model import RegisteredNameModel
+from craft_store.publisher import RegisteredName
 
 
 class FakeKeyring:
@@ -133,4 +133,4 @@ def fake_registered_name_dict():
 
 @pytest.fixture
 def fake_registered_name_model(fake_registered_name_dict):
-    return RegisteredNameModel.unmarshal(fake_registered_name_dict)
+    return RegisteredName.unmarshal(fake_registered_name_dict)
