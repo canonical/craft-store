@@ -17,6 +17,7 @@ jobs:
       UV_FROZEN: "true"
       UV_PYTHON_PREFERENCE: only-system
       UV_PYTHON_DOWNLOADS: never
+      UV_PROJECT_ENVIRONMENT: /tmp/tics_env
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,7 +53,13 @@ jobs:
           path: |
             results/
 
-      - name: Run TICS analysis
+      - name: Install additional TiCS dependencies
+        run: |
+          source ${UV_PROJECT_ENVIRONMENT}/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          uv pip install pylint pyflakes flake8
+
+      - name: Run TiCS analysis
         uses: tiobe/tics-github-action@v3
         with:
           mode: qserver
