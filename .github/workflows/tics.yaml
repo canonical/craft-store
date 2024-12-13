@@ -4,67 +4,12 @@ on:
   push:
     branches:
       - "work/tics"
-  pull_request:
-    paths:
-      - .github/workflows/tics.yaml
   schedule:
     - cron: "0 0 * * *" # Daily at midnight
 
 jobs:
   tests:
-    runs-on: ubuntu-24.04
-    env:
-      UV_FROZEN: "true"
-      UV_PYTHON_PREFERENCE: only-system
-      UV_PYTHON_DOWNLOADS: never
-      UV_PROJECT_ENVIRONMENT: /tmp/tics_env
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up uv with caching
-        id: setup-uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-          cache-suffix: ${{ toJSON(matrix.platform) }}
-
-      - name: Install dependencies
-        run: |
-          make setup-tests
-
-      - name: Run tests
-        run: |
-          make test-coverage
-
-      - name: Add XML coverage reports
-        run: |
-          uvx coverage xml
-          mkdir results
-          mv -t results .coverage coverage.xml htmlcov
-
-      - name: Upload test coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-tics
-          overwrite: true
-          path: |
-            results/
-
-      - name: Install additional TiCS dependencies
-        run: |
-          source ${UV_PROJECT_ENVIRONMENT}/bin/activate
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          uv pip install pylint pyflakes flake8
-
-      - name: Run TiCS analysis
-        uses: tiobe/tics-github-action@v3
-        with:
-          mode: qserver
-          project: craft-store
-          viewerUrl: https://canonical.tiobe.com/tiobeweb/TICS/api/cfg?name=default
-          branchdir: ${{ github.workspace }}
-          ticsAuthToken: ${{ secrets.TICSAUTHTOKEN }}
-          installTics: true
+    uses: canonical/starflow/.github/workflows/analysis.yaml@work/tics
+    with:
+      platform-tags: '"ubuntu-24.04"'
+      project: craft-store
