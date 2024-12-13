@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Tests that only involve reading from the store."""
 
-
+import pytest
 from craft_store import publisher
 
 from tests.integration.conftest import needs_charmhub_credentials
@@ -27,9 +27,7 @@ def test_get_package_metadata(
     publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
 ):
     metadata = publisher_gateway.get_package_metadata(charmhub_charm_name)
-    assert metadata.get("name") == charmhub_charm_name
-    assert metadata.get("default-track")
-    assert len(metadata["id"]) == len("sCPqM62aJhbLUJmpPfFbsxbd2zpR6dcu")
-    assert metadata.get("default-track") in {
-        track["name"] for track in metadata.get("tracks") or []
-    }
+    assert metadata.name == charmhub_charm_name
+    assert metadata.default_track
+    assert len(metadata.id) == len("sCPqM62aJhbLUJmpPfFbsxbd2zpR6dcu")
+    assert metadata.default_track in {track.name for track in metadata.tracks}

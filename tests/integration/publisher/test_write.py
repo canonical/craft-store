@@ -39,23 +39,25 @@ def test_create_tracks(
 
     tracks_created = publisher_gateway.create_tracks(
         charmhub_charm_name,
-        {
-            "name": track_name,
-            "version-pattern": version_pattern,
-            "automatic-phasing-percentage": percentages,
-        },
+        publisher.CreateTrackRequest.unmarshal(
+            {
+                "name": track_name,
+                "version-pattern": version_pattern,
+                "automatic-phasing-percentage": percentages,
+            }
+        ),
     )
     assert tracks_created == 1
 
     metadata = publisher_gateway.get_package_metadata(charmhub_charm_name)
-    if "tracks" not in metadata or not metadata["tracks"]:
+    if not metadata.tracks:
         raise ValueError("No tracks returned from the store")
 
-    for track in metadata["tracks"]:
-        if track["name"] != track_name:
+    for track in metadata.tracks:
+        if track.name != track_name:
             continue
-        assert track["version-pattern"] == version_pattern
-        assert track["automatic-phasing-percentage"] == percentages
+        assert track.version_pattern == version_pattern
+        assert track.automatic_phasing_percentage == percentages
         break
     else:
         raise ValueError(f"Track {track_name} created but not returned from the store.")
@@ -69,7 +71,10 @@ def test_create_disallowed_track(
     track_name = "disallowed"
 
     with pytest.raises(errors.CraftStoreError, match="Invalid track name") as exc_info:
-        publisher_gateway.create_tracks(charmhub_charm_name, {"name": track_name})
+        publisher_gateway.create_tracks(
+            charmhub_charm_name,
+            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+        )
 
     assert exc_info.value.store_errors is not None
     assert "invalid-tracks" in exc_info.value.store_errors
@@ -84,12 +89,18 @@ def test_create_existing_track(
 
     # Suppress the error because we don't care about the first time
     with contextlib.suppress(errors.CraftStoreError):
-        publisher_gateway.create_tracks(charmhub_charm_name, {"name": track_name})
+        publisher_gateway.create_tracks(
+            charmhub_charm_name,
+            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+        )
 
     with pytest.raises(
         errors.CraftStoreError, match="Conflicting track exists"
     ) as exc_info:
-        publisher_gateway.create_tracks(charmhub_charm_name, {"name": track_name})
+        publisher_gateway.create_tracks(
+            charmhub_charm_name,
+            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+        )
 
     assert exc_info.value.store_errors is not None
     assert "conflicting-tracks" in exc_info.value.store_errors

@@ -17,15 +17,14 @@
 from __future__ import annotations
 
 from json import JSONDecodeError
-from typing import cast
 
 import httpx
 
-from craft_store import errors
+from craft_store import errors, models
 from craft_store._httpx_auth import CandidAuth
 from craft_store.auth import Auth
 
-from . import _request, _response
+from . import _request
 
 
 class PublisherGateway:
@@ -69,7 +68,7 @@ class PublisherGateway:
             brief, store_errors=errors.StoreErrorList(error_list)
         )
 
-    def get_package_metadata(self, name: str) -> _response.PackageMetadata:
+    def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
         """Get general metadata for a package.
 
         :param name: The name of the package to query.
@@ -81,7 +80,7 @@ class PublisherGateway:
             url=f"/v1/{self._namespace}/{name}",
         )
         self._check_error(response)
-        return cast(_response.PackageMetadata, response.json()["metadata"])
+        return models.RegisteredNameModel.unmarshal(response.json()["metadata"])
 
     def create_tracks(self, name: str, *tracks: _request.CreateTrackRequest) -> int:
         """Create one or more tracks in the store.
@@ -94,21 +93,10 @@ class PublisherGateway:
 
         API docs: https://api.charmhub.io/docs/default.html#create_tracks
         """
-        bad_track_names = {
-            track["name"]
-            for track in tracks
-            if not _request.TRACK_NAME_REGEX.match(track["name"])
-            or len(track["name"]) > 28
-        }
-        if bad_track_names:
-            bad_tracks = ", ".join(sorted(bad_track_names))
-            raise errors.InvalidRequestError(
-                f"The following track names are invalid: {bad_tracks}",
-                resolution="Ensure all tracks have valid names.",
-            )
+        track_list = [track.marshal() for track in tracks]
 
         response = self._client.post(
-            f"/v1/{self._namespace}/{name}/tracks", json=tracks
+            f"/v1/{self._namespace}/{name}/tracks", json=track_list
         )
         self._check_error(response)
 

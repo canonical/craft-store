@@ -18,8 +18,9 @@
 import re
 from typing import Annotated
 
-import annotated_types
-from typing_extensions import NotRequired, TypedDict
+import pydantic
+
+from craft_store.models import MarshableModel
 
 TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 """A regular expression guarding track names.
@@ -27,15 +28,12 @@ TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 Retrieved from https://api.staging.charmhub.io/docs/default.html#create_tracks
 """
 
-CreateTrackRequest = TypedDict(
-    "CreateTrackRequest",
-    {
-        "name": Annotated[
-            str,
-            annotated_types.Len(1, 28),
-            annotated_types.Predicate(lambda name: bool(TRACK_NAME_REGEX.match(name))),
-        ],
-        "version-pattern": NotRequired[str | None],
-        "automatic-phasing-percentage": NotRequired[str | None],
-    },
-)
+
+class CreateTrackRequest(MarshableModel):
+    """Model for each track to be created when creating a track."""
+
+    name: Annotated[
+        str, pydantic.Field(min_length=1, max_length=28, pattern=TRACK_NAME_REGEX)
+    ]
+    version_pattern: str | None = None
+    automatic_phasing_percentage: int | None = None

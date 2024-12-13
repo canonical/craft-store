@@ -16,11 +16,15 @@
 """Unit tests for the publisher gateway."""
 
 import textwrap
+from typing import Any
 from unittest import mock
 
 import httpx
+import pydantic
 import pytest
 from craft_store import errors, publisher
+from craft_store.models.registered_name_model import RegisteredNameModel
+from craft_store.publisher._request import CreateTrackRequest
 
 
 @pytest.fixture
@@ -93,13 +97,18 @@ def test_check_error(response: httpx.Response, match):
 
 
 def test_get_package_metadata(
-    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    fake_registered_name_dict: dict[str, Any],
+    fake_registered_name_model: RegisteredNameModel,
 ):
     mock_httpx_client.get.return_value = httpx.Response(
-        200, json={"metadata": {"meta": "data"}}
+        200, json={"metadata": fake_registered_name_dict}
     )
 
-    assert publisher_gateway.get_package_metadata("my-package") == {"meta": "data"}
+    actual = publisher_gateway.get_package_metadata("my-package")
+
+    assert actual == fake_registered_name_model
 
     mock_httpx_client.get.assert_called_once_with(url="/v1/charm/my-package")
 
@@ -107,12 +116,12 @@ def test_get_package_metadata(
 @pytest.mark.parametrize(
     ("tracks", "match"),
     [
-        ([{"name": "-"}], ": -$"),
+        ([{"name": "-"}], "type=string_pattern_mismatch"),
         (
             [{"name": "123456789012345678901234567890"}],
-            ": 123456789012345678901234567890$",
+            "type=string_too_long",
         ),
-        ([{"name": "-"}, {"name": "_!"}], ": -, _!$"),
+        ([{"name": "-"}, {"name": "_!"}], "type=string_pattern_mismatch"),
     ],
 )
 def test_create_tracks_validation(
@@ -120,8 +129,9 @@ def test_create_tracks_validation(
     tracks,
     match,
 ):
-    with pytest.raises(ValueError, match=match):
-        publisher_gateway.create_tracks("my-name", *tracks)
+    track_list = [CreateTrackRequest.unmarshal(track) for track in tracks]
+    with pytest.raises(pydantic.ValidationError, match=match):
+        publisher_gateway.create_tracks("my-name", *track_list)
 
 
 def test_create_tracks_success(

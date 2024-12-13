@@ -18,18 +18,19 @@
 from ._request import (
     CreateTrackRequest,
 )
-
-from ._response import (
-    PackageMetadata,
-    PublisherMetadata,
-    TrackMetadata,
-)
 from ._publishergw import PublisherGateway
 
+from craft_store.models.account_model import AccountModel
+from craft_store.models.registered_name_model import MediaModel, RegisteredNameModel
+from craft_store.models.track_guardrail_model import TrackGuardrailModel
+from craft_store.models.track_model import TrackModel
+
 __all__ = [
+    "AccountModel",
     "CreateTrackRequest",
-    "PackageMetadata",
-    "PublisherMetadata",
-    "TrackMetadata",
+    "MediaModel",
+    "RegisteredNameModel",
+    "TrackGuardrailModel",
+    "TrackModel",
     "PublisherGateway",
 ]
