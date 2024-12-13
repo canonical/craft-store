@@ -28,7 +28,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 @pytest.mark.slow
 @needs_charmhub_credentials()
 @pytest.mark.parametrize("version_pattern", [None, r"\d+"])
-@pytest.mark.parametrize("percentages", [None, 50])
+@pytest.mark.parametrize("percentages", [None, 50, 0.32])
 def test_create_tracks(
     publisher_gateway: publisher.PublisherGateway,
     charmhub_charm_name: str,
@@ -39,13 +39,11 @@ def test_create_tracks(
 
     tracks_created = publisher_gateway.create_tracks(
         charmhub_charm_name,
-        publisher.CreateTrackRequest.unmarshal(
-            {
-                "name": track_name,
-                "version-pattern": version_pattern,
-                "automatic-phasing-percentage": percentages,
-            }
-        ),
+        {
+            "name": track_name,
+            "version-pattern": version_pattern,
+            "automatic-phasing-percentage": percentages,
+        },
     )
     assert tracks_created == 1
 
@@ -73,7 +71,7 @@ def test_create_disallowed_track(
     with pytest.raises(errors.CraftStoreError, match="Invalid track name") as exc_info:
         publisher_gateway.create_tracks(
             charmhub_charm_name,
-            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+            {"name": track_name},
         )
 
     assert exc_info.value.store_errors is not None
@@ -91,7 +89,7 @@ def test_create_existing_track(
     with contextlib.suppress(errors.CraftStoreError):
         publisher_gateway.create_tracks(
             charmhub_charm_name,
-            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+            {"name": track_name},
         )
 
     with pytest.raises(
@@ -99,7 +97,7 @@ def test_create_existing_track(
     ) as exc_info:
         publisher_gateway.create_tracks(
             charmhub_charm_name,
-            publisher.CreateTrackRequest.unmarshal({"name": track_name}),
+            {"name": track_name},
         )
 
     assert exc_info.value.store_errors is not None

@@ -16,7 +16,9 @@
 """Client for the publisher gateway."""
 from __future__ import annotations
 
+import re
 from json import JSONDecodeError
+from typing import TYPE_CHECKING
 
 import httpx
 
@@ -24,7 +26,15 @@ from craft_store import errors, models
 from craft_store._httpx_auth import CandidAuth
 from craft_store.auth import Auth
 
-from . import _request
+if TYPE_CHECKING:
+    from . import _request
+
+
+TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
+"""A regular expression guarding track names.
+
+Retrieved from https://api.staging.charmhub.io/docs/default.html#create_tracks
+"""
 
 
 class PublisherGateway:
@@ -93,10 +103,20 @@ class PublisherGateway:
 
         API docs: https://api.charmhub.io/docs/default.html#create_tracks
         """
-        track_list = [track.marshal() for track in tracks]
+        bad_track_names = {
+            track["name"]
+            for track in tracks
+            if not TRACK_NAME_REGEX.match(track["name"]) or len(track["name"]) > 28
+        }
+        if bad_track_names:
+            bad_tracks = ", ".join(sorted(bad_track_names))
+            raise errors.InvalidRequestError(
+                f"The following track names are invalid: {bad_tracks}",
+                resolution="Ensure all tracks have valid names.",
+            )
 
         response = self._client.post(
-            f"/v1/{self._namespace}/{name}/tracks", json=track_list
+            f"/v1/{self._namespace}/{name}/tracks", json=tracks
         )
         self._check_error(response)
 

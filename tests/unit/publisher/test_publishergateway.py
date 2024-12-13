@@ -20,11 +20,9 @@ from typing import Any
 from unittest import mock
 
 import httpx
-import pydantic
 import pytest
 from craft_store import errors, publisher
 from craft_store.models.registered_name_model import RegisteredNameModel
-from craft_store.publisher._request import CreateTrackRequest
 
 
 @pytest.fixture
@@ -116,12 +114,12 @@ def test_get_package_metadata(
 @pytest.mark.parametrize(
     ("tracks", "match"),
     [
-        ([{"name": "-"}], "type=string_pattern_mismatch"),
+        ([{"name": "-"}], ": -$"),
         (
             [{"name": "123456789012345678901234567890"}],
-            "type=string_too_long",
+            ": 123456789012345678901234567890$",
         ),
-        ([{"name": "-"}, {"name": "_!"}], "type=string_pattern_mismatch"),
+        ([{"name": "-"}, {"name": "_!"}], ": -, _!$"),
     ],
 )
 def test_create_tracks_validation(
@@ -129,9 +127,8 @@ def test_create_tracks_validation(
     tracks,
     match,
 ):
-    track_list = [CreateTrackRequest.unmarshal(track) for track in tracks]
-    with pytest.raises(pydantic.ValidationError, match=match):
-        publisher_gateway.create_tracks("my-name", *track_list)
+    with pytest.raises(ValueError, match=match):
+        publisher_gateway.create_tracks("my-name", *tracks)
 
 
 def test_create_tracks_success(

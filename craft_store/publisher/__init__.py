@@ -20,17 +20,22 @@ from ._request import (
 )
 from ._publishergw import PublisherGateway
 
-from craft_store.models.account_model import AccountModel
-from craft_store.models.registered_name_model import MediaModel, RegisteredNameModel
-from craft_store.models.track_guardrail_model import TrackGuardrailModel
-from craft_store.models.track_model import TrackModel
+from craft_store.models.account_model import AccountModel as Account
+from craft_store.models.registered_name_model import MediaModel as Media
+from craft_store.models.registered_name_model import (
+    RegisteredNameModel as RegisteredName,
+)
+from craft_store.models.track_guardrail_model import (
+    TrackGuardrailModel as TrackGuardrail,
+)
+from craft_store.models.track_model import TrackModel as Track
 
 __all__ = [
-    "AccountModel",
+    "Account",
     "CreateTrackRequest",
-    "MediaModel",
-    "RegisteredNameModel",
-    "TrackGuardrailModel",
-    "TrackModel",
+    "Media",
+    "RegisteredName",
+    "TrackGuardrail",
+    "Track",
     "PublisherGateway",
 ]
