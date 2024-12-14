@@ -15,11 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Craft Store errors."""
+from __future__ import annotations
 
 import contextlib
 import logging
 from typing import Any
 
+import httpx
 import requests
 import urllib3
 import urllib3.exceptions
@@ -31,9 +33,31 @@ logger = logging.getLogger(__name__)
 class CraftStoreError(Exception):
     """Base class error for craft-store."""
 
-    def __init__(self, message: str, resolution: str | None = None) -> None:
+    def __init__(
+        self,
+        message: str,
+        details: str | None = None,
+        resolution: str | None = None,
+        store_errors: StoreErrorList | None = None,
+    ) -> None:
         super().__init__(message)
+        if store_errors and not details:
+            details = str(store_errors)
+        self.details = details
         self.resolution = resolution
+        self.store_errors = store_errors
+
+
+class InvalidRequestError(CraftStoreError, ValueError):
+    """Error when the request is invalid in a known way."""
+
+    def __init__(
+        self,
+        message: str,
+        details: str | None = None,
+        resolution: str | None = None,
+    ) -> None:
+        super().__init__(message, details, resolution)
 
 
 class NetworkError(CraftStoreError):
@@ -75,7 +99,7 @@ class StoreErrorList:
             if code:
                 code_list.append(code)
 
-        return "<StoreErrorList: {' '.join(code_list)}>"
+        return f"<StoreErrorList: {' '.join(code_list)}>"
 
     def __contains__(self, error_code: str) -> bool:
         return any(error.get("code") == error_code for error in self._error_list)
@@ -111,7 +135,7 @@ class StoreServerError(CraftStoreError):
 
         return error_list
 
-    def __init__(self, response: requests.Response) -> None:
+    def __init__(self, response: requests.Response | httpx.Response) -> None:
         self.response = response
 
         try:
@@ -126,9 +150,13 @@ class StoreServerError(CraftStoreError):
             with contextlib.suppress(KeyError):
                 message = "Store operation failed:\n" + str(self.error_list)
         if message is None:
+            if isinstance(response, httpx.Response):
+                reason = response.reason_phrase
+            else:
+                reason = response.reason
             message = (
                 "Issue encountered while processing your request: "
-                f"[{response.status_code}] {response.reason}."
+                f"[{response.status_code}] {reason}."
             )
 
         super().__init__(message)
@@ -193,5 +221,5 @@ class CandidTokenValueError(CraftStoreError):
         super().__init__(f"Empty token value returned from {url!r}.")
 
 
-class DeveloperTokenUnavailableError(CraftStoreError):
-    """Raised when developer token is not set."""
+class AuthTokenUnavailableError(CraftStoreError):
+    """Raised when an authorization token is not available."""

@@ -30,7 +30,7 @@ import keyring.backend
 import keyring.backends.fail
 import keyring.errors
 from jaraco.classes import properties
-from xdg import BaseDirectory  # type: ignore[import]
+from xdg import BaseDirectory  # type: ignore[import-untyped]
 
 from . import errors
 

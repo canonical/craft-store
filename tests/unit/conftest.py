@@ -16,9 +16,12 @@
 
 import datetime
 from typing import Any
+from unittest import mock
 from unittest.mock import patch
 
+import craft_store
 import pytest
+from craft_store.publisher import RegisteredName
 
 
 class FakeKeyring:
@@ -108,3 +111,26 @@ def new_auth(request) -> bool:
     :see: base_client.wrap_credentials()
     """
     return request.param
+
+
+@pytest.fixture
+def mock_auth():
+    return mock.Mock(spec=craft_store.Auth)
+
+
+@pytest.fixture
+def fake_registered_name_dict():
+    return {
+        "id": "0",
+        "name": "my-package",
+        "private": False,
+        "publisher": {"id": "0"},
+        "status": "tired",
+        "store": "charmhub",
+        "type": "charm",
+    }
+
+
+@pytest.fixture
+def fake_registered_name_model(fake_registered_name_dict):
+    return RegisteredName.unmarshal(fake_registered_name_dict)

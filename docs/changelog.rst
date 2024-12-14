@@ -7,6 +7,9 @@ Changelog
 
 - Add opt-in ``FileKeyring`` fallback for ``Auth`` in the case of missing
   ``SecretService`` provider on a system.
+- Add ``CandidAuth`` and ``DeveloperTokenAuth`` authorisation models for
+  ``httpx.Client`` classes.
+- Add a ``PublisherGateway`` client.
 
 ..
   For a complete list of commits, check out the `3.1.0`_ release on GitHub.
