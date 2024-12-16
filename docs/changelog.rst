@@ -2,7 +2,7 @@
 Changelog
 *********
 
-3.1.0 (2024-XX-XX)
+3.1.0 (2024-12-16)
 ------------------
 
 - Add opt-in ``FileKeyring`` fallback for ``Auth`` in the case of missing
