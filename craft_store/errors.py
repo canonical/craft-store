@@ -61,6 +61,26 @@ class InvalidRequestError(CraftStoreError, ValueError):
         super().__init__(message, details, resolution)
 
 
+class InvalidResponseError(CraftStoreError):
+    """Error when the store sends a response that is invalid."""
+
+    def __init__(
+        self,
+        response: httpx.Response,
+        *,
+        details: str | None = None,
+        resolution: str | None = None,
+    ) -> None:
+        message = f"Store returned an invalid response (status: {response.status_code})"
+        if not details:
+            details = f"Response content: {response.text}" if response.text else None
+        super().__init__(
+            message,
+            details,
+            resolution,
+        )
+
+
 class NetworkError(CraftStoreError):
     """Error to raise on network or infrastructure issues.
 
