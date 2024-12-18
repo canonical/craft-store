@@ -41,7 +41,7 @@ def publisher_gateway(mock_httpx_client):
 
 @pytest.mark.parametrize("response", [httpx.Response(status_code=204)])
 def test_check_error_on_success(response: httpx.Response):
-    assert publisher.PublisherGateway._check_error(response) is None
+    publisher.PublisherGateway._check_error(response, expected_keys=set())
 
 
 @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ def test_check_error_on_success(response: httpx.Response):
 )
 def test_check_error(response: httpx.Response, match):
     with pytest.raises(errors.CraftStoreError, match=match):
-        publisher.PublisherGateway._check_error(response)
+        publisher.PublisherGateway._check_error(response, expected_keys=set())
 
 
 @pytest.mark.parametrize(
@@ -206,6 +206,86 @@ def test_get_package_metadata(
     assert actual == fake_registered_name_model
 
     mock_httpx_client.get.assert_called_once_with(url="/v1/charm/my-package")
+
+
+def test_unregister_name_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(
+        200, json={"package-id": "baleted!"}
+    )
+
+    publisher_gateway.unregister_name("my-name")
+
+
+def test_unregister_name_bad_response(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
+        publisher_gateway.unregister_name("my-name")
+
+    assert exc_info.value.details == "Missing JSON keys: {'package-id'}"
+
+
+@pytest.mark.parametrize(
+    ("status_code", "json", "error_code"),
+    [
+        (
+            404,
+            {
+                "error-list": [
+                    {
+                        "code": "resource-not-found",
+                        "message": "Name my-name not found in the charm namespace",
+                    }
+                ]
+            },
+            "resource-not-found",
+        ),
+        (
+            403,
+            {
+                "error-list": [
+                    {
+                        "code": "forbidden",
+                        "message": "Cannot unregister a package with existing revisions",
+                    }
+                ]
+            },
+            "forbidden",
+        ),
+        (
+            401,
+            {
+                "error-list": [
+                    {
+                        "code": "permission-required",
+                        "message": "Charms can only be unregistered by their publisher",
+                    }
+                ]
+            },
+            "permission-required",
+        ),
+    ],
+)
+def test_unregister_name_client_errors(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    status_code: int,
+    json: dict,
+    error_code: str,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(status_code, json=json)
+
+    with pytest.raises(errors.CraftStoreError) as exc_info:
+        publisher_gateway.unregister_name("my-name")
+
+    assert exc_info.value.store_errors is not None
+    assert error_code in exc_info.value.store_errors
 
 
 @pytest.mark.parametrize(

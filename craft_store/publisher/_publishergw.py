@@ -55,13 +55,31 @@ class PublisherGateway:
         )
 
     @staticmethod
-    def _check_error(response: httpx.Response) -> None:
-        if response.is_success:
+    def _check_error(response: httpx.Response, expected_keys: set[str]) -> None:
+        """Check a response for general errors.
+
+        :param response: an httpx response from the server.
+        :param expected_keys: A set of expected keys in the JSON response.
+        :raises: InvalidResponseError if the response from the server is invalid.
+        :raises: CraftStoreError if the response status code is an error code.
+        """
+        if not expected_keys and response.is_success:
             return
         try:
             error_response = response.json()
         except JSONDecodeError as exc:
             raise errors.InvalidResponseError(response) from exc
+
+        if response.is_success:
+            if not isinstance(error_response, dict):
+                raise errors.InvalidResponseError(response)
+            received_expected_keys = expected_keys & error_response.keys()
+            missing_keys = expected_keys - received_expected_keys
+            if missing_keys:
+                raise errors.InvalidResponseError(
+                    response, details=f"Missing JSON keys: {missing_keys}"
+                )
+            return
         error_list = error_response.get("error-list", [])
         if response.status_code >= 500:
             brief = f"Store had an error ({response.status_code})"
@@ -91,9 +109,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}",
             params={"include-collaborations": include_collaborations},
         )
-        self._check_error(response)
-        if "results" not in response.json():
-            raise errors.InvalidResponseError(response)
+        self._check_error(response, expected_keys={"results"})
         return [
             models.RegisteredNameModel.unmarshal(item)
             for item in response.json()["results"]
@@ -126,10 +142,8 @@ class PublisherGateway:
             request_json["type"] = entity_type
 
         response = self._client.post(f"/v1/{self._namespace}", json=request_json)
-        self._check_error(response)
-        if "id" not in (result := response.json()):
-            raise errors.InvalidResponseError(response)
-        return str(result["id"])
+        self._check_error(response, expected_keys={"id"})
+        return str(response.json()["id"])
 
     def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
         """Get general metadata for a package.
@@ -142,8 +156,21 @@ class PublisherGateway:
         response = self._client.get(
             url=f"/v1/{self._namespace}/{name}",
         )
-        self._check_error(response)
+        self._check_error(response, expected_keys={"metadata"})
         return models.RegisteredNameModel.unmarshal(response.json()["metadata"])
+
+    def unregister_name(self, name: str) -> str:
+        """Unregister a name with no published packages.
+
+        :param name: The name to unregister.
+
+        :returns: the ID of the deleted name.
+
+        API docs: https://api.charmhub.io/docs/default.html#unregister_package
+        """
+        response = self._client.delete(f"/v1/{self._namespace}/{name}")
+        self._check_error(response, expected_keys={"package-id"})
+        return str(response.json()["package-id"])
 
     def create_tracks(self, name: str, *tracks: _request.CreateTrackRequest) -> int:
         """Create one or more tracks in the store.
@@ -171,6 +198,6 @@ class PublisherGateway:
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/tracks", json=tracks
         )
-        self._check_error(response)
+        self._check_error(response, expected_keys={"num-tracks-created"})
 
         return int(response.json()["num-tracks-created"])
