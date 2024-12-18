@@ -101,3 +101,29 @@ def test_create_existing_track(
 
     assert exc_info.value.store_errors is not None
     assert "conflicting-tracks" in exc_info.value.store_errors
+
+
+@pytest.mark.slow
+@needs_charmhub_credentials()
+@pytest.mark.parametrize("entity_type", ["charm", "bundle"])
+def test_register_unregister_cycle(
+    publisher_gateway: publisher.PublisherGateway,
+    entity_type: str,
+    unregistered_charm_name: str,
+):
+    try:
+        publisher_gateway.register_name(
+            unregistered_charm_name, entity_type=entity_type
+        )
+
+        names = {pkg.name for pkg in publisher_gateway.list_registered_names()}
+        assert (
+            unregistered_charm_name in names
+        ), f"{entity_type} was not successfully registered."
+    finally:
+        publisher_gateway.unregister_name(unregistered_charm_name)
+
+    names = {result.name for result in publisher_gateway.list_registered_names()}
+    assert (
+        unregistered_charm_name not in names
+    ), f"{entity_type} was not successfully unregistered."
