@@ -22,6 +22,7 @@ from unittest import mock
 import httpx
 import pydantic
 import pytest
+import pytest_check
 from craft_store import errors, publisher
 from craft_store.models.registered_name_model import RegisteredNameModel
 
@@ -48,7 +49,7 @@ def test_check_error_on_success(response: httpx.Response):
     [
         pytest.param(
             httpx.Response(503, text="help!"),
-            r"Invalid response from server \(503\)",
+            r"Store returned an invalid response \(status: 503\)",
             id="really-bad",
         ),
         pytest.param(
@@ -153,6 +154,41 @@ def test_list_registered_names_invalid_result(
 
     with pytest.raises(pydantic.ValidationError, match=message):
         publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize("entity_type", ["charm", "rock", "snap", None])
+@pytest.mark.parametrize("private", [True, False])
+@pytest.mark.parametrize("team", ["my-team", None])
+def test_register_name_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    entity_type: str | None,
+    private: bool,
+    team: str | None,
+):
+    mock_httpx_client.post.return_value = httpx.Response(200, json={"id": "abc"})
+
+    publisher_gateway.register_name(
+        "my-name", entity_type=entity_type, private=private, team=team
+    )
+
+    call = mock_httpx_client.post.mock_calls[0]
+    json = call.kwargs["json"]
+
+    pytest_check.equal(json["name"], "my-name")
+    pytest_check.equal(json["private"], private)
+    pytest_check.equal(json.get("team"), team)
+    pytest_check.equal(json.get("type"), entity_type)
+
+
+def test_register_name_error(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.post.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError):
+        publisher_gateway.register_name("my-name")
 
 
 def test_get_package_metadata(

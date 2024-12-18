@@ -61,10 +61,7 @@ class PublisherGateway:
         try:
             error_response = response.json()
         except JSONDecodeError as exc:
-            raise errors.InvalidResponseError(
-                status=response.status_code,
-                text=response.text,
-            ) from exc
+            raise errors.InvalidResponseError(response) from exc
         error_list = error_response.get("error-list", [])
         if response.status_code >= 500:
             brief = f"Store had an error ({response.status_code})"
@@ -96,11 +93,43 @@ class PublisherGateway:
         )
         self._check_error(response)
         if "results" not in response.json():
-            raise errors.InvalidResponseError(response.status_code, response.text)
+            raise errors.InvalidResponseError(response)
         return [
             models.RegisteredNameModel.unmarshal(item)
             for item in response.json()["results"]
         ]
+
+    def register_name(
+        self,
+        name: str,
+        *,
+        entity_type: str | None = None,
+        private: bool = False,
+        team: str | None = None,
+    ) -> str:
+        """Register a name on the store.
+
+        :param name: the name to register.
+        :param entity_type: The type of package to register (e.g. charm or snap)
+        :param private: Whether this entity is private or not.
+        :param team: An optional team ID to register the name with.
+
+        :returns: the ID of the registered name.
+        """
+        request_json = {
+            "name": name,
+            "private": private,
+        }
+        if team is not None:
+            request_json["team"] = team
+        if entity_type is not None:
+            request_json["type"] = entity_type
+
+        response = self._client.post(f"/v1/{self._namespace}", json=request_json)
+        self._check_error(response)
+        if "id" not in (result := response.json()):
+            raise errors.InvalidResponseError(response)
+        return str(result["id"])
 
     def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
         """Get general metadata for a package.

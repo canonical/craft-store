@@ -66,12 +66,11 @@ class InvalidResponseError(CraftStoreError):
 
     def __init__(
         self,
-        status: int,
-        text: str | None = None,
+        response: httpx.Response,
         resolution: str | None = None,
     ) -> None:
-        message = f"Store returned an invalid response (status: {status})"
-        details = f"Response content: {text}" if text else None
+        message = f"Store returned an invalid response (status: {response.status_code})"
+        details = f"Response content: {response.text}" if response.text else None
         super().__init__(
             message,
             details,
