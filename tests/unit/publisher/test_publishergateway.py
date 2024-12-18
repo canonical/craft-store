@@ -20,6 +20,7 @@ from typing import Any
 from unittest import mock
 
 import httpx
+import pydantic
 import pytest
 from craft_store import errors, publisher
 from craft_store.models.registered_name_model import RegisteredNameModel
@@ -92,6 +93,66 @@ def test_check_error_on_success(response: httpx.Response):
 def test_check_error(response: httpx.Response, match):
     with pytest.raises(errors.CraftStoreError, match=match):
         publisher.PublisherGateway._check_error(response)
+
+
+@pytest.mark.parametrize(
+    "results",
+    [
+        [],
+        [
+            {
+                "id": "abc",
+                "private": False,
+                "publisher": {"id": "def"},
+                "status": "there",
+                "store": "yep",
+                "type": "charm",
+            }
+        ],
+    ],
+)
+def test_list_registered_names_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    results: list[dict],
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={"results": results})
+
+    publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [
+        ({}, r"Store returned an invalid response \(status: 200\)"),
+    ],
+)
+def test_list_registered_names_bad_response(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    response: Any,
+    message: str,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json=response)
+
+    with pytest.raises(errors.InvalidResponseError, match=message):
+        publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [({"results": [{}]}, "validation errors for RegisteredNameModel")],
+)
+def test_list_registered_names_invalid_result(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    response: Any,
+    message: str,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json=response)
+
+    with pytest.raises(pydantic.ValidationError, match=message):
+        publisher_gateway.list_registered_names()
 
 
 def test_get_package_metadata(

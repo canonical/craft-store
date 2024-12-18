@@ -430,7 +430,7 @@ toml = [
 
 [[package]]
 name = "craft-store"
-version = "3.0.2.post32+g7399526.d20241216"
+version = "3.1.0.post1+gf98bdb0.d20241218"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },

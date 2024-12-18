@@ -61,9 +61,9 @@ class PublisherGateway:
         try:
             error_response = response.json()
         except JSONDecodeError as exc:
-            raise errors.CraftStoreError(
-                f"Invalid response from server ({response.status_code})",
-                details=response.text,
+            raise errors.InvalidResponseError(
+                status=response.status_code,
+                text=response.text,
             ) from exc
         error_list = error_response.get("error-list", [])
         if response.status_code >= 500:
@@ -78,6 +78,29 @@ class PublisherGateway:
         raise errors.CraftStoreError(
             brief, store_errors=errors.StoreErrorList(error_list)
         )
+
+    def list_registered_names(
+        self, include_collaborations: bool = False
+    ) -> list[models.RegisteredNameModel]:
+        """Return names registered by the authenticated user.
+
+        :param include_collaborations: if True, includes names the user is a
+            collaborator on but does not own.
+        :returns: A sequence of names registered to the user.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_registered_names
+        """
+        response = self._client.get(
+            f"/v1/{self._namespace}",
+            params={"include-collaborations": include_collaborations},
+        )
+        self._check_error(response)
+        if "results" not in response.json():
+            raise errors.InvalidResponseError(response.status_code, response.text)
+        return [
+            models.RegisteredNameModel.unmarshal(item)
+            for item in response.json()["results"]
+        ]
 
     def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
         """Get general metadata for a package.
@@ -100,7 +123,7 @@ class PublisherGateway:
             to which this track will be attached.
         :param tracks: Each track is a dictionary mapping query values.
         :returns: The number of tracks created by the store.
-        :returns: InvalidRequestError if the name field of any passed track is invalid.
+        :raises: InvalidRequestError if the name field of any passed track is invalid.
 
         API docs: https://api.charmhub.io/docs/default.html#create_tracks
         """
