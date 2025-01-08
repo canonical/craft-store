@@ -29,7 +29,7 @@ from .base_client import BaseClient
 class UbuntuOneStoreClient(BaseClient):
     """Encapsulates API calls for the Snap Store or Charmhub with Ubuntu One."""
 
-    TOKEN_TYPE: str = "u1-macaroon"
+    TOKEN_TYPE: str = "u1-macaroon"  # noqa: S105
 
     def __init__(
         self,

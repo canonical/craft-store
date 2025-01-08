@@ -75,7 +75,7 @@ class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):  # type: ign
 class StoreClient(BaseClient):
     """Encapsulates API calls for the Snap Store or Charmhub."""
 
-    TOKEN_TYPE: str = "macaroon"
+    TOKEN_TYPE: str = "macaroon"  # noqa: S105
 
     @overrides
     def __init__(
