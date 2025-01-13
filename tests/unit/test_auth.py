@@ -227,9 +227,9 @@ def test_no_keyring_fallback_to_file(
     auth = Auth("fakeclient", "fakestore.com", file_fallback=True)
     assert isinstance(auth._keyring, FileKeyring)
     set_keyring_mock.assert_called_once_with(ANY)
-    assert isinstance(
-        set_keyring_mock.call_args.args[0], FileKeyring
-    ), "Keyring should be set to FileKeyring"
+    assert isinstance(set_keyring_mock.call_args.args[0], FileKeyring), (
+        "Keyring should be set to FileKeyring"
+    )
 
 
 def test_memory_keyring_set_get():

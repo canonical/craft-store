@@ -128,9 +128,9 @@ def test_developer_token_marshal():
     json_dev_token = dev_token.model_dump_json()
     loaded = json.loads(json_dev_token)
     assert len(loaded) == 1, "Dict with single key should be stored"
-    assert (
-        loaded["macaroon"] == dev_token.macaroon
-    ), "Serialized and deserialized object should be the same as base one"
+    assert loaded["macaroon"] == dev_token.macaroon, (
+        "Serialized and deserialized object should be the same as base one"
+    )
 
 
 def test_developer_token_unmarshal(stored_developer_token: str):
