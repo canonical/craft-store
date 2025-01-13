@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import re
 from json import JSONDecodeError
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
@@ -55,31 +55,20 @@ class PublisherGateway:
         )
 
     @staticmethod
-    def _check_error(response: httpx.Response, expected_keys: set[str]) -> None:
+    def _check_error(response: httpx.Response) -> None:
         """Check a response for general errors.
 
         :param response: an httpx response from the server.
-        :param expected_keys: A set of expected keys in the JSON response.
         :raises: InvalidResponseError if the response from the server is invalid.
         :raises: CraftStoreError if the response status code is an error code.
         """
-        if not expected_keys and response.is_success:
+        if response.is_success:
             return
         try:
             error_response = response.json()
         except JSONDecodeError as exc:
             raise errors.InvalidResponseError(response) from exc
 
-        if response.is_success:
-            if not isinstance(error_response, dict):
-                raise errors.InvalidResponseError(response)
-            received_expected_keys = expected_keys & error_response.keys()
-            missing_keys = expected_keys - received_expected_keys
-            if missing_keys:
-                raise errors.InvalidResponseError(
-                    response, details=f"Missing JSON keys: {missing_keys}"
-                )
-            return
         error_list = error_response.get("error-list", [])
         if response.status_code >= 500:
             brief = f"Store had an error ({response.status_code})"
@@ -93,6 +82,31 @@ class PublisherGateway:
         raise errors.CraftStoreError(
             brief, store_errors=errors.StoreErrorList(error_list)
         )
+
+    @staticmethod
+    def _check_keys(
+        response: httpx.Response, expected_keys: set[str]
+    ) -> dict[str, Any]:
+        """Check that a json dictionary has the expected keys.
+
+        :param json_response: The deserialised JSON from the server.
+        :param expected_keys: A set of keys that are expected in the JSON.
+        :returns: The deserialised JSON from the server.
+        :raises: InvalidResponseError if the response from the server is invalid.
+        """
+        try:
+            json_response = response.json()
+        except JSONDecodeError as exc:
+            raise errors.InvalidResponseError(response) from exc
+        if not isinstance(json_response, dict):
+            raise errors.InvalidResponseError(response)
+        received_expected_keys = expected_keys & json_response.keys()
+        missing_keys = expected_keys - received_expected_keys
+        if missing_keys:
+            raise errors.InvalidResponseError(
+                response, details=f"Missing JSON keys: {missing_keys}"
+            )
+        return json_response
 
     def list_registered_names(
         self, include_collaborations: bool = False
@@ -109,17 +123,15 @@ class PublisherGateway:
             f"/v1/{self._namespace}",
             params={"include-collaborations": include_collaborations},
         )
-        self._check_error(response, expected_keys={"results"})
-        return [
-            models.RegisteredNameModel.unmarshal(item)
-            for item in response.json()["results"]
-        ]
+        self._check_error(response)
+        results = self._check_keys(response, expected_keys={"results"})["results"]
+        return [models.RegisteredNameModel.unmarshal(item) for item in results]
 
     def register_name(
         self,
         name: str,
         *,
-        entity_type: str | None = None,
+        entity_type: str,
         private: bool = False,
         team: str | None = None,
     ) -> str:
@@ -135,15 +147,13 @@ class PublisherGateway:
         request_json = {
             "name": name,
             "private": private,
+            "type": entity_type,
         }
         if team is not None:
             request_json["team"] = team
-        if entity_type is not None:
-            request_json["type"] = entity_type
 
         response = self._client.post(f"/v1/{self._namespace}", json=request_json)
-        self._check_error(response, expected_keys={"id"})
-        return str(response.json()["id"])
+        return str(self._check_keys(response, expected_keys={"id"})["id"])
 
     def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
         """Get general metadata for a package.
@@ -156,8 +166,10 @@ class PublisherGateway:
         response = self._client.get(
             url=f"/v1/{self._namespace}/{name}",
         )
-        self._check_error(response, expected_keys={"metadata"})
-        return models.RegisteredNameModel.unmarshal(response.json()["metadata"])
+        self._check_error(response)
+        return models.RegisteredNameModel.unmarshal(
+            self._check_keys(response, expected_keys={"metadata"})["metadata"]
+        )
 
     def unregister_name(self, name: str) -> str:
         """Unregister a name with no published packages.
@@ -169,8 +181,10 @@ class PublisherGateway:
         API docs: https://api.charmhub.io/docs/default.html#unregister_package
         """
         response = self._client.delete(f"/v1/{self._namespace}/{name}")
-        self._check_error(response, expected_keys={"package-id"})
-        return str(response.json()["package-id"])
+        self._check_error(response)
+        return str(
+            self._check_keys(response, expected_keys={"package-id"})["package-id"]
+        )
 
     def create_tracks(self, name: str, *tracks: _request.CreateTrackRequest) -> int:
         """Create one or more tracks in the store.
@@ -198,6 +212,10 @@ class PublisherGateway:
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/tracks", json=tracks
         )
-        self._check_error(response, expected_keys={"num-tracks-created"})
+        self._check_error(response)
 
-        return int(response.json()["num-tracks-created"])
+        return int(
+            self._check_keys(response, expected_keys={"num-tracks-created"})[
+                "num-tracks-created"
+            ]
+        )

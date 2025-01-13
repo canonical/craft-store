@@ -41,7 +41,7 @@ def publisher_gateway(mock_httpx_client):
 
 @pytest.mark.parametrize("response", [httpx.Response(status_code=204)])
 def test_check_error_on_success(response: httpx.Response):
-    publisher.PublisherGateway._check_error(response, expected_keys=set())
+    publisher.PublisherGateway._check_error(response)
 
 
 @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ def test_check_error_on_success(response: httpx.Response):
 )
 def test_check_error(response: httpx.Response, match):
     with pytest.raises(errors.CraftStoreError, match=match):
-        publisher.PublisherGateway._check_error(response, expected_keys=set())
+        publisher.PublisherGateway._check_error(response)
 
 
 @pytest.mark.parametrize(
@@ -156,13 +156,13 @@ def test_list_registered_names_invalid_result(
         publisher_gateway.list_registered_names()
 
 
-@pytest.mark.parametrize("entity_type", ["charm", "rock", "snap", None])
+@pytest.mark.parametrize("entity_type", ["charm", "rock", "snap"])
 @pytest.mark.parametrize("private", [True, False])
 @pytest.mark.parametrize("team", ["my-team", None])
 def test_register_name_success(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
-    entity_type: str | None,
+    entity_type: str,
     private: bool,
     team: str | None,
 ):
@@ -188,7 +188,7 @@ def test_register_name_error(
     mock_httpx_client.post.return_value = httpx.Response(200, json={})
 
     with pytest.raises(errors.InvalidResponseError):
-        publisher_gateway.register_name("my-name")
+        publisher_gateway.register_name("my-name", entity_type="snazzy")
 
 
 def test_get_package_metadata(
