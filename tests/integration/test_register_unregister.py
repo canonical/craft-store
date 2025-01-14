@@ -30,16 +30,16 @@ def test_register_unregister_cycle(charm_client, unregistered_charm_name, entity
         charm_client.register_name(unregistered_charm_name, entity_type=entity_type)
 
         names = {result.name for result in charm_client.list_registered_names()}
-        assert (
-            unregistered_charm_name in names
-        ), f"{entity_type} was not successfully registered."
+        assert unregistered_charm_name in names, (
+            f"{entity_type} was not successfully registered."
+        )
     finally:
         charm_client.unregister_name(unregistered_charm_name)
 
     names = {result.name for result in charm_client.list_registered_names()}
-    assert (
-        unregistered_charm_name not in names
-    ), f"{entity_type} was not successfully unregistered."
+    assert unregistered_charm_name not in names, (
+        f"{entity_type} was not successfully unregistered."
+    )
 
 
 @needs_charmhub_credentials()

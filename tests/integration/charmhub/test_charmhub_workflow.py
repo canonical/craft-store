@@ -138,12 +138,12 @@ def test_full_charm_workflow(  # noqa: PLR0912, PLR0915
         raise ValueError("File revision from status URL does not appear in revisions.")
 
     file_sha256 = hashlib.sha256(file_contents).hexdigest()
-    assert file_revision.size == len(
-        file_contents
-    ), "Uploaded file size does not match file."
-    assert (
-        file_revision.sha256 == file_sha256
-    ), "Uploaded file hash does not match file."
+    assert file_revision.size == len(file_contents), (
+        "Uploaded file size does not match file."
+    )
+    assert file_revision.sha256 == file_sha256, (
+        "Uploaded file hash does not match file."
+    )
     assert file_revision.bases == [arch_dependent_base]
 
     # 5. Upload a zero-byte file (probably a repeat)
@@ -214,9 +214,9 @@ def test_full_charm_workflow(  # noqa: PLR0912, PLR0915
         if new_revision and new_zb_revision:
             break
     assert new_revision is not None, "File revision not found in resource revisions"
-    assert (
-        new_zb_revision is not None
-    ), "Zero-byte file revision not found in resource revisions"
+    assert new_zb_revision is not None, (
+        "Zero-byte file revision not found in resource revisions"
+    )
     combined_base = ResponseCharmResourceBase(
         name="all", channel="all", architectures=["amd64", "all"]
     )
