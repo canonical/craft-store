@@ -153,6 +153,7 @@ class PublisherGateway:
             request_json["team"] = team
 
         response = self._client.post(f"/v1/{self._namespace}", json=request_json)
+        self._check_error(response)
         return str(self._check_keys(response, expected_keys={"id"})["id"])
 
     def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
