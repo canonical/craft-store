@@ -72,8 +72,6 @@ class InvalidResponseError(CraftStoreError):
         resolution: str | None = None,
     ) -> None:
         message = f"Store returned an invalid response (status: {response.status_code})"
-        if not details:
-            details = f"Response content: {response.text}" if response.text else None
         super().__init__(
             message,
             details,

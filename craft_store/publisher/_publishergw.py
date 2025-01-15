@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
@@ -36,6 +37,8 @@ TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 
 Retrieved from https://api.staging.charmhub.io/docs/default.html#create_tracks
 """
+
+logger = logging.getLogger(__name__)
 
 
 class PublisherGateway:
@@ -67,6 +70,7 @@ class PublisherGateway:
         try:
             error_response = response.json()
         except JSONDecodeError as exc:
+            logger.debug(f"Error response: {response.text}")
             raise errors.InvalidResponseError(response) from exc
 
         error_list = error_response.get("error-list", [])
@@ -97,12 +101,15 @@ class PublisherGateway:
         try:
             json_response = response.json()
         except JSONDecodeError as exc:
+            logger.debug(f"Server response: {response.text}")
             raise errors.InvalidResponseError(response) from exc
         if not isinstance(json_response, dict):
+            logger.debug(f"Server response: {response.text}")
             raise errors.InvalidResponseError(response)
         received_expected_keys = expected_keys & json_response.keys()
         missing_keys = expected_keys - received_expected_keys
         if missing_keys:
+            logger.debug(f"Server response: {response.text}")
             raise errors.InvalidResponseError(
                 response, details=f"Missing JSON keys: {missing_keys}"
             )
