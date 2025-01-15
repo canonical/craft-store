@@ -117,13 +117,13 @@ def test_register_unregister_cycle(
         )
 
         names = {pkg.name for pkg in publisher_gateway.list_registered_names()}
-        assert (
-            unregistered_charm_name in names
-        ), f"{entity_type} was not successfully registered."
+        assert unregistered_charm_name in names, (
+            f"{entity_type} was not successfully registered."
+        )
     finally:
         publisher_gateway.unregister_name(unregistered_charm_name)
 
     names = {result.name for result in publisher_gateway.list_registered_names()}
-    assert (
-        unregistered_charm_name not in names
-    ), f"{entity_type} was not successfully unregistered."
+    assert unregistered_charm_name not in names, (
+        f"{entity_type} was not successfully unregistered."
+    )
