@@ -20,7 +20,9 @@ from typing import Any
 from unittest import mock
 
 import httpx
+import pydantic
 import pytest
+import pytest_check
 from craft_store import errors, publisher
 from craft_store.models.registered_name_model import RegisteredNameModel
 
@@ -39,7 +41,7 @@ def publisher_gateway(mock_httpx_client):
 
 @pytest.mark.parametrize("response", [httpx.Response(status_code=204)])
 def test_check_error_on_success(response: httpx.Response):
-    assert publisher.PublisherGateway._check_error(response) is None
+    publisher.PublisherGateway._check_error(response)
 
 
 @pytest.mark.parametrize(
@@ -47,7 +49,7 @@ def test_check_error_on_success(response: httpx.Response):
     [
         pytest.param(
             httpx.Response(503, text="help!"),
-            r"Invalid response from server \(503\)",
+            r"Store returned an invalid response \(status: 503\)",
             id="really-bad",
         ),
         pytest.param(
@@ -94,6 +96,101 @@ def test_check_error(response: httpx.Response, match):
         publisher.PublisherGateway._check_error(response)
 
 
+@pytest.mark.parametrize(
+    "results",
+    [
+        [],
+        [
+            {
+                "id": "abc",
+                "private": False,
+                "publisher": {"id": "def"},
+                "status": "there",
+                "store": "yep",
+                "type": "charm",
+            }
+        ],
+    ],
+)
+def test_list_registered_names_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    results: list[dict],
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={"results": results})
+
+    publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [
+        ({}, r"Store returned an invalid response \(status: 200\)"),
+    ],
+)
+def test_list_registered_names_bad_response(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    response: Any,
+    message: str,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json=response)
+
+    with pytest.raises(errors.InvalidResponseError, match=message):
+        publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [({"results": [{}]}, "validation errors for RegisteredNameModel")],
+)
+def test_list_registered_names_invalid_result(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    response: Any,
+    message: str,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json=response)
+
+    with pytest.raises(pydantic.ValidationError, match=message):
+        publisher_gateway.list_registered_names()
+
+
+@pytest.mark.parametrize("entity_type", ["charm", "rock", "snap"])
+@pytest.mark.parametrize("private", [True, False])
+@pytest.mark.parametrize("team", ["my-team", None])
+def test_register_name_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    entity_type: str,
+    private: bool,
+    team: str | None,
+):
+    mock_httpx_client.post.return_value = httpx.Response(200, json={"id": "abc"})
+
+    publisher_gateway.register_name(
+        "my-name", entity_type=entity_type, private=private, team=team
+    )
+
+    call = mock_httpx_client.post.mock_calls[0]
+    json = call.kwargs["json"]
+
+    pytest_check.equal(json["name"], "my-name")
+    pytest_check.equal(json["private"], private)
+    pytest_check.equal(json.get("team"), team)
+    pytest_check.equal(json.get("type"), entity_type)
+
+
+def test_register_name_error(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.post.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError):
+        publisher_gateway.register_name("my-name", entity_type="snazzy")
+
+
 def test_get_package_metadata(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
@@ -109,6 +206,86 @@ def test_get_package_metadata(
     assert actual == fake_registered_name_model
 
     mock_httpx_client.get.assert_called_once_with(url="/v1/charm/my-package")
+
+
+def test_unregister_name_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(
+        200, json={"package-id": "baleted!"}
+    )
+
+    publisher_gateway.unregister_name("my-name")
+
+
+def test_unregister_name_bad_response(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
+        publisher_gateway.unregister_name("my-name")
+
+    assert exc_info.value.details == "Missing JSON keys: {'package-id'}"
+
+
+@pytest.mark.parametrize(
+    ("status_code", "json", "error_code"),
+    [
+        (
+            404,
+            {
+                "error-list": [
+                    {
+                        "code": "resource-not-found",
+                        "message": "Name my-name not found in the charm namespace",
+                    }
+                ]
+            },
+            "resource-not-found",
+        ),
+        (
+            403,
+            {
+                "error-list": [
+                    {
+                        "code": "forbidden",
+                        "message": "Cannot unregister a package with existing revisions",
+                    }
+                ]
+            },
+            "forbidden",
+        ),
+        (
+            401,
+            {
+                "error-list": [
+                    {
+                        "code": "permission-required",
+                        "message": "Charms can only be unregistered by their publisher",
+                    }
+                ]
+            },
+            "permission-required",
+        ),
+    ],
+)
+def test_unregister_name_client_errors(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    status_code: int,
+    json: dict,
+    error_code: str,
+):
+    mock_httpx_client.delete.return_value = httpx.Response(status_code, json=json)
+
+    with pytest.raises(errors.CraftStoreError) as exc_info:
+        publisher_gateway.unregister_name("my-name")
+
+    assert exc_info.value.store_errors is not None
+    assert error_code in exc_info.value.store_errors
 
 
 @pytest.mark.parametrize(
