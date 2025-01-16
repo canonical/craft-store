@@ -31,3 +31,37 @@ def test_get_package_metadata(
     assert metadata.default_track
     assert len(metadata.id) == len("sCPqM62aJhbLUJmpPfFbsxbd2zpR6dcu")
     assert metadata.default_track in {track.name for track in metadata.tracks}
+
+
+@needs_charmhub_credentials()
+@pytest.mark.slow
+def test_list_revisions(
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
+):
+    revisions = publisher_gateway.list_revisions(charmhub_charm_name)
+
+    assert len({revision.revision for revision in revisions}) == len(revisions), (
+        "Multiple revisions returned with the same revision number."
+    )
+
+
+@needs_charmhub_credentials()
+@pytest.mark.slow
+def test_list_releases(
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
+):
+    response = publisher_gateway.list_releases(charmhub_charm_name)
+
+    # We should only ever have one type of revision.
+    # There might be no revisions in which case it could be 0.
+    assert len({type(rev) for rev in response.revisions}) in (0, 1)
+
+    channel_names = {channel.name for channel in response.package.channels}
+    for channel in response.package.channels:
+        assert channel.fallback in channel_names | {None}
+
+        channel_parts = channel.name.split("/")
+        assert channel.risk in channel_parts
+        assert channel.track in channel_parts
+        if channel.branch:
+            assert channel.branch in channel_parts

@@ -127,3 +127,36 @@ def test_register_unregister_cycle(
     assert unregistered_charm_name not in names, (
         f"{entity_type} was not successfully unregistered."
     )
+
+
+@needs_charmhub_credentials()
+@pytest.mark.slow
+def test_release(
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
+):
+    # Find a revision to release.
+    releases = publisher_gateway.list_releases(charmhub_charm_name)
+
+    for channel in releases.channel_map:
+        if channel.channel != "latest/edge":
+            break
+    else:
+        raise ValueError(
+            f"Please release at least one revision of {charmhub_charm_name} to a channel other than latest/edge"
+        )
+
+    for revision_to_release in releases.revisions:
+        if revision_to_release.revision == channel.revision:
+            break
+    else:
+        raise ValueError(
+            f"Cannot find revision to release (revision {channel.revision})"
+        )
+
+    # Try releasing that revision to edge.
+
+    results = publisher_gateway.release(
+        charmhub_charm_name, [{"channel": "latest/edge", "revision": channel.revision}]
+    )
+    assert results[0].revision == revision_to_release.revision
+    assert results[0].channel in ("latest/edge", "edge")  # Could be either!

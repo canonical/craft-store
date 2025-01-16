@@ -28,3 +28,23 @@ CreateTrackRequest = TypedDict(
         "automatic-phasing-percentage": NotRequired[str | None],
     },
 )
+
+
+class ResourceReleaseRequest(TypedDict):
+    """A resource dictionary for a release request."""
+
+    name: str
+    """The resource name."""
+    revision: NotRequired[int | None]
+    """The resource's revision number."""
+
+
+class ReleaseRequest(TypedDict):
+    """Request item for a release."""
+
+    channel: str
+    """The channel to release to."""
+    resources: NotRequired[list[ResourceReleaseRequest]]
+    """A list of resources to attach to this release."""
+    revision: int | None
+    """The revision to release to the channel."""

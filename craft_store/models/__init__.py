@@ -34,7 +34,11 @@ from .resource_revision_model import (
     CharmResourceType,
     RequestCharmResourceBase,
 )
-from .revisions_model import RevisionsRequestModel, RevisionsResponseModel
+from .revisions_model import (
+    RevisionModel,
+    RevisionsRequestModel,
+    RevisionsResponseModel,
+)
 from .snap_list_releases_model import ListReleasesModel as SnapListReleasesModel
 from .track_guardrail_model import TrackGuardrailModel
 from .track_model import TrackModel
@@ -50,6 +54,7 @@ __all__ = [
     "RequestCharmResourceBase",
     "CharmResourceRevisionUpdateRequest",
     "CharmResourceType",
+    "RevisionModel",
     "RevisionsRequestModel",
     "RevisionsResponseModel",
     "SnapListReleasesModel",

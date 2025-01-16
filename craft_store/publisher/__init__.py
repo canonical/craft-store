@@ -17,6 +17,28 @@
 
 from ._request import (
     CreateTrackRequest,
+    ResourceReleaseRequest,
+    ReleaseRequest,
+)
+from ._response import (
+    Base,
+    Resource,
+    Package,
+    Progressive,
+    Length,
+    RevisionNumber,
+    Sha3_384,
+    Error,
+    SnapConfinement,
+    Grade,
+    SnapType,
+    ChannelMap,
+    Revision,
+    CharmRevision,
+    SnapRevision,
+    SourceRevision,
+    Releases,
+    ReleaseResult,
 )
 from ._publishergw import PublisherGateway
 
@@ -28,6 +50,7 @@ from craft_store.models.registered_name_model import (
 from craft_store.models.track_guardrail_model import (
     TrackGuardrailModel as TrackGuardrail,
 )
+from craft_store.models._common_list_releases_model import ChannelsModel as Channel
 from craft_store.models.track_model import TrackModel as Track
 
 __all__ = [
@@ -35,7 +58,29 @@ __all__ = [
     "CreateTrackRequest",
     "Media",
     "RegisteredName",
+    "ReleaseRequest",
+    "ResourceReleaseRequest",
     "TrackGuardrail",
     "Track",
     "PublisherGateway",
+    "RegisteredName",
+    "Base",
+    "Resource",
+    "Channel",
+    "Package",
+    "Progressive",
+    "Length",
+    "RevisionNumber",
+    "Sha3_384",
+    "Error",
+    "SnapConfinement",
+    "Grade",
+    "SnapType",
+    "ChannelMap",
+    "Revision",
+    "CharmRevision",
+    "SnapRevision",
+    "SourceRevision",
+    "Releases",
+    "ReleaseResult",
 ]
