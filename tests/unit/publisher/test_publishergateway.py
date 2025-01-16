@@ -24,7 +24,7 @@ import pydantic
 import pytest
 import pytest_check
 from craft_store import errors, publisher
-from craft_store.models.registered_name_model import RegisteredNameModel
+from craft_store.publisher import RegisteredName, ReleaseResult, Revision
 
 
 @pytest.fixture
@@ -195,7 +195,7 @@ def test_get_package_metadata(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
     fake_registered_name_dict: dict[str, Any],
-    fake_registered_name_model: RegisteredNameModel,
+    fake_registered_name_model: RegisteredName,
 ):
     mock_httpx_client.get.return_value = httpx.Response(
         200, json={"metadata": fake_registered_name_dict}
@@ -286,6 +286,115 @@ def test_unregister_name_client_errors(
 
     assert exc_info.value.store_errors is not None
     assert error_code in exc_info.value.store_errors
+
+
+@pytest.mark.parametrize(
+    ("json_values"),
+    [
+        pytest.param([], id="empty"),
+        pytest.param(
+            [
+                {
+                    "created-at": "2000-01-01T00:00:00Z",
+                    "revision": 1,
+                    "sha3-384": "734e1ec20ce19747101614c1cd924b2745b56d291d53973304a5e6390b9101b78fa19f966ffed86c9de570a5e2c163dc",
+                    "size": 0,
+                    "status": "empty",
+                    "version": "1",
+                },
+                {
+                    "created-at": "2000-01-01T00:00:00Z",
+                    "created-by": "someone",
+                    "errors": [{"code": "0", "message": "Oops!"}],
+                    "revision": 2,
+                    "sha3-384": "734e1ec20ce19747101614c1cd924b2745b56d291d53973304a5e6390b9101b78fa19f966ffed86c9de570a5e2c163dc",
+                    "size": 124546586765432456876764,
+                    "status": "bad",
+                    "version": "versiony",
+                },
+            ],
+            id="has-values",
+        ),
+    ],
+)
+def test_list_revisions_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    json_values,
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200, json={"revisions": json_values}
+    )
+    result = publisher_gateway.list_revisions("my-name")
+
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-name/revisions", params={}
+    )
+
+    assert result == [Revision.unmarshal(rev) for rev in json_values]
+
+
+@pytest.mark.parametrize(
+    ("fields", "expected_fields"),
+    [
+        ([], ""),
+        (["size", "status"], "size,status"),
+        ({"commit-id"}, "commit-id"),
+    ],
+)
+@pytest.mark.parametrize("include_craft_yaml", [True, False])
+@pytest.mark.parametrize("revision", [None, 123])
+def test_list_revisions_parameters(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    fields: list[str] | None,
+    expected_fields: str | None,
+    include_craft_yaml: bool,
+    revision: int | None,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={"revisions": []})
+    include_str = str(include_craft_yaml).lower()
+
+    publisher_gateway.list_revisions(
+        "my-name",
+        fields=fields,
+        include_craft_yaml=include_craft_yaml,
+        revision=revision,
+    )
+
+    call = mock_httpx_client.get.mock_calls[0]
+
+    assert call.args[0] == "/v1/charm/my-name/revisions"
+    actual_params = call.kwargs["params"]
+
+    assert actual_params.get("fields") == expected_fields
+    assert actual_params.get("include-craft-yaml", "false") == include_str
+    assert actual_params.get("revision") == (str(revision) if revision else None)
+
+
+@pytest.mark.parametrize(
+    ("requests", "expected"),
+    [
+        pytest.param([], [], id="empty"),
+        pytest.param(
+            [{"channel": "latest/edge", "revision": 123}],
+            [ReleaseResult(channel="latest/edge", revision=123)],
+        ),
+    ],
+)
+def test_release(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    requests,
+    expected,
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"released": requests}
+    )
+
+    actual = publisher_gateway.release("my-name", requests)
+
+    assert actual == expected
 
 
 @pytest.mark.parametrize(

@@ -19,14 +19,22 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Collection, Sequence
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from craft_store import errors, models
+from craft_store import errors
 from craft_store._httpx_auth import CandidAuth
 from craft_store.auth import Auth
+from craft_store.models import RegisteredNameModel as RegisteredName
+
+from ._response import (
+    ReleaseResult,
+    Releases,
+    Revision,
+)
 
 if TYPE_CHECKING:
     from . import _request
@@ -117,7 +125,7 @@ class PublisherGateway:
 
     def list_registered_names(
         self, include_collaborations: bool = False
-    ) -> list[models.RegisteredNameModel]:
+    ) -> Sequence[RegisteredName]:
         """Return names registered by the authenticated user.
 
         :param include_collaborations: if True, includes names the user is a
@@ -132,7 +140,7 @@ class PublisherGateway:
         )
         self._check_error(response)
         results = self._check_keys(response, expected_keys={"results"})["results"]
-        return [models.RegisteredNameModel.unmarshal(item) for item in results]
+        return [RegisteredName.unmarshal(item) for item in results]
 
     def register_name(
         self,
@@ -163,7 +171,7 @@ class PublisherGateway:
         self._check_error(response)
         return str(self._check_keys(response, expected_keys={"id"})["id"])
 
-    def get_package_metadata(self, name: str) -> models.RegisteredNameModel:
+    def get_package_metadata(self, name: str) -> RegisteredName:
         """Get general metadata for a package.
 
         :param name: The name of the package to query.
@@ -175,7 +183,7 @@ class PublisherGateway:
             url=f"/v1/{self._namespace}/{name}",
         )
         self._check_error(response)
-        return models.RegisteredNameModel.unmarshal(
+        return RegisteredName.unmarshal(
             self._check_keys(response, expected_keys={"metadata"})["metadata"]
         )
 
@@ -193,6 +201,67 @@ class PublisherGateway:
         return str(
             self._check_keys(response, expected_keys={"package-id"})["package-id"]
         )
+
+    def list_revisions(
+        self,
+        name: str,
+        *,
+        fields: Collection[str] | None = None,
+        include_craft_yaml: bool = False,
+        revision: int | None = None,
+    ) -> Sequence[Revision]:
+        """List the revisions for a specific name.
+
+        :param name: The name of the package to query.
+        :param fields: A list of fields to include. These vary by namespace and are only
+            checked server-side.
+        :param include_craft_yaml: Whether to include the craft YAML file in the response.
+        :param revision: If provided, get only the specified revision.
+        :returns: A list of revisions in the store and their metadata.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_revisions
+        """
+        params = {}
+        if fields is not None:
+            params["fields"] = ",".join(fields)
+        if include_craft_yaml:
+            params["include-craft-yaml"] = "true"
+        if revision is not None:
+            params["revision"] = str(revision)
+        response = self._client.get(
+            f"/v1/{self._namespace}/{name}/revisions", params=params
+        )
+        self._check_error(response)
+        response_data = self._check_keys(response, {"revisions"})
+        return [Revision.unmarshal(revision) for revision in response_data["revisions"]]
+
+    def list_releases(self, name: str) -> Releases:
+        """Get the information about the releases of a name.
+
+        :param name: The name of the package to query.
+        :returns: Channel info, package info and revision info.
+
+        The revision information returned is only for the revisions that are currently
+        published in a channel.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_releases
+        """
+        response = self._client.get(f"/v1/{self._namespace}/{name}/releases")
+        self._check_error(response)
+        return Releases.unmarshal(response.json())
+
+    def release(
+        self, name: str, requests: list[_request.ReleaseRequest]
+    ) -> Sequence[ReleaseResult]:
+        response = self._client.post(
+            f"/v1/{self._namespace}/{name}/releases", json=requests
+        )
+        self._check_error(response)
+
+        return [
+            ReleaseResult.unmarshal(rel)
+            for rel in self._check_keys(response, {"released"})["released"]
+        ]
 
     def create_tracks(self, name: str, *tracks: _request.CreateTrackRequest) -> int:
         """Create one or more tracks in the store.
