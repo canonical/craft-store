@@ -435,7 +435,19 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
+dev-dependencies = [
+    { name = "build" },
+    { name = "coverage", extra = ["toml"] },
+    { name = "pytest" },
+    { name = "pytest-check" },
+    { name = "pytest-cov" },
+    { name = "pytest-httpx" },
+    { name = "pytest-mock" },
+    { name = "pytest-subprocess" },
+    { name = "pytest-timeout" },
+    { name = "pyyaml" },
+]
 docs = [
     { name = "furo" },
     { name = "lxd-sphinx-extensions" },
@@ -448,7 +460,6 @@ docs = [
     { name = "sphinx-lint" },
     { name = "sphinx-notfound-page" },
     { name = "sphinx-reredirects" },
-    { name = "sphinx-rtd-theme" },
     { name = "sphinx-tabs" },
     { name = "sphinx-toolbox" },
     { name = "sphinxcontrib-jquery" },
@@ -472,74 +483,67 @@ types = [
     { name = "types-setuptools" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "build" },
-    { name = "coverage", extra = ["toml"] },
-    { name = "pytest" },
-    { name = "pytest-check" },
-    { name = "pytest-cov" },
-    { name = "pytest-httpx" },
-    { name = "pytest-mock" },
-    { name = "pytest-subprocess" },
-    { name = "pytest-timeout" },
-    { name = "pyyaml" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "annotated-types", specifier = ">=0.6.0" },
-    { name = "codespell", extras = ["toml"], marker = "extra == 'lint'", specifier = "~=2.3" },
-    { name = "furo", marker = "extra == 'docs'", specifier = "==2024.8.6" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "jaraco-classes", specifier = ">=3.4.0" },
     { name = "keyring", specifier = ">=23.0" },
-    { name = "lxd-sphinx-extensions", marker = "extra == 'docs'", specifier = "==0.0.16" },
     { name = "macaroonbakery", specifier = ">=1.3.0,!=1.3.3" },
-    { name = "mypy", extras = ["reports"], marker = "extra == 'types'", specifier = "~=1.13" },
-    { name = "myst-parser", marker = "extra == 'docs'", specifier = "==4.0.0" },
     { name = "overrides", specifier = ">=7.0.0" },
     { name = "pydantic", specifier = "~=2.8" },
-    { name = "pyspelling", marker = "extra == 'docs'", specifier = "==2.10" },
     { name = "pyxdg", specifier = ">=0.26" },
     { name = "requests", specifier = ">=2.27.0" },
     { name = "requests-toolbelt", specifier = ">=1.0.0" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = "==8.1.3" },
-    { name = "sphinx-autobuild", marker = "extra == 'docs'", specifier = "==2024.10.3" },
-    { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "==0.5.2" },
-    { name = "sphinx-design", marker = "extra == 'docs'", specifier = "==0.6.1" },
-    { name = "sphinx-lint", marker = "extra == 'docs'", specifier = "==1.0.0" },
-    { name = "sphinx-notfound-page", marker = "extra == 'docs'", specifier = "==1.0.4" },
-    { name = "sphinx-reredirects", marker = "extra == 'docs'", specifier = "==0.1.5" },
-    { name = "sphinx-rtd-theme", marker = "extra == 'docs'" },
-    { name = "sphinx-tabs", marker = "extra == 'docs'", specifier = "==3.4.7" },
-    { name = "sphinx-toolbox", marker = "extra == 'docs'", specifier = ">=2.5.0" },
-    { name = "sphinxcontrib-jquery", marker = "extra == 'docs'", specifier = "==4.1" },
-    { name = "sphinxext-opengraph", marker = "extra == 'docs'", specifier = "==0.9.1" },
-    { name = "twine", marker = "extra == 'release'" },
-    { name = "types-colorama", marker = "extra == 'types'" },
-    { name = "types-docutils", marker = "extra == 'types'" },
-    { name = "types-pygments", marker = "extra == 'types'" },
-    { name = "types-pyyaml", marker = "extra == 'types'" },
-    { name = "types-requests", marker = "extra == 'types'" },
-    { name = "types-setuptools", marker = "extra == 'types'" },
     { name = "typing-extensions", specifier = ">=4.12" },
-    { name = "wheel", marker = "extra == 'release'" },
-    { name = "yamllint", marker = "extra == 'lint'", specifier = "~=1.35" },
 ]
 
 [package.metadata.requires-dev]
-dev = [
+dev-dependencies = [
     { name = "build" },
-    { name = "coverage", extras = ["toml"], specifier = "==7.6.2" },
-    { name = "pytest", specifier = "==8.3.3" },
-    { name = "pytest-check", specifier = ">=2.4" },
-    { name = "pytest-cov", specifier = "==5.0.0" },
-    { name = "pytest-httpx", specifier = ">=0.35" },
-    { name = "pytest-mock", specifier = "==3.14.0" },
-    { name = "pytest-subprocess", specifier = ">=1.5" },
-    { name = "pytest-timeout", specifier = ">=2.0" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "coverage", extras = ["toml"], specifier = "~=7.6" },
+    { name = "pytest", specifier = "~=8.3" },
+    { name = "pytest-check", specifier = "~=2.4" },
+    { name = "pytest-cov", specifier = "~=5.0" },
+    { name = "pytest-httpx", specifier = "~=0.35" },
+    { name = "pytest-mock", specifier = "~=3.14" },
+    { name = "pytest-subprocess", specifier = "~=1.5" },
+    { name = "pytest-timeout", specifier = "~=2.0" },
+    { name = "pyyaml", specifier = "~=6.0" },
+]
+docs = [
+    { name = "furo", specifier = "==2024.8.6" },
+    { name = "lxd-sphinx-extensions", specifier = "==0.0.16" },
+    { name = "myst-parser", specifier = "==4.0.0" },
+    { name = "pyspelling", specifier = "==2.10" },
+    { name = "sphinx", specifier = "~=8.1" },
+    { name = "sphinx-autobuild", specifier = "~=2024.10.3" },
+    { name = "sphinx-copybutton", specifier = "~=0.5.2" },
+    { name = "sphinx-design", specifier = "~=0.6.1" },
+    { name = "sphinx-lint", specifier = "~=1.0" },
+    { name = "sphinx-notfound-page", specifier = "~=1.0" },
+    { name = "sphinx-reredirects", specifier = "~=0.1.5" },
+    { name = "sphinx-tabs", specifier = "~=3.4.7" },
+    { name = "sphinx-toolbox", specifier = "~=3.8" },
+    { name = "sphinxcontrib-jquery", specifier = "~=4.1" },
+    { name = "sphinxext-opengraph", specifier = "~=0.9.1" },
+]
+lint = [
+    { name = "codespell", extras = ["toml"], specifier = "~=2.3" },
+    { name = "yamllint", specifier = "~=1.35" },
+]
+release = [
+    { name = "twine" },
+    { name = "wheel" },
+]
+types = [
+    { name = "mypy", extras = ["reports"], specifier = "~=1.13" },
+    { name = "types-colorama" },
+    { name = "types-docutils" },
+    { name = "types-pygments" },
+    { name = "types-pyyaml" },
+    { name = "types-requests" },
+    { name = "types-setuptools" },
 ]
 
 [[package]]
@@ -748,7 +752,7 @@ name = "importlib-metadata"
 version = "8.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7", size = 55304 }
 wheels = [
@@ -2044,20 +2048,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f9/1d/b1229d825a418738ce1a03930629a7b873cd6a0ff05953493604de35a3d5/sphinx_reredirects-0.1.5.tar.gz", hash = "sha256:cfa753b441020a22708ce8eb17d4fd553a28fc87a609330092917ada2a6da0d8", size = 7095 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/34/97/1f8143f87330f4c9ccc2c08ae9cd3cb1ce2944c51e98dd7ff141154fbcc7/sphinx_reredirects-0.1.5-py3-none-any.whl", hash = "sha256:444ae1438fba4418242ca76d6a6de3eaee82aaf0d8f2b0cac71a15d32ce6eba2", size = 5673 },
-]
-
-[[package]]
-name = "sphinx-rtd-theme"
-version = "3.0.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "docutils" },
-    { name = "sphinx" },
-    { name = "sphinxcontrib-jquery" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/91/44/c97faec644d29a5ceddd3020ae2edffa69e7d00054a8c7a6021e82f20335/sphinx_rtd_theme-3.0.2.tar.gz", hash = "sha256:b7457bc25dda723b20b086a670b9953c859eab60a2a03ee8eb2bb23e176e5f85", size = 7620463 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/85/77/46e3bac77b82b4df5bb5b61f2de98637724f246b4966cfc34bc5895d852a/sphinx_rtd_theme-3.0.2-py2.py3-none-any.whl", hash = "sha256:422ccc750c3a3a311de4ae327e82affdaf59eb695ba4936538552f3b00f4ee13", size = 7655561 },
 ]
 
 [[package]]

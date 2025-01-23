@@ -8,10 +8,16 @@ ifneq ($(OS),Windows_NT)
 	OS := $(shell uname)
 endif
 ifdef CI
-    APT := apt-get --yes
+	APT := apt-get --yes
 else
 	APT := apt-get
 endif
+
+PRETTIER=npm exec --package=prettier -- prettier
+PRETTIER_FILES=**.yaml **.yml **.json **.json5 **.css **.md
+
+# By default we should not update the uv lock file here.
+export UV_FROZEN := true
 
 .DEFAULT_GOAL := help
 
@@ -42,25 +48,22 @@ help: ## Show this help.
 
 .PHONY: setup
 setup: install-uv setup-precommit ## Set up a development environment
-	uv sync --frozen --all-extras
+	uv sync --all-extras
 
 .PHONY: setup-tests
 setup-tests: install-uv install-build-deps ##- Set up a testing environment without linters
-	uv sync --frozen
+	uv sync
 
 .PHONY: setup-lint
 setup-lint: install-uv install-shellcheck install-pyright install-lint-build-deps  ##- Set up a linting-only environment
-	uv sync --frozen --no-install-workspace --extra lint --extra types
+	uv sync --no-install-workspace --group lint --group types
 
 .PHONY: setup-docs
 setup-docs: install-uv  ##- Set up a documentation-only environment
-	uv sync --frozen --no-dev --no-install-workspace --extra docs
+	uv sync --no-dev --group docs
 
 .PHONY: setup-precommit
 setup-precommit: install-uv  ##- Set up pre-commit hooks in this repository.
-ifeq ($(shell which pre-commit),)
-	uv tool install pre-commit
-endif
 ifeq ($(shell which pre-commit),)
 	uv tool run pre-commit install
 else
@@ -86,6 +89,10 @@ format-ruff: install-ruff  ##- Automatically format with ruff
 format-codespell:  ##- Fix spelling issues with codespell
 	uv run codespell --toml pyproject.toml --write-changes $(SOURCES)
 
+.PHONY: format-prettier
+format-prettier: install-npm  ##- Format files with prettier
+	$(PRETTIER) --write $(PRETTIER_FILES)
+
 .PHONY: lint-ruff
 lint-ruff: install-ruff  ##- Lint with ruff
 ifneq ($(CI),)
@@ -98,7 +105,7 @@ ifneq ($(CI),)
 endif
 
 .PHONY: lint-codespell
-lint-codespell:  ##- Check spelling with codespell
+lint-codespell: install-codespell  ##- Check spelling with codespell
 ifneq ($(CI),)
 	@echo ::group::$@
 endif
@@ -141,12 +148,12 @@ ifneq ($(CI),)
 	@echo ::endgroup::
 endif
 
-.PHONY: lint-yaml
-lint-yaml:  ##- Lint YAML files with yamllint
+.PHONY: lint-prettier
+lint-prettier: install-npm  ##- Lint files with prettier
 ifneq ($(CI),)
 	@echo ::group::$@
 endif
-	uv run --extra lint yamllint .
+	$(PRETTIER) --check $(PRETTIER_FILES)
 ifneq ($(CI),)
 	@echo ::endgroup::
 endif
@@ -156,7 +163,7 @@ lint-docs:  ##- Lint the documentation
 ifneq ($(CI),)
 	@echo ::group::$@
 endif
-	uv run --extra docs sphinx-lint --max-line-length 88 --enable all $(DOCS)
+	uv run --group docs sphinx-lint --max-line-length 88 --ignore docs/reference/commands --ignore docs/_build --enable all $(DOCS)
 ifneq ($(CI),)
 	@echo ::endgroup::
 endif
@@ -192,11 +199,11 @@ test-coverage:  ## Generate coverage report
 
 .PHONY: docs
 docs:  ## Build documentation
-	uv run --extra docs sphinx-build -b html -W $(DOCS) $(DOCS)/_build
+	uv run --group docs sphinx-build -b html -W $(DOCS) $(DOCS)/_build
 
 .PHONY: docs-auto
 docs-auto:  ## Build and host docs with sphinx-autobuild
-	uv run --extra docs sphinx-autobuild -b html --open-browser --port=8080 --watch $(PROJECT) -W $(DOCS) $(DOCS)/_build
+	uv run --group docs sphinx-autobuild -b html --open-browser --port=8080 --watch $(PROJECT) -W $(DOCS) $(DOCS)/_build
 
 .PHONY: pack-pip
 pack-pip:  ##- Build packages for pip (sdist, wheel)
@@ -242,7 +249,7 @@ ifneq ($(shell which pyright),)
 else ifneq ($(shell which snap),)
 	sudo snap install --classic pyright
 else
-    # Workaround for a bug in npm
+	# Workaround for a bug in npm
 	[ -d "$(HOME)/.npm/_cacache" ] && chown -R `id -u`:`id -g` "$(HOME)/.npm" || true
 	uv tool install pyright
 endif
@@ -266,4 +273,15 @@ else ifneq ($(shell which brew),)
 	brew install shellcheck
 else
 	$(warning Shellcheck not installed. Please install it yourself.)
+endif
+
+.PHONY: install-npm
+install-npm:
+ifneq ($(shell which npm),)
+else ifneq ($(shell which snap),)
+	sudo snap install --classic node
+else ifneq ($(shell which brew),)
+	brew install node
+else
+	$(error npm not installed. Please install it yourself.)
 endif
