@@ -13,12 +13,6 @@ Welcome to Craft Store's documentation!
    reference/index
    explanation/index
 
-
-.. toctree::
-   :caption: About the project
-
-   changelog
-
 Indices and tables
 ==================
 
