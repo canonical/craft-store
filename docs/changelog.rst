@@ -2,6 +2,13 @@
 Changelog
 *********
 
+3.2.0 (2025-01-24)
+------------------
+
+- Add more endpoints for the ``PublisherGateway`` client.
+
+  For a complete list of commits, check out the `3.2.0`_ release on GitHub.
+
 3.1.0 (2024-12-16)
 ------------------
 
@@ -190,3 +197,4 @@ Bug fixes:
 
 
 .. _3.1.0: https://github.com/canonical/craft-store/releases/tag/3.1.0
+.. _3.2.0: https://github.com/canonical/craft-store/releases/tag/3.2.0
