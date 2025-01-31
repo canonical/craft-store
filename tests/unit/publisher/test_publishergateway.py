@@ -25,6 +25,7 @@ import pytest
 import pytest_check
 from craft_store import errors, publisher
 from craft_store.publisher import RegisteredName, ReleaseResult, Revision
+from craft_store.publisher._response import ReleasedResourceRevision
 
 
 @pytest.fixture
@@ -379,6 +380,25 @@ def test_list_revisions_parameters(
         pytest.param(
             [{"channel": "latest/edge", "revision": 123}],
             [ReleaseResult(channel="latest/edge", revision=123)],
+        ),
+        pytest.param(
+            [
+                {
+                    "channel": "latest/edge",
+                    "revision": 123,
+                    "resources": [{"name": "my-resource", "revision": 456}],
+                }
+            ],
+            [
+                ReleaseResult(
+                    channel="latest/edge",
+                    revision=123,
+                    resources=[
+                        ReleasedResourceRevision(name="my-resource", revision=456)
+                    ],
+                )
+            ],
+            id="with_resource",
         ),
     ],
 )
