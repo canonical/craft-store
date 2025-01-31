@@ -2,6 +2,14 @@
 Changelog
 *********
 
+3.2.1 (2025-02-03)
+------------------
+
+- Fix a bug on the ``PublisherGateway`` client that could cause releases containing
+  resources to fail.
+
+For a complete list of commits, check out the `3.2.1`_ release on GitHub.
+
 3.2.0 (2025-01-24)
 ------------------
 
@@ -198,3 +206,4 @@ Bug fixes:
 
 .. _3.1.0: https://github.com/canonical/craft-store/releases/tag/3.1.0
 .. _3.2.0: https://github.com/canonical/craft-store/releases/tag/3.2.0
+.. _3.2.1: https://github.com/canonical/craft-store/releases/tag/3.2.1
