@@ -166,9 +166,16 @@ class Releases(_base_model.MarshableModel):
     )
 
 
+class ReleasedResourceRevision(_base_model.MarshableModel):
+    """A resource revision attached to a release."""
+
+    name: str
+    revision: int | None = None
+
+
 class ReleaseResult(_base_model.MarshableModel):
     """The result of a single release request."""
 
     channel: str | None = None
     revision: int | None = None
-    resources: list[Resource] | None = None
+    resources: list[ReleasedResourceRevision] | None = None
