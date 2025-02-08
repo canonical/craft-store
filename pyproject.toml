@@ -50,6 +50,8 @@ types = [
     "types-requests",
     "types-setuptools",
 ]
+
+[dependency-groups]
 docs = [
     "furo==2024.8.6",
     "lxd-sphinx-extensions==0.0.16",
