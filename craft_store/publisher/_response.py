@@ -73,7 +73,7 @@ class SnapType(enum.Enum):
 
 class ChannelMap(_base_model.MarshableModel):
     base: Base | None = pydantic.Field(
-        description=("The base this revision works on, if relevant in this namespace.")
+        description="The base this revision works on, if relevant in this namespace."
     )
     channel: str = pydantic.Field(
         description='The channel name, including "latest" for the latest track.',
@@ -92,6 +92,29 @@ class ChannelMap(_base_model.MarshableModel):
     )
     revision: RevisionNumber
     when: datetime.datetime = pydantic.Field(description="When this release was made.")
+
+
+class MacaroonMetadata(_base_model.MarshableModel):
+    """Information about a macaroon."""
+
+    description: str | None = pydantic.Field(
+        default=None,
+        description="Description of the macaroon.",
+    )
+    revoked_at: datetime.datetime | None = pydantic.Field(
+        default=None,
+        description="When the macaroon was revoked, or None if it has not been.",
+    )
+    revoked_by: str | None = pydantic.Field(
+        default=None, description="Who revoked this token, if it was revoked."
+    )
+    session_id: str = pydantic.Field(description="The actual session ID.")
+    valid_since: datetime.datetime = pydantic.Field(
+        description="The beginning time of the validity of this macaroon."
+    )
+    valid_until: datetime.datetime = pydantic.Field(
+        description="The last moment when this macaroon is valid."
+    )
 
 
 class Revision(_base_model.MarshableModel):

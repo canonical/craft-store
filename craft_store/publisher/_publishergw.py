@@ -31,6 +31,8 @@ from craft_store.auth import Auth
 from craft_store.models import RegisteredNameModel as RegisteredName
 
 from ._response import (
+    MacaroonInfo,
+    MacaroonMetadata,
     ReleaseResult,
     Releases,
     Revision,
@@ -58,12 +60,16 @@ class PublisherGateway:
     Each instance is only valid for one particular namespace.
     """
 
-    def __init__(self, base_url: str, namespace: str, auth: Auth) -> None:
+    def __init__(self, base_url: str, namespace: str, auth: Auth | None) -> None:
         self._namespace = namespace
-        self._client = httpx.Client(
-            base_url=base_url,
-            auth=CandidAuth(auth=auth, auth_type="macaroon"),
-        )
+
+        if auth:
+            self._client = httpx.Client(
+                base_url=base_url,
+                auth=CandidAuth(auth=auth, auth_type="macaroon"),
+            )
+        else:
+            self._client = httpx.Client(base_url=base_url)
 
     @staticmethod
     def _check_error(response: httpx.Response) -> None:
@@ -122,6 +128,44 @@ class PublisherGateway:
                 response, details=f"Missing JSON keys: {missing_keys}"
             )
         return json_response
+
+    def get_macaroons(
+        self, include_inactive: bool = False
+    ) -> str | Sequence[MacaroonMetadata]:
+        """Return existing macaroons for the authenticated account.
+
+        If unauthenticated, returns a macaroon to be discharged by Candid.
+
+        :param include_inactive: whether to include revoked and invalid macaroons.
+
+        API Docs: https://api.charmhub.io/docs/default.html#get_macaroon
+        """
+        response = self._client.get(
+            "/v1/tokens", params={"include-inactive": include_inactive}
+        )
+        self._check_error(response)
+        result = self._check_keys(response, set())
+        if "macaroon" in result:
+            return result["macaroon"]
+        return [MacaroonInfo.model_validate(result) for macaroon in result["macaroons"]]
+
+    @classmethod
+    def issue_macaroon(cls, base_url: str = "https://api.charmhub.io") -> str:
+        """Get a bakery v2 macaroon to be discharged by Candid.
+
+        API Docs: https://api.charmhub.io/docs/default.html#issue_macaroon
+        """
+        response = httpx.get(f"{base_url}/v1/tokens")
+        cls._check_error(response)
+        return cls._check_keys(response, {"macaroon"})["macaroon"]
+
+    def get_macaroon_info(self) -> None:
+        """Get information about the authenticated macaroon.
+
+        API Docs: https://api.charmhub.io/docs/default.html#macaroon_info
+        """
+        response = self._client.get("/v1/tokens/whoami")
+        self._check_error(response)
 
     def list_registered_names(
         self, include_collaborations: bool = False

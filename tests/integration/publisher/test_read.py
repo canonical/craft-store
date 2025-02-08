@@ -15,10 +15,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Tests that only involve reading from the store."""
 
+import json
+
 import pytest
 from craft_store import publisher
 
 from tests.integration.conftest import needs_charmhub_credentials
+
+
+@pytest.mark.slow
+def test_issue_macaroon(charmhub_base_url):
+    macaroon = publisher.PublisherGateway.issue_macaroon(base_url=charmhub_base_url)
+    assert isinstance(macaroon, str)
+    macaroon_struct = json.loads(macaroon)
+    assert macaroon_struct.keys() == {"i64", "s64", "l", "c"}
+
+
+@pytest.mark.slow
+def test_get_macaroon_charged(charmhub_base_url):
+    gateway = publisher.PublisherGateway(
+        base_url=charmhub_base_url, namespace="any", auth=None
+    )
+    macaroon = gateway.get_macaroons()
+    assert isinstance(macaroon, str)
+    macaroon_struct = json.loads(macaroon)
+    assert macaroon_struct.keys() == {"i64", "s64", "l", "c"}
 
 
 @needs_charmhub_credentials()
