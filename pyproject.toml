@@ -53,7 +53,7 @@ types = [
 docs = [
     "furo==2024.8.6",
     "lxd-sphinx-extensions==0.0.16",
-    "myst-parser==4.0.0",
+    "myst-parser==4.0.1",
     "pyspelling==2.10",
     "sphinx==8.1.3",
     "sphinx-autobuild==2024.10.3",
@@ -101,8 +101,8 @@ constraint-dependencies = [
 dev-dependencies = [
     "build",
     "pyyaml>=6.0.0",
-    "coverage[toml]==7.6.2",
-    "pytest==8.3.3",
+    "coverage[toml]==7.6.12",
+    "pytest==8.3.4",
     "pytest-cov==6.0.0",
     "pytest-mock==3.14.0",
     "pytest-check>=2.4",
