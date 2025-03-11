@@ -78,6 +78,7 @@ constraint-dependencies = [
     # Basic constraints to allow --resolution=lowest
     "build>=0.7.0",
     "cffi>=1.15",
+    "cryptography>=44.0.1",
     "iniconfig>=1.1.0",
     "libnacl>=2.0",
     "lxml>=5.0",
