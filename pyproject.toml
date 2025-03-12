@@ -78,6 +78,7 @@ constraint-dependencies = [
     # Basic constraints to allow --resolution=lowest
     "build>=0.7.0",
     "cffi>=1.15",
+    "cryptography>=44.0.1",
     "iniconfig>=1.1.0",
     "libnacl>=2.0",
     "lxml>=5.0",
@@ -91,6 +92,7 @@ constraint-dependencies = [
     "pytz>=2020",
     "pyyaml>5.0",
     "regex>=2021.11.10",
+    "secretstorage>=3.3.1",
     "setuptools>=50",
     "sphinx-basic-ng>=1.0.0b1",
     "tornado>=4.0",
