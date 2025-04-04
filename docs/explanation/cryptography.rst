@@ -10,12 +10,11 @@ cryptography, but it does depend on external libraries to do so.
 Authentication
 --------------
 
-Craft Store uses `macaroons
-<https://research.google/pubs/macaroons-cookies-with-contextual-caveats-for-decentralized-authorization-in-the-cloud/>`_,
-as an authentication mechanism, which are processed by the `macaroonbakery
-<https://pypi.org/project/macaroonbakery/>`_ library. This library validates
-and manages macaroons as returned by store front-ends and simplifies the
-inclusion of macaroons in further requests to stores.
+Craft Store uses `macaroons`_, as an authentication mechanism, which are
+processed by the `macaroonbakery <https://pypi.org/project/macaroonbakery/>`_
+library. This library validates and manages macaroons as returned by store
+front-ends and simplifies the inclusion of macaroons in further requests to
+stores.
 
 Credentials may additionally be stored on-disk using the `keyring
 <https://pypi.org/project/keyring/>`_ library, which will use the keyring
@@ -44,3 +43,5 @@ is retained to aid with local testing. The distinction of which library is used
 depends on the request object provided by an application using this library.
 These libraries handle cryptographic operations such as the TLS handshake that
 are standard requirements for modern internet communication.
+
+.. _macaroons: https://research.google/pubs/macaroons-cookies-with-contextual-caveats-for-decentralized-authorization-in-the-cloud/
