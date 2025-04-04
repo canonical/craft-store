@@ -1,4 +1,4 @@
-.. _reference_cryptography:
+.. _explanation_cryptographic-technology:
 
 Cryptographic technology in Craft Store
 =======================================
@@ -12,9 +12,8 @@ Authentication
 
 Craft Store uses `macaroons`_, as an authentication mechanism, which are
 processed by the `macaroonbakery <https://pypi.org/project/macaroonbakery/>`_
-library. This library validates and manages macaroons as returned by store
-front-ends and simplifies the inclusion of macaroons in further requests to
-stores.
+library. This library validates and manages macaroons as returned by stores
+and simplifies the inclusion of macaroons in further requests to stores.
 
 Credentials may additionally be stored on-disk using the `keyring
 <https://pypi.org/project/keyring/>`_ library, which will use the keyring
@@ -39,9 +38,7 @@ cryptographic operations such as the TLS handshake that are standard
 requirements for modern internet connections. These are configured to always
 attempt HTTPS connections first, but have the ability to communicate over HTTP
 as a fallback. Canonical storefronts do not support HTTP, but this capability
-is retained to aid with local testing. The distinction of which library is used
-depends on the request object provided by an application using this library.
-These libraries handle cryptographic operations such as the TLS handshake that
-are standard requirements for modern internet communication.
+is retained to aid with local testing. Between these two libraries, Craft Store
+will use whichever of the two is invoked by the consuming application.
 
 .. _macaroons: https://research.google/pubs/macaroons-cookies-with-contextual-caveats-for-decentralized-authorization-in-the-cloud/
