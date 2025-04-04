@@ -18,7 +18,8 @@ of macaroons in further requests to storefronts.
 Credentials may additionally be stored on-disk using the `keyring
 <https://pypi.org/project/keyring/>`_ library, which will use the keyring service
 provided by the host operating system. If the host OS does not have a keyring service,
-they will instead be stored in plain text. A warning is issued to the terminal when this
+they will instead be stored in a plain text file called :file:`credentials.json` under
+the application's data storage directory. A warning is issued to the terminal when this
 behavior is triggered. This behavior is available to ease the usage of Craft Store
 within CI containers, but is generally discouraged.
 
