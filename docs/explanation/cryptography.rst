@@ -21,7 +21,7 @@ provided by the host operating system. If the host does not have a keyring servi
 will instead be stored in a plain text file called :file:`credentials.json` under the
 application's data storage directory. A warning is issued to the terminal when this
 behavior is triggered. This behavior is available to ease the usage of Craft Store
-within CI containers, but is generally discouraged.
+inside virtual machines and containers, but is generally discouraged.
 
 Network connectivity
 --------------------
