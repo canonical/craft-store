@@ -91,8 +91,20 @@ class PublisherGateway:
         else:
             fancy_error_list = errors.StoreErrorList(error_list)
             brief = f"{brief}.\n{fancy_error_list}"
+
+        try:
+            request = response.request
+        except RuntimeError:
+            details = None
+        else:
+            details = f"Error occurred on {request.method} request to {response.url}"
+            if request.content:
+                details += "\nRequest content: "
+                details += request.content.decode()
         raise errors.CraftStoreError(
-            brief, store_errors=errors.StoreErrorList(error_list)
+            brief,
+            details=details,
+            store_errors=errors.StoreErrorList(error_list),
         )
 
     @staticmethod
