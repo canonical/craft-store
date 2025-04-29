@@ -1,10 +1,8 @@
 [project]
 name = "craft-store"
-description="Store bindings for Snaps and Charms"
+description = "Store bindings for Snaps and Charms"
 dynamic = ["version", "readme"]
-authors = [
-    {name = "Canonical Ltd.", email = "snapcraft@lists.snapcraft.io"},
-]
+authors = [{ name = "Canonical Ltd.", email = "snapcraft@lists.snapcraft.io" }]
 dependencies = [
     "annotated-types>=0.6.0",
     "keyring>=23.0",
@@ -37,10 +35,7 @@ requires-python = ">=3.10"
 "Issues" = "https://github.com/canonical/craft-store/issues"
 
 [project.optional-dependencies]
-lint = [
-    "codespell[toml]~=2.3",
-    "yamllint~=1.35"
-]
+lint = ["codespell[toml]~=2.3", "yamllint~=1.35"]
 types = [
     "mypy[reports]~=1.13",
     "types-PyYAML",
@@ -68,10 +63,8 @@ docs = [
     "sphinx-tabs==3.4.7",
     "sphinx-toolbox>=2.5.0",
 ]
-release = [
-    "twine",
-    "wheel",
-]
+release = ["twine", "wheel"]
+tics = ["flake8", "pylint"]
 
 [tool.uv]
 constraint-dependencies = [
@@ -114,17 +107,14 @@ dev-dependencies = [
 ]
 
 [build-system]
-requires = [
-    "setuptools==75.8.0",
-    "setuptools_scm[toml]>=7.1"
-]
+requires = ["setuptools==75.8.0", "setuptools_scm[toml]>=7.1"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-data = {"craft_store" = ["py.typed"]}
+package-data = { "craft_store" = ["py.typed"] }
 
 [tool.setuptools.dynamic]
-readme = {file = "README.md"}
+readme = { file = "README.md" }
 
 [tool.setuptools_scm]
 write_to = "craft_store/_version.py"
@@ -168,10 +158,7 @@ line_length = 88
 minversion = "7.0"
 testpaths = "tests"
 xfail_strict = true
-markers = [
-    "disable_fake_keyring",
-    "slow: tests that take a long time",
-]
+markers = ["disable_fake_keyring", "slow: tests that take a long time"]
 
 [tool.coverage.run]
 branch = true
@@ -179,34 +166,27 @@ omit = ["tests/**"]
 
 [tool.coverage.report]
 skip_empty = true
-exclude_also = [
-    "if (typing\\.)?TYPE_CHECKING:",
-]
+exclude_also = ["if (typing\\.)?TYPE_CHECKING:"]
 
 [tool.pylint.messages_control]
 disable = "too-many-ancestors,too-few-public-methods,fixme,unspecified-encoding,use-implicit-booleaness-not-comparison,unnecessary-lambda-assignment"
 
 [tool.pylint.similarities]
-min-similarity-lines=12
+min-similarity-lines = 12
 
 [tool.pylint.format]
 max-line-length = "100"
 max-locals = 16
 
 [tool.pylint.MASTER]
-extension-pkg-whitelist = [
-    "pydantic"
-]
+extension-pkg-whitelist = ["pydantic"]
 load-plugins = "pylint_fixme_info,pylint_pytest"
 
 [tool.pyright]
 #strict = ["craft_store"]  # Disabled because pyrightconfig.json didn't include this.
 pythonVersion = "3.10"
 pythonPlatform = "Linux"
-include = [
-    "craft_store",
-    "tests",
-]
+include = ["craft_store", "tests"]
 exclude = [
     "**/__pycache__",
     "**/.mypy_cache",
@@ -223,12 +203,7 @@ exclude = [
 [tool.mypy]
 python_version = "3.10"
 plugins = ["pydantic.mypy"]
-exclude = [
-    "build",
-    "tests",
-    "results",
-    "docs",
-]
+exclude = ["build", "tests", "results", "docs"]
 warn_unused_configs = true
 warn_redundant_casts = true
 strict_equality = true
@@ -251,105 +226,114 @@ strict = false
 line-length = 88
 target-version = "py310"
 src = ["craft_store", "tests"]
-extend-exclude = [
-    "docs",
-    "__pycache__",
-    "docs/sphinx-docs-starter-pack",
-]
+extend-exclude = ["docs", "__pycache__", "docs/sphinx-docs-starter-pack"]
 
 [tool.ruff.lint]
 # Follow ST063 - Maintaining and updating linting specifications for updating these.
-select = [  # Base linting rule selections.
+select = [ # Base linting rule selections.
     # See the internal document for discussion:
     # https://docs.google.com/document/d/1i1n8pDmFmWi4wTDpk-JfnWCVUThPJiggyPi2DYwBBu4/edit
     # All sections here are stable in ruff and shouldn't randomly introduce
     # failures with ruff updates.
-    "F",  # The rules built into Flake8
-    "E", "W",  # pycodestyle errors and warnings
-    "I",  # isort checking
-    "N",  # PEP8 naming
-    "D",  # Implement pydocstyle checking as well.
+    "F",   # The rules built into Flake8
+    "E",
+    "W",   # pycodestyle errors and warnings
+    "I",   # isort checking
+    "N",   # PEP8 naming
+    "D",   # Implement pydocstyle checking as well.
     "UP",  # Pyupgrade - note that some of are excluded below due to Python versions
-    "YTT",  # flake8-2020: Misuse of `sys.version` and `sys.version_info`
-    "ANN",  # Type annotations.
-    "BLE",  # Do not catch blind exceptions
+    "YTT", # flake8-2020: Misuse of `sys.version` and `sys.version_info`
+    "ANN", # Type annotations.
+    "BLE", # Do not catch blind exceptions
     #"FBT",  # Disallow boolean positional arguments (make them keyword-only)
-    "B0",  # Common mistakes and typos.
-    "A",  # Shadowing built-ins.
-    "C4", # Encourage comprehensions, which tend to be faster than alternatives.
-    "T10",  # Don't call the debugger in production code
-    "ISC",  # Implicit string concatenation that can cause subtle issues
-    "ICN",  # Only use common conventions for import aliases.
-    "INP",  # Implicit namespace packages
-    "PYI",  # Linting for type stubs.
-    "PT",  # Pytest
-    "Q",  # Consistent quotations
-    "RSE",  # Errors on pytest raises.
-    "RET",  # Simpler logic after return, raise, continue or break
-    "SIM",  # Code simplification
-    "TC004",  # Remove imports from type-checking guard blocks if used at runtime
-    "TC005",  # Delete empty type-checking blocks
-    "ARG",  # Unused arguments
-    "PTH",  # Migrate to pathlib
-    "ERA",  # Don't check in commented out code
-    "PGH",  # Pygrep hooks
-    "PL",  # Pylint
-    "TRY",  # Cleaner try/except,
+    "B0",    # Common mistakes and typos.
+    "A",     # Shadowing built-ins.
+    "C4",    # Encourage comprehensions, which tend to be faster than alternatives.
+    "T10",   # Don't call the debugger in production code
+    "ISC",   # Implicit string concatenation that can cause subtle issues
+    "ICN",   # Only use common conventions for import aliases.
+    "INP",   # Implicit namespace packages
+    "PYI",   # Linting for type stubs.
+    "PT",    # Pytest
+    "Q",     # Consistent quotations
+    "RSE",   # Errors on pytest raises.
+    "RET",   # Simpler logic after return, raise, continue or break
+    "SIM",   # Code simplification
+    "TC004", # Remove imports from type-checking guard blocks if used at runtime
+    "TC005", # Delete empty type-checking blocks
+    "ARG",   # Unused arguments
+    "PTH",   # Migrate to pathlib
+    "ERA",   # Don't check in commented out code
+    "PGH",   # Pygrep hooks
+    "PL",    # Pylint
+    "TRY",   # Cleaner try/except,
 ]
 extend-select = [
     # Pyupgrade: https://github.com/charliermarsh/ruff#pyupgrade-up
-    "UP00", "UP01", "UP02", "UP030", "UP032", "UP033",
+    "UP00",
+    "UP01",
+    "UP02",
+    "UP030",
+    "UP032",
+    "UP033",
     # "UP034",  # Very new, not yet enabled in ruff 0.0.227
     # Annotations: https://github.com/charliermarsh/ruff#flake8-annotations-ann
-    "ANN0",  # Type annotations for arguments other than `self` and `cls`
-    "ANN2",  # Return type annotations
-    "B026",  # Keyword arguments must come after starred arguments
+    "ANN0", # Type annotations for arguments other than `self` and `cls`
+    "ANN2", # Return type annotations
+    "B026", # Keyword arguments must come after starred arguments
     # flake8-bandit: security testing. https://github.com/charliermarsh/ruff#flake8-bandit-s
     # https://bandit.readthedocs.io/en/latest/plugins/index.html#complete-test-plugin-listing
-    "S101", "S102",  # assert or exec
-    "S103", "S108",  # File permissions and tempfiles - use #noqa to silence when appropriate.
-    "S104",  # Network binds
-    "S105", "S106", "S107",  # Hardcoded passwords
-    "S110",  # try-except-pass (use contextlib.suppress instead)
-    "S113",  # Requests calls without timeouts
-    "S3",  # Serialising, deserialising, hashing, crypto, etc.
-    "S506",  # Unsafe YAML load
-    "S508", "S509",  # Insecure SNMP
-    "S701",  # jinja2 templates without autoescape
-    "RUF001", "RUF002", "RUF003",  # Ambiguous unicode characters
-    "RUF005",  # Encourages unpacking rather than concatenation
-    "RUF008",  # Do not use mutable default values for dataclass attributes
-    "RUF100",  # #noqa directive that doesn't flag anything
+    "S101",
+    "S102",   # assert or exec
+    "S103",
+    "S108",   # File permissions and tempfiles - use #noqa to silence when appropriate.
+    "S104",   # Network binds
+    "S105",
+    "S106",
+    "S107",   # Hardcoded passwords
+    "S110",   # try-except-pass (use contextlib.suppress instead)
+    "S113",   # Requests calls without timeouts
+    "S3",     # Serialising, deserialising, hashing, crypto, etc.
+    "S506",   # Unsafe YAML load
+    "S508",
+    "S509",   # Insecure SNMP
+    "S701",   # jinja2 templates without autoescape
+    "RUF001",
+    "RUF002",
+    "RUF003", # Ambiguous unicode characters
+    "RUF005", # Encourages unpacking rather than concatenation
+    "RUF008", # Do not use mutable default values for dataclass attributes
+    "RUF100", # #noqa directive that doesn't flag anything
 ]
 ignore = [
     "ANN10",  # Type annotations for `self` and `cls`
     "ANN002", # Missing type annotation for `*args`
     "ANN003", # Missing type annotation for `**kwargs`
     #"E203",  # Whitespace before ":"  -- Commented because ruff doesn't currently check E203
-    "E501",  # Line too long (reason: black will automatically fix this for us)
-    "D105",  # Missing docstring in magic method (reason: magic methods already have definitions)
-    "D107",  # Missing docstring in __init__ (reason: documented in class docstring)
-    "D203",  # 1 blank line required before class docstring (reason: pep257 default)
-    "D213",  # Multi-line docstring summary should start at the second line (reason: pep257 default)
-    "D215",  # Section underline is over-indented (reason: pep257 default)
-    "A003",  # Class attribute shadowing built-in (reason: Class attributes don't often get bare references)
+    "E501",    # Line too long (reason: black will automatically fix this for us)
+    "D105",    # Missing docstring in magic method (reason: magic methods already have definitions)
+    "D107",    # Missing docstring in __init__ (reason: documented in class docstring)
+    "D203",    # 1 blank line required before class docstring (reason: pep257 default)
+    "D213",    # Multi-line docstring summary should start at the second line (reason: pep257 default)
+    "D215",    # Section underline is over-indented (reason: pep257 default)
+    "A003",    # Class attribute shadowing built-in (reason: Class attributes don't often get bare references)
     "PLR0913", # Too many arguments to function call (n > 5)
     "PLR2004", # Magic value used in comparison, consider replacing 5 with a constant variable
-    "SIM117", # Use a single `with` statement with multiple contexts instead of nested `with` statements
-              # (reason: this creates long lines that get wrapped and reduces readability)
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    # (reason: this creates long lines that get wrapped and reduces readability)
 
     # Ignored due to common usage in current code
-    "TRY003",  # Avoid specifying long messages outside the exception class
+    "TRY003", # Avoid specifying long messages outside the exception class
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**.py" = [  # Some things we want for the moin project are unnecessary in tests.
-    "D",  # Ignore docstring rules in tests
-    "ANN", # Ignore type annotations in tests
-    "S101",  # Allow assertions in tests
-    "S103", # Allow `os.chmod` setting a permissive mask `0o555` on file or directory
-    "S108", # Allow Probable insecure usage of temporary file or directory
-    "PLR0913",  # Allow many arguments for test functions
+"tests/**.py" = [ # Some things we want for the moin project are unnecessary in tests.
+    "D",       # Ignore docstring rules in tests
+    "ANN",     # Ignore type annotations in tests
+    "S101",    # Allow assertions in tests
+    "S103",    # Allow `os.chmod` setting a permissive mask `0o555` on file or directory
+    "S108",    # Allow Probable insecure usage of temporary file or directory
+    "PLR0913", # Allow many arguments for test functions
 ]
 # isort leaves init files alone by default, this makes ruff ignore them too.
 "__init__.py" = ["I001"]
