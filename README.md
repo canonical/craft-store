@@ -58,7 +58,6 @@ If a new dependency is added to the project run:
 uv add '<dependency spec>'
 ```
 
-
 ## Verifying documentation changes
 
 To locally verify documentation changes run:
@@ -67,7 +66,6 @@ To locally verify documentation changes run:
 make lint-docs
 make docs
 ```
-
 
 After running, newly generated documentation shall be available at
 `./docs/_build/html/`.
