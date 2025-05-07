@@ -45,11 +45,12 @@ def test_check_error_on_success(response: httpx.Response):
 
 
 @pytest.mark.parametrize(
-    ("response", "match"),
+    ("response", "match", "details"),
     [
         pytest.param(
             httpx.Response(503, text="help!"),
             r"Store returned an invalid response \(status: 503\)",
+            None,
             id="really-bad",
         ),
         pytest.param(
@@ -58,6 +59,7 @@ def test_check_error_on_success(response: httpx.Response):
                 json={"error-list": [{"code": "whelp", "message": "we done goofed"}]},
             ),
             r"Store had an error \(503\): we done goofed",
+            None,
             id="server-error",
         ),
         pytest.param(
@@ -66,6 +68,7 @@ def test_check_error_on_success(response: httpx.Response):
                 json={"error-list": [{"code": "whelp", "message": "you messed up"}]},
             ),
             r"Error 400 returned from store: you messed up",
+            None,
             id="client-error",
         ),
         pytest.param(
@@ -87,13 +90,34 @@ def test_check_error_on_success(response: httpx.Response):
                 - good: I am a teapot
                 - bad: Why would you ask me for coffee?"""
             ),
+            None,
             id="multiple-client-errors",
+        ),
+        pytest.param(
+            httpx.Response(
+                500,
+                json={"error-list": [{"code": "ope", "message": "we done goofed"}]},
+                request=httpx.Request(
+                    "GET",
+                    "http://localhost/some-endpoint",
+                    json={"is-request": True},
+                ),
+            ),
+            r"Store had an error \(500\): we done goofed",
+            textwrap.dedent(
+                """\
+                Error occurred on GET request to http://localhost/some-endpoint
+                Request content: {"is-request":true}"""
+            ),
         ),
     ],
 )
-def test_check_error(response: httpx.Response, match):
-    with pytest.raises(errors.CraftStoreError, match=match):
+def test_check_error(response: httpx.Response, match, details):
+    with pytest.raises(errors.CraftStoreError, match=match) as exc_info:
         publisher.PublisherGateway._check_error(response)
+
+    if details:
+        assert exc_info.value.details == details
 
 
 @pytest.mark.parametrize(
