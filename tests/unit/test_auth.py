@@ -176,6 +176,13 @@ def test_credentials_not_parseable_error(monkeypatch):
         Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
 
 
+def test_credentials_not_parseable_decode_error(monkeypatch):
+    monkeypatch.setenv("FAKE_ENV", "\\\\nfoo")
+
+    with pytest.raises(errors.CredentialsNotParseable):
+        Auth("fakeclient", "fakestore.com", environment_auth="FAKE_ENV")
+
+
 def test_environment_set(monkeypatch, fake_keyring, keyring_set_keyring_mock):
     monkeypatch.setenv("FAKE_ENV", "c2VjcmV0LWtleXM=")
 
