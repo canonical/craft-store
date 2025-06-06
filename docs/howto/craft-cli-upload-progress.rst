@@ -14,4 +14,4 @@ The example requires setting the environment variable
     :language: python
 
 .. _craft-cli: https://canonical-craft-cli.readthedocs-hosted.com/en/latest/
-.. _snapcraft export-login: https://snapcraft.io/docs/snapcraft-authentication
+.. _snapcraft export-login: https://documentation.ubuntu.com/snapcraft/stable/how-to/publishing/authenticate/
