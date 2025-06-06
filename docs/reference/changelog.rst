@@ -2,6 +2,19 @@
 Changelog
 *********
 
+.. _release-3.2.2:
+
+3.2.2 (2025-06-06)
+------------------
+
+Bug fixes:
+
+- Catch decoding errors when parsing credentials.
+
+For a complete list of commits, check out the `3.2.2`_ release on GitHub.
+
+.. _release-3.2.1:
+
 3.2.1 (2025-02-03)
 ------------------
 
@@ -9,6 +22,7 @@ Changelog
   resources to fail.
 
 For a complete list of commits, check out the `3.2.1`_ release on GitHub.
+
 
 3.2.0 (2025-01-24)
 ------------------
@@ -207,3 +221,4 @@ Bug fixes:
 .. _3.1.0: https://github.com/canonical/craft-store/releases/tag/3.1.0
 .. _3.2.0: https://github.com/canonical/craft-store/releases/tag/3.2.0
 .. _3.2.1: https://github.com/canonical/craft-store/releases/tag/3.2.1
+.. _3.2.2: https://github.com/canonical/craft-store/releases/tag/3.2.2

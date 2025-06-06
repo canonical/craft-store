@@ -221,7 +221,7 @@ class Auth:
         """
         try:
             return base64.b64decode(encoded_credentials).decode()
-        except binascii.Error as err:
+        except (binascii.Error, UnicodeDecodeError) as err:
             raise errors.CredentialsNotParseable from err
 
     @staticmethod
