@@ -95,7 +95,10 @@ redirects: Dict[str, str] = {}
 
 # Links to ignore when checking links
 
-linkcheck_ignore: List[str] = ["http://127.0.0.1:8000"]
+linkcheck_ignore: List[str] = [
+    "http://127.0.0.1:8000",
+    "https://github.com/canonical/craft-store/releases/tag/.*",
+]
 
 # Pages on which to ignore anchors
 # (This list will be appended to linkcheck_anchors_ignore_for_url)

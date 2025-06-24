@@ -48,6 +48,14 @@ setup: install-uv setup-precommit ## Set up a development environment
 setup-tests: install-uv install-build-deps ##- Set up a testing environment without linters
 	uv sync --frozen
 
+.PHONY: setup-tics
+setup-tics: install-uv install-build-deps ##- Set up a testing environment for Tiobe TICS
+	uv venv
+	uv sync --extra lint --extra types --extra tics
+ifneq ($(CI),)
+	echo $(PWD)/.venv/bin >> $(GITHUB_PATH)
+endif
+
 .PHONY: setup-lint
 setup-lint: install-uv install-shellcheck install-pyright install-lint-build-deps  ##- Set up a linting-only environment
 	uv sync --frozen --no-install-workspace --extra lint --extra types
@@ -185,8 +193,15 @@ test-slow:  ##- Run slow tests
 
 .PHONY: test-coverage
 test-coverage:  ## Generate coverage report
-	uv run coverage run --source $(PROJECT) -m pytest
-	uv run coverage xml -o coverage.xml
+ifeq ($(COVERAGE_SOURCE),)
+	uv run coverage run --source $(PROJECT),tests -m pytest
+else
+	uv run coverage run --source $(COVERAGE_SOURCE),tests -m pytest
+endif
+	uv run coverage xml -o results/coverage.xml
+	# for backwards compatibility
+	# https://github.com/canonical/starflow/blob/3447d302cb7883cbb966ce0ec7e5b3dfd4bb3019/.github/workflows/test-python.yaml#L109
+	cp results/coverage.xml coverage.xml
 	uv run coverage report -m
 	uv run coverage html
 

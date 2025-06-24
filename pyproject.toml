@@ -72,6 +72,10 @@ release = [
     "twine",
     "wheel",
 ]
+tics = [
+    "flake8",
+    "pylint",
+]
 
 [tool.uv]
 constraint-dependencies = [
@@ -88,6 +92,7 @@ constraint-dependencies = [
     "pyyaml>=5.0",
     "markdown>=3.0",
     "markupsafe>=2.0",
+    "pylint>=0.29",
     "pynacl>=1.5",
     "pytz>=2020",
     "pyyaml>5.0",
@@ -111,6 +116,7 @@ dev-dependencies = [
     "pytest-subprocess>=1.5",
     "pytest-timeout>=2.0",
     "pytest-httpx>=0.35",
+    "pytest-randomly>=3.16.0",
 ]
 
 [build-system]
