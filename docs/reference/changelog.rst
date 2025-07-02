@@ -2,6 +2,16 @@
 Changelog
 *********
 
+.. _release-3.3.0:
+
+3.3.0 (2025-07-02)
+------------------
+
+- Don't report errors coming from the store twice.
+- Add a CONTRIBUTING file describing contribution guidelines.
+
+For a complete list of commits, check out the `3.3.0`_ release on GitHub.
+
 .. _release-3.2.2:
 
 3.2.2 (2025-06-06)
@@ -222,3 +232,4 @@ Bug fixes:
 .. _3.2.0: https://github.com/canonical/craft-store/releases/tag/3.2.0
 .. _3.2.1: https://github.com/canonical/craft-store/releases/tag/3.2.1
 .. _3.2.2: https://github.com/canonical/craft-store/releases/tag/3.2.2
+.. _3.3.0: https://github.com/canonical/craft-store/releases/tag/3.3.0
