@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Unit tests for the publisher gateway."""
 
+import logging
 import textwrap
 from typing import Any
 from unittest import mock
@@ -24,6 +25,7 @@ import pydantic
 import pytest
 import pytest_check
 from craft_store import errors, publisher
+from craft_store.errors import StoreErrorList
 from craft_store.publisher import RegisteredName, ReleaseResult, Revision
 from craft_store.publisher._response import ReleasedResourceRevision
 
@@ -46,11 +48,12 @@ def test_check_error_on_success(response: httpx.Response):
 
 
 @pytest.mark.parametrize(
-    ("response", "match"),
+    ("response", "match", "has_error_list"),
     [
         pytest.param(
             httpx.Response(503, text="help!"),
             r"Store returned an invalid response \(status: 503\)",
+            False,
             id="really-bad",
         ),
         pytest.param(
@@ -59,6 +62,7 @@ def test_check_error_on_success(response: httpx.Response):
                 json={"error-list": [{"code": "whelp", "message": "we done goofed"}]},
             ),
             r"Store had an error \(503\): we done goofed",
+            True,
             id="server-error",
         ),
         pytest.param(
@@ -67,6 +71,7 @@ def test_check_error_on_success(response: httpx.Response):
                 json={"error-list": [{"code": "whelp", "message": "you messed up"}]},
             ),
             r"Error 400 returned from store: you messed up",
+            True,
             id="client-error",
         ),
         pytest.param(
@@ -88,13 +93,23 @@ def test_check_error_on_success(response: httpx.Response):
                 - good: I am a teapot
                 - bad: Why would you ask me for coffee?"""
             ),
+            True,
             id="multiple-client-errors",
         ),
     ],
 )
-def test_check_error(response: httpx.Response, match):
-    with pytest.raises(errors.CraftStoreError, match=match):
+def test_check_error(response: httpx.Response, match, has_error_list, caplog):
+    caplog.set_level(logging.DEBUG)
+
+    with pytest.raises(errors.CraftStoreError, match=match) as exc:
         publisher.PublisherGateway._check_error(response)
+
+    assert exc.value.details is None
+
+    if has_error_list:
+        error_list = response.json().get("error-list", [])
+        expected_log = f"Errors from the store:\n{StoreErrorList(error_list)}"
+        assert expected_log in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -279,14 +294,15 @@ def test_unregister_name_client_errors(
     status_code: int,
     json: dict,
     error_code: str,
+    caplog,
 ):
+    caplog.set_level(logging.DEBUG)
     mock_httpx_client.delete.return_value = httpx.Response(status_code, json=json)
 
-    with pytest.raises(errors.CraftStoreError) as exc_info:
+    with pytest.raises(errors.CraftStoreError):
         publisher_gateway.unregister_name("my-name")
 
-    assert exc_info.value.store_errors is not None
-    assert error_code in exc_info.value.store_errors
+    assert error_code in caplog.text
 
 
 @pytest.mark.parametrize(

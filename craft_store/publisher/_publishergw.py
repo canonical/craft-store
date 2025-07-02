@@ -91,9 +91,13 @@ class PublisherGateway:
         else:
             fancy_error_list = errors.StoreErrorList(error_list)
             brief = f"{brief}.\n{fancy_error_list}"
-        raise errors.CraftStoreError(
-            brief, store_errors=errors.StoreErrorList(error_list)
-        )
+
+        if error_list:
+            # Log the errors, but don't pass them to CraftStoreError or they will be
+            # duplicated.
+            logger.debug(f"Errors from the store:\n{errors.StoreErrorList(error_list)}")
+
+        raise errors.CraftStoreError(brief)
 
     @staticmethod
     def _check_keys(
