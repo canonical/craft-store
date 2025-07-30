@@ -234,19 +234,11 @@ Craft Store's test suite includes both unit and integration tests. If you're not
 which tests you should add, go with your best judgement – additional tests can be added
 during the review process.
 
-For low-complexity changes that require basic testing, run the fast tests:
-
-```bash
-make test-fast
-```
-
-For complex work, run the full test suite:
+Once you've made your changes, run the test suite:
 
 ```bash
 make test
 ```
-
-Running all tests can take a very long time, in some cases an hour.
 
 When iterating and testing, it's a good practice to clean the local temporary files that
 the tests generate:
