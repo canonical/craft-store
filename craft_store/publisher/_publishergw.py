@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from json import JSONDecodeError
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -31,14 +32,38 @@ from craft_store.auth import Auth
 from craft_store.models import RegisteredNameModel as RegisteredName
 
 from ._response import (
+    ExchangeDashboardMacaroonsResponse,
+    ExchangeMacaroonResponse,
+    GetMacaroonResponse,
+    MacaroonInfo,
+    MacaroonResponse,
+    OciImageResourceBlobResponse,
+    OciImageResourceUploadCredentialsResponse,
+    OfflineExchangeMacaroonResponse,
+    PushResourceResponse,
+    PushRevisionResponse,
     ReleaseResult,
     Releases,
+    ResourceInfo,
+    ResourceRevisionsList,
     Revision,
+    RevokeMacaroonResponse,
+    UpdatePackageMetadataResponse,
+    UpdateResourceRevisionsResponse,
+    UploadReview,
 )
 
 if TYPE_CHECKING:
     from . import _request
 
+from ._request import (
+    ExchangeMacaroonRequest,
+    MacaroonRequest,
+    PushResourceRequest,
+    PushRevisionRequest,
+    ResourceRevisionUpdateRequest,
+    UpdatePackageMetadataRequest,
+)
 
 TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 """A regular expression guarding track names.
@@ -300,3 +325,410 @@ class PublisherGateway:
                 "num-tracks-created"
             ]
         )
+
+    def get_macaroon(self, include_inactive: bool = False) -> GetMacaroonResponse:
+        """Get existing macaroons for authenticated account, or bakery v2 macaroon for unauthenticated.
+
+        :param include_inactive: Whether to include inactive macaroons.
+        :returns: Either existing macaroons or a bakery v2 macaroon for discharge.
+
+        API docs: https://api.charmhub.io/docs/default.html#get_macaroon
+        """
+        params = {}
+        if include_inactive:
+            params["include-inactive"] = "true"
+
+        response = self._client.get("/v1/tokens", params=params)
+        self._check_error(response)
+
+        response_data = response.json()
+        return GetMacaroonResponse.unmarshal(response_data)
+
+    def issue_macaroon(self, request: MacaroonRequest) -> MacaroonResponse:
+        """Issue a new macaroon with specified permissions and constraints.
+
+        :param request: The macaroon request with permissions and constraints.
+        :returns: The macaroon response with the issued macaroon.
+
+        API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
+        """
+        response = self._client.post(
+            "/v1/tokens",
+            json=request.model_dump(exclude_none=True),
+        )
+        self._check_error(response)
+        return MacaroonResponse.unmarshal(
+            self._check_keys(response, expected_keys={"macaroon"})
+        )
+
+    def exchange_macaroons(
+        self, request: ExchangeMacaroonRequest
+    ) -> ExchangeMacaroonResponse:
+        """Exchange discharged macaroons for store credentials.
+
+        :param request: The exchange request with discharged macaroon.
+        :returns: The exchanged macaroon response.
+
+        API docs: https://api.charmhub.io/docs/default.html#exchange_macaroons
+        """
+        response = self._client.post(
+            "/v1/tokens/exchange",
+            json=request.model_dump(exclude_none=True),
+        )
+        self._check_error(response)
+        return ExchangeMacaroonResponse.unmarshal(
+            self._check_keys(response, expected_keys={"macaroon"})
+        )
+
+    def offline_exchange_macaroon(
+        self, macaroon: str
+    ) -> OfflineExchangeMacaroonResponse:
+        """Exchange macaroons offline for store admin authentication.
+
+        :param macaroon: The macaroon to exchange offline.
+        :returns: The exchanged offline macaroon response.
+
+        API docs: https://api.charmhub.io/docs/default.html#offline_exchange_macaroon
+        """
+        response = self._client.post(
+            "/v1/tokens/offline/exchange",
+            json={"macaroon": macaroon},
+        )
+        self._check_error(response)
+        return OfflineExchangeMacaroonResponse.unmarshal(
+            self._check_keys(response, expected_keys={"macaroon"})
+        )
+
+    def revoke_macaroon(self, session_id: str) -> RevokeMacaroonResponse:
+        """Revoke a macaroon.
+
+        :param session_id: The session ID of the macaroon to revoke.
+        :returns: The revocation response with updated macaroons list.
+
+        API docs: https://api.charmhub.io/docs/default.html#revoke_macaroon
+        """
+        response = self._client.post(
+            "/v1/tokens/revoke",
+            json={"session-id": session_id},
+        )
+        self._check_error(response)
+        return RevokeMacaroonResponse.unmarshal(
+            self._check_keys(response, expected_keys={"macaroons"})
+        )
+
+    def macaroon_info(self) -> MacaroonInfo:
+        """Get information about the authenticated macaroon token.
+
+        :returns: Information about the authenticated macaroon and account.
+
+        API docs: https://api.charmhub.io/docs/default.html#macaroon_info
+        """
+        response = self._client.get("/v1/tokens/whoami")
+        self._check_error(response)
+        return MacaroonInfo.unmarshal(
+            self._check_keys(
+                response,
+                expected_keys={"account", "permissions", "packages", "channels"},
+            )
+        )
+
+    def exchange_dashboard_macaroons(
+        self,
+        discharged_macaroons: str,
+        *,
+        description: str | None = None,
+    ) -> ExchangeDashboardMacaroonsResponse:
+        """Exchange dashboard.snapcraft.io SSO discharged macaroons for a developer token.
+
+        The macaroons are passed in as the Authorization header.
+
+        :param discharged_macaroons: Dashboard SSO discharged macaroons for authorization.
+        :param description: Optional client description.
+        :returns: The developer token response.
+
+        API docs: https://api.charmhub.io/docs/default.html#exchange_dashboard_macaroons
+        """
+        json_data = {}
+        if description is not None:
+            json_data["client-description"] = description
+
+        response = self._client.post(
+            "/v1/tokens/dashboard/exchange",
+            json=json_data,
+            headers={"Authorization": discharged_macaroons},
+        )
+        self._check_error(response)
+        return ExchangeDashboardMacaroonsResponse.unmarshal(
+            self._check_keys(response, expected_keys={"macaroon"})
+        )
+
+    def push_resource(
+        self,
+        name: str,
+        resource_name: str,
+        request: PushResourceRequest,
+    ) -> PushResourceResponse:
+        """Push a resource revision to the server.
+
+        :param name: The package name to attach the upload to.
+        :param resource_name: The name of the resource.
+        :param request: The push resource request with upload ID and metadata.
+        :returns: The push resource response with status URL.
+
+        API docs: https://api.charmhub.io/docs/default.html#push_resource
+        """
+        response = self._client.post(
+            f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions",
+            json=request.model_dump(exclude_none=True),
+        )
+        self._check_error(response)
+        response_data = self._check_keys(response, expected_keys={"status-url"})
+        return PushResourceResponse.unmarshal(
+            {"status_url": response_data["status-url"]}
+        )
+
+    def push_revision(
+        self,
+        name: str,
+        request: PushRevisionRequest,
+    ) -> PushRevisionResponse:
+        """Push/notify a revision to the server.
+
+        :param name: The package name to attach the upload to.
+        :param request: The push revision request with upload ID and metadata.
+        :returns: The push revision response with status URL.
+
+        API docs: https://api.charmhub.io/docs/default.html#push_revision
+        """
+        response = self._client.post(
+            f"/v1/{self._namespace}/{name}/revisions",
+            json=request.model_dump(exclude_none=True),
+        )
+        self._check_error(response)
+        response_data = self._check_keys(response, expected_keys={"status-url"})
+        return PushRevisionResponse.unmarshal(
+            {"status_url": response_data["status-url"]}
+        )
+
+    def list_resources(
+        self, name: str, *, revision: int | None = None
+    ) -> Sequence[ResourceInfo]:
+        """List existing declared resources for a package.
+
+        :param name: The name of the package to query.
+        :param revision: Optional specific revision to list resources for.
+        :returns: A sequence of declared resources for the package.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_resources
+        """
+        params = {}
+        if revision is not None:
+            params["revision"] = str(revision)
+
+        response = self._client.get(
+            f"/v1/{self._namespace}/{name}/resources", params=params
+        )
+        self._check_error(response)
+        response_data = self._check_keys(response, expected_keys={"resources"})
+        return [
+            ResourceInfo.unmarshal(resource) for resource in response_data["resources"]
+        ]
+
+    def list_resource_revisions(
+        self, name: str, resource_name: str
+    ) -> ResourceRevisionsList:
+        """List the revisions for a specific resource of a specific package.
+
+        :param name: The name of the package to query.
+        :param resource_name: The name of the resource to query.
+        :returns: A list of resource revisions.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_resource_revisions
+        """
+        response = self._client.get(
+            f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions"
+        )
+        self._check_error(response)
+        return ResourceRevisionsList.unmarshal(
+            self._check_keys(response, expected_keys={"revisions"})
+        )
+
+    def update_resource_revisions(
+        self,
+        name: str,
+        resource_name: str,
+        updates: list[ResourceRevisionUpdateRequest],
+    ) -> UpdateResourceRevisionsResponse:
+        """Update one or more resource revisions.
+
+        :param name: The package name.
+        :param resource_name: The resource name to update.
+        :param updates: The updates to make to any revisions.
+        :returns: The number of revisions updated.
+
+        API docs: https://api.charmhub.io/docs/default.html#update_resource_revisions
+        """
+        if not updates:
+            raise ValueError("Need at least one resource revision to update.")
+
+        request_body = {
+            "resource-revision-updates": [
+                update.model_dump(exclude_none=True) for update in updates
+            ]
+        }
+
+        response = self._client.patch(
+            f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions",
+            json=request_body,
+        )
+        self._check_error(response)
+        response_data = self._check_keys(
+            response, expected_keys={"num-resource-revisions-updated"}
+        )
+        return UpdateResourceRevisionsResponse.unmarshal(
+            {
+                "num_resource_revisions_updated": response_data[
+                    "num-resource-revisions-updated"
+                ]
+            }
+        )
+
+    def update_package_metadata(
+        self,
+        name: str,
+        request: UpdatePackageMetadataRequest,
+    ) -> UpdatePackageMetadataResponse:
+        """Update package metadata.
+
+        :param name: The package name to update.
+        :param request: The metadata update request.
+        :returns: The update response.
+
+        API docs: https://api.charmhub.io/docs/default.html#update_package_metadata
+        """
+        request_data = request.model_dump(exclude_none=True)
+        if "default_track" in request_data:
+            request_data["default-track"] = request_data.pop("default_track")
+
+        response = self._client.patch(
+            f"/v1/{self._namespace}/{name}",
+            json=request_data,
+        )
+        self._check_error(response)
+        return UpdatePackageMetadataResponse.unmarshal(
+            self._check_keys(response, expected_keys={"metadata"})
+        )
+
+    def list_upload_reviews(
+        self, name: str, *, upload_id: str | None = None
+    ) -> Sequence[UploadReview]:
+        """List existing uploads review status for a package.
+
+        :param name: The package name to query.
+        :param upload_id: Optional upload ID to view status of a specific upload.
+        :returns: A sequence of upload review revisions.
+
+        API docs: https://api.charmhub.io/docs/default.html#list_upload_reviews
+        """
+        params = {}
+        if upload_id:
+            params["upload-id"] = upload_id
+
+        response = self._client.get(
+            f"/v1/{self._namespace}/{name}/revisions/review", params=params
+        )
+        self._check_error(response)
+        response_data = self._check_keys(response, expected_keys={"revisions"})
+        return [UploadReview.unmarshal(review) for review in response_data["revisions"]]
+
+    def oci_image_resource_upload_credentials(
+        self,
+        name: str,
+        resource_name: str,
+    ) -> OciImageResourceUploadCredentialsResponse:
+        """Get Charmstore docker registry auth server credential for oci-image upload.
+
+        Returns image name and Charmstore docker registry auth server credentials
+        for a specific image upload to this registry.
+
+        :param name: The package name.
+        :param resource_name: The resource name.
+        :returns: The upload credentials response.
+
+        API docs: https://api.charmhub.io/docs/default.html#oci_image_resource_upload_credentials
+        """
+        response = self._client.get(
+            f"/v1/{self._namespace}/{name}/resources/{resource_name}/oci-image/upload-credentials"
+        )
+        self._check_error(response)
+        return OciImageResourceUploadCredentialsResponse.unmarshal(
+            self._check_keys(
+                response, expected_keys={"image-name", "username", "password"}
+            )
+        )
+
+    def oci_image_resource_blob(
+        self,
+        name: str,
+        resource_name: str,
+        image_digest: str,
+    ) -> OciImageResourceBlobResponse:
+        """Return OCI-image resource blob as expected by Juju.
+
+        :param name: The package name.
+        :param resource_name: The resource name.
+        :param image_digest: The image digest.
+        :returns: The blob response with image credentials.
+
+        API docs: https://api.charmhub.io/docs/default.html#oci_image_resource_blob
+        """
+        response = self._client.post(
+            f"/v1/{self._namespace}/{name}/resources/{resource_name}/oci-image/blob",
+            json={"image-digest": image_digest},
+        )
+        self._check_error(response)
+        return OciImageResourceBlobResponse.unmarshal(
+            self._check_keys(
+                response, expected_keys={"ImageName", "Username", "Password"}
+            )
+        )
+
+    def upload_file(
+        self,
+        filepath: Path,
+        monitor_callback: Callable | None = None,  # type: ignore[type-arg] # noqa: ARG002
+    ) -> str:
+        """Upload filepath to storage.
+
+        The monitor_callback is a method receiving one argument of type
+        ``MultipartEncoder``, the total length of the upload can be accessed
+        from this encoder from the ``len`` attribute to setup a progress bar
+        instance.
+
+        :param filepath: Path to the file to upload.
+        :param monitor_callback: A callback to monitor progress.
+        :returns: The upload ID.
+
+        API docs: https://api.charmhub.io/docs/default.html#upload
+        """
+        try:
+            with filepath.open("rb") as upload_file:
+                files = {
+                    "binary": (filepath.name, upload_file, "application/octet-stream")
+                }
+                response = self._client.post("/unscanned-upload/", files=files)
+
+            self._check_error(response)
+            result = response.json()
+
+            if not result.get("successful", False):
+                self._raise_upload_error(result)
+
+            return str(result["upload_id"])
+        except Exception as e:
+            logger.debug(f"Upload failed for {filepath}: {e}")
+            raise
+
+    def _raise_upload_error(self, result: dict[str, Any]) -> None:
+        """Raise an error for upload failures."""
+        raise errors.CraftStoreError(f"Server error while pushing file: {result}")
