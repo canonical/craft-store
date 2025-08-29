@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Fetch tag annotations
         run: |
           git fetch --force --tags --depth 1
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
           check-latest: true
       - name: Build packages
         run: |
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: pypi-packages
           path: dist/
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get pypi artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
