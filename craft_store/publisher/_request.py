@@ -15,11 +15,66 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Request models for the publisher gateway."""
 
+from enum import Enum
 from typing import Annotated, Any
 
 import annotated_types
 from pydantic import BaseModel, Field
 from typing_extensions import NotRequired, TypedDict
+
+
+class PackageType(str, Enum):
+    """Enumeration of valid package types."""
+
+    BIN = "bin"
+    BUNDLE = "bundle"
+    CHARM = "charm"
+    ROCK = "rock"
+    ROCKCRAFT = "rockcraft"
+    SNAP = "snap"
+    SNAPCRAFT = "snapcraft"
+    SOURCECRAFT = "sourcecraft"
+    CHARMCRAFT = "charmcraft"
+
+
+class IdPackage(TypedDict):
+    """Package identified by ID."""
+
+    id: str
+    type: PackageType
+
+
+class NamePackage(TypedDict):
+    """Package identified by name."""
+
+    name: str
+    type: PackageType
+
+
+PackageDict = IdPackage | NamePackage
+
+
+class Permission(str, Enum):
+    """Enumeration of valid permissions for macaroons."""
+
+    ACCOUNT_MANAGE_KEYS = "account-manage-keys"
+    ACCOUNT_MANAGE_METADATA = "account-manage-metadata"
+    ACCOUNT_REGISTER_PACKAGE = "account-register-package"
+    ACCOUNT_VIEW_PACKAGES = "account-view-packages"
+    PACKAGE_MANAGE = "package-manage"
+    PACKAGE_MANAGE_ACL = "package-manage-acl"
+    PACKAGE_MANAGE_METADATA = "package-manage-metadata"
+    PACKAGE_MANAGE_RELEASES = "package-manage-releases"
+    PACKAGE_MANAGE_REVISIONS = "package-manage-revisions"
+    PACKAGE_VIEW = "package-view"
+    PACKAGE_VIEW_ACL = "package-view-acl"
+    PACKAGE_VIEW_METADATA = "package-view-metadata"
+    PACKAGE_VIEW_METRICS = "package-view-metrics"
+    PACKAGE_VIEW_RELEASES = "package-view-releases"
+    PACKAGE_VIEW_REVISIONS = "package-view-revisions"
+    STORE_MANAGE = "store-manage"
+    STORE_VIEW = "store-view"
+
 
 CreateTrackRequest = TypedDict(
     "CreateTrackRequest",
@@ -54,13 +109,17 @@ class ReleaseRequest(TypedDict):
 class MacaroonRequest(BaseModel):
     """Request for issuing a macaroon."""
 
-    permissions: list[str] = Field(description="List of permissions to grant")
-    description: str = Field(description="Description of the macaroon usage")
-    ttl: int = Field(description="Time to live in seconds")
-    packages: list[dict[str, str]] | None = Field(
+    permissions: list[Permission] | None = Field(
+        default=None, description="List of permissions to grant"
+    )
+    description: str | None = Field(
+        default=None, description="Description of the macaroon usage"
+    )
+    ttl: int | None = Field(default=None, description="Time to live in seconds", ge=10)
+    packages: list[PackageDict] | None = Field(
         default=None, description="Package restrictions"
     )
-    channels: list[str] | None = Field(default=None, description="Channel restrictions")
+    channels: set[str] | None = Field(default=None, description="Channel restrictions")
 
 
 class ExchangeMacaroonRequest(BaseModel):

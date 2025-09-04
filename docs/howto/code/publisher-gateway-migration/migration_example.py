@@ -9,11 +9,7 @@ API to the new PublisherGateway API.
 from pathlib import Path
 from craft_store.publisher import (
     PublisherGateway,
-    MacaroonRequest,
-    PushRevisionRequest,
-    PushResourceRequest,
-    UpdatePackageMetadataRequest,
-    ResourceRevisionUpdateRequest,
+    Permission,
 )
 from craft_store.auth import Auth
 
@@ -62,18 +58,16 @@ def modern_approach():
         auth=auth
     )
 
-    macaroon_request = MacaroonRequest(
-        permissions=["package-upload"],
+    macaroon_response = gateway.issue_macaroon(
+        permissions=[Permission.PACKAGE_MANAGE],
         description="My app login",
         ttl=3600
     )
-    macaroon_response = gateway.issue_macaroon(macaroon_request)
     print(f"Macaroon issued successfully: {macaroon_response.macaroon[:20]}...")
 
     upload_id = gateway.upload_file(Path("my-package.charm"))
 
-    push_request = PushRevisionRequest(upload_id=upload_id)
-    response = gateway.push_revision("my-package", push_request)
+    response = gateway.push_revision("my-package", upload_id=upload_id)
 
     return response
 
@@ -97,32 +91,26 @@ def complete_workflow_example():
 
     upload_id = gateway.upload_file(Path("my-package.charm"))
 
-    push_request = PushRevisionRequest(upload_id=upload_id)
-    push_response = gateway.push_revision(package_name, push_request)
+    push_response = gateway.push_revision(package_name, upload_id=upload_id)
 
     print(f"Revision pushed. Status URL: {push_response.status_url}")
 
-    metadata_request = UpdatePackageMetadataRequest(
+    gateway.update_package_metadata(
+        package_name,
         summary="An awesome package for doing awesome things",
         description="This package provides utilities for...",
         contact="maintainer@example.com",
         website="https://github.com/example/my-package"
     )
-
-    gateway.update_package_metadata(package_name, metadata_request)
     print("Package metadata updated")
 
     resource_upload_id = gateway.upload_file(Path("my-resource.tar.gz"))
 
-    resource_request = PushResourceRequest(
-        upload_id=resource_upload_id,
-        type="file"
-    )
-
     resource_response = gateway.push_resource(
         package_name,
         "my-resource",
-        resource_request
+        upload_id=resource_upload_id,
+        resource_type="file"
     )
     print(f"Resource pushed. Status URL: {resource_response.status_url}")
 
@@ -130,17 +118,14 @@ def complete_workflow_example():
     print(f"Package has {len(resources)} resources")
 
     revisions = gateway.list_resource_revisions(package_name, "my-resource")
-    print(f"Resource has {len(revisions.revisions)} revisions")
+    print(f"Resource has {len(revisions)} revisions")
 
-    if revisions.revisions:
+    if revisions:
         updates = [
-            ResourceRevisionUpdateRequest(
-                revision=revisions.revisions[0].revision,
-                bases=[
-                    {"name": "ubuntu", "channel": "20.04"},
-                    {"name": "ubuntu", "channel": "22.04"}
-                ]
-            )
+            (revisions[0].revision, [
+                {"name": "ubuntu", "channel": "20.04"},
+                {"name": "ubuntu", "channel": "22.04"}
+            ])
         ]
 
         update_response = gateway.update_resource_revisions(

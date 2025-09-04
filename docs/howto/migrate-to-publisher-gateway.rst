@@ -65,32 +65,28 @@ Macaroon Operations
 
 .. code-block:: python
 
-    from craft_store.publisher import MacaroonRequest
+    from craft_store.publisher import Permission
 
     # New way - explicit macaroon management
     # Get existing macaroons
     existing_macaroons = gateway.get_macaroon(include_inactive=False)
 
-    # Or issue a new macaroon
-    request = MacaroonRequest(
-        permissions=["package-upload"],
+    # Or issue a new macaroon with individual parameters
+    macaroon_response = gateway.issue_macaroon(
+        permissions=[Permission.PACKAGE_MANAGE],
         description="My app",
         ttl=3600
     )
-    macaroon_response = gateway.issue_macaroon(request)
 
 **Additional macaroon operations now available:**
 
 .. code-block:: python
 
-    from craft_store.publisher import ExchangeMacaroonRequest
+    # Exchange macaroons - simplified to pass macaroon directly
+    exchanged = gateway.exchange_macaroons("discharged-macaroon")
 
-    # Exchange macaroons
-    exchange_request = ExchangeMacaroonRequest(macaroon="discharged-macaroon")
-    exchanged = gateway.exchange_macaroons(exchange_request)
-
-    # Revoke macaroons - simplified to pass session ID directly
-    gateway.revoke_macaroon("session-123")
+    # Revoke macaroons - returns the revoked session ID
+    revoked_session_id = gateway.revoke_macaroon("session-123")
 
     # Get macaroon info
     info = gateway.macaroon_info()
@@ -127,14 +123,12 @@ Upload Operations
 
 .. code-block:: python
 
-    from craft_store.publisher import PushRevisionRequest
     from pathlib import Path
 
-    # New way - with type safety
+    # New way - with simplified parameters
     upload_id = gateway.upload_file(Path("my-package.charm"))
 
-    request = PushRevisionRequest(upload_id=upload_id)
-    response = gateway.push_revision("my-package", request)
+    response = gateway.push_revision("my-package", upload_id=upload_id)
 
 Resource Management Migration
 =============================
@@ -161,14 +155,13 @@ Resource Operations
 
 .. code-block:: python
 
-    from craft_store.publisher import PushResourceRequest
-
-    # New way - with structured requests
-    request = PushResourceRequest(
+    # New way - with simplified parameters
+    response = gateway.push_resource(
+        "my-package",
+        "my-resource",
         upload_id=upload_id,
-        type="file"
+        resource_type="file"
     )
-    response = gateway.push_resource("my-package", "my-resource", request)
 
     # List all resources for a package - returns a list directly
     resources = gateway.list_resources("my-package")
@@ -178,25 +171,17 @@ Resource Operations
     # List resources for a specific revision
     resources = gateway.list_resources("my-package", revision=123)
 
-    # List specific resource revisions
+    # List specific resource revisions - returns a list directly
     revisions = gateway.list_resource_revisions("my-package", "my-resource")
 
 **Resource revision updates:**
 
 .. code-block:: python
 
-    from craft_store.publisher import ResourceRevisionUpdateRequest
-
-    # Update resource revisions with new bases
+    # Update resource revisions with new bases - simplified tuple format
     updates = [
-        ResourceRevisionUpdateRequest(
-            revision=1,
-            bases=[{"name": "ubuntu", "channel": "20.04"}]
-        ),
-        ResourceRevisionUpdateRequest(
-            revision=2,
-            bases=[{"name": "ubuntu", "channel": "22.04"}]
-        )
+        (1, [{"name": "ubuntu", "channel": "20.04"}]),
+        (2, [{"name": "ubuntu", "channel": "22.04"}])
     ]
 
     result = gateway.update_resource_revisions(
@@ -216,27 +201,29 @@ The new API provides direct package metadata management:
 
 .. code-block:: python
 
-    from craft_store.publisher import UpdatePackageMetadataRequest, PackageLinks
+    from craft_store.publisher import PackageLinks
 
-    # Simple metadata update
-    metadata_request = UpdatePackageMetadataRequest(
+    # Simple metadata update with individual parameters
+    gateway.update_package_metadata(
+        "my-package",
         summary="Updated package summary",
         description="Updated package description",
         default_track="latest"
     )
 
     # Or with complex links structure
-    metadata_request = UpdatePackageMetadataRequest(
-        summary="Updated package summary",
-        description="Updated package description",
-        links=PackageLinks(
-            website=["https://example.com"],
-            contact=["maintainer@example.com"],
-            docs=["https://docs.example.com"]
-        )
+    links = PackageLinks(
+        website=["https://example.com"],
+        contact=["maintainer@example.com"],
+        docs=["https://docs.example.com"]
     )
 
-    gateway.update_package_metadata("my-package", metadata_request)
+    gateway.update_package_metadata(
+        "my-package",
+        summary="Updated package summary",
+        description="Updated package description",
+        links=links
+    )
 
 Upload Reviews
 --------------
@@ -277,7 +264,7 @@ New support for OCI image resources:
     blob_response = gateway.oci_image_resource_blob(
         "my-package",
         "my-resource",
-        "sha256:abc123..."
+        image_digest="sha256:abc123..."
     )
     print(f"Access image: {blob_response.image_name}")
 
@@ -291,7 +278,7 @@ The PublisherGateway maintains the same error handling patterns:
     from craft_store import errors
 
     try:
-        response = gateway.push_revision("my-package", request)
+        response = gateway.push_revision("my-package", upload_id="upload-123")
     except errors.CraftStoreError as e:
         print(f"Store error: {e}")
         if hasattr(e, 'store_errors') and e.store_errors:
@@ -306,8 +293,8 @@ Migration Checklist
 When migrating your code:
 
 1. **✓ Replace StoreClient/BaseClient imports** with PublisherGateway
-2. **✓ Update authentication** to use explicit macaroon requests
-3. **✓ Replace direct dict usage** with Pydantic request models
+2. **✓ Update authentication** to use simplified parameter calls
+3. **✓ Replace direct dict usage** with individual parameters instead of request models
 4. **✓ Update upload workflows** to use new structured approaches
 5. **✓ Take advantage of new features** like metadata updates and OCI support
 6. **✓ Update error handling** if you were catching specific exceptions

@@ -28,26 +28,19 @@ from craft_store import errors, publisher
 from craft_store.errors import StoreErrorList
 from craft_store.publisher import (
     ExchangeDashboardMacaroonsResponse,
-    ExchangeMacaroonRequest,
     ExchangeMacaroonResponse,
     GetMacaroonResponse,
     MacaroonInfo,
-    MacaroonRequest,
     MacaroonResponse,
     OciImageResourceBlobResponse,
     OciImageResourceUploadCredentialsResponse,
     OfflineExchangeMacaroonResponse,
-    PushResourceRequest,
+    Permission,
     PushResourceResponse,
-    PushRevisionRequest,
     PushRevisionResponse,
     RegisteredName,
     ReleaseResult,
-    ResourceRevisionsList,
-    ResourceRevisionUpdateRequest,
     Revision,
-    RevokeMacaroonResponse,
-    UpdatePackageMetadataRequest,
     UpdatePackageMetadataResponse,
     UpdateResourceRevisionsResponse,
 )
@@ -536,17 +529,15 @@ def test_issue_macaroon_success(
         200, json={"macaroon": "test-macaroon"}
     )
 
-    request = MacaroonRequest(
-        permissions=["package-upload"], description="Test client", ttl=3600
+    result = publisher_gateway.issue_macaroon(
+        permissions=[Permission.PACKAGE_MANAGE], description="Test client", ttl=3600
     )
-
-    result = publisher_gateway.issue_macaroon(request)
 
     assert isinstance(result, MacaroonResponse)
     mock_httpx_client.post.assert_called_once_with(
         "/v1/tokens",
         json={
-            "permissions": ["package-upload"],
+            "permissions": ["package-manage"],
             "description": "Test client",
             "ttl": 3600,
         },
@@ -560,9 +551,7 @@ def test_exchange_macaroons_success(
         200, json={"macaroon": "exchanged-macaroon"}
     )
 
-    request = ExchangeMacaroonRequest(macaroon="discharged-macaroon")
-
-    result = publisher_gateway.exchange_macaroons(request)
+    result = publisher_gateway.exchange_macaroons("discharged-macaroon")
 
     assert isinstance(result, ExchangeMacaroonResponse)
     mock_httpx_client.post.assert_called_once_with(
@@ -645,10 +634,7 @@ def test_revoke_macaroon_success(
 
     result = publisher_gateway.revoke_macaroon("session-123")
 
-    assert isinstance(result, RevokeMacaroonResponse)
-    assert len(result.macaroons) == 1
-    assert result.macaroons[0].session_id == "session-456"
-    assert result.macaroons[0].revoked_at == "2024-06-01T10:00:00Z"
+    assert result == "session-123"
     mock_httpx_client.post.assert_called_once_with(
         "/v1/tokens/revoke", json={"session-id": "session-123"}
     )
@@ -700,9 +686,9 @@ def test_push_resource_success(
         200, json={"status-url": "/status/123"}
     )
 
-    request = PushResourceRequest(upload_id="upload-123")
-
-    result = publisher_gateway.push_resource("my-package", "my-resource", request)
+    result = publisher_gateway.push_resource(
+        "my-package", "my-resource", upload_id="upload-123"
+    )
 
     assert isinstance(result, PushResourceResponse)
     mock_httpx_client.post.assert_called_once_with(
@@ -718,9 +704,7 @@ def test_push_revision_success(
         200, json={"status-url": "/status/456"}
     )
 
-    request = PushRevisionRequest(upload_id="upload-456")
-
-    result = publisher_gateway.push_revision("my-package", request)
+    result = publisher_gateway.push_revision("my-package", upload_id="upload-456")
 
     assert isinstance(result, PushRevisionResponse)
     mock_httpx_client.post.assert_called_once_with(
@@ -795,7 +779,8 @@ def test_list_resource_revisions_success(
 
     result = publisher_gateway.list_resource_revisions("my-package", "my-resource")
 
-    assert isinstance(result, ResourceRevisionsList)
+    assert isinstance(result, list)
+    assert len(result) == 0
     mock_httpx_client.get.assert_called_once_with(
         "/v1/charm/my-package/resources/my-resource/revisions"
     )
@@ -809,12 +794,8 @@ def test_update_resource_revisions_success(
     )
 
     updates = [
-        ResourceRevisionUpdateRequest(
-            revision=1, bases=[{"name": "ubuntu", "channel": "20.04"}]
-        ),
-        ResourceRevisionUpdateRequest(
-            revision=2, bases=[{"name": "ubuntu", "channel": "22.04"}]
-        ),
+        (1, [{"name": "ubuntu", "channel": "20.04"}]),
+        (2, [{"name": "ubuntu", "channel": "22.04"}]),
     ]
 
     result = publisher_gateway.update_resource_revisions(
@@ -873,11 +854,12 @@ def test_update_package_metadata_success(
         },
     )
 
-    request = UpdatePackageMetadataRequest(
-        summary="New summary", description="New description", default_track="latest"
+    result = publisher_gateway.update_package_metadata(
+        "my-package",
+        summary="New summary",
+        description="New description",
+        default_track="latest",
     )
-
-    result = publisher_gateway.update_package_metadata("my-package", request)
 
     assert isinstance(result, UpdatePackageMetadataResponse)
     assert result.metadata.id == "package-123"

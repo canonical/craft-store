@@ -30,6 +30,7 @@ from craft_store import errors
 from craft_store._httpx_auth import CandidAuth
 from craft_store.auth import Auth
 from craft_store.models import RegisteredNameModel as RegisteredName
+from craft_store.models.resource_revision_model import CharmResourceRevision
 
 from ._response import (
     ExchangeDashboardMacaroonsResponse,
@@ -45,9 +46,7 @@ from ._response import (
     ReleaseResult,
     Releases,
     ResourceInfo,
-    ResourceRevisionsList,
     Revision,
-    RevokeMacaroonResponse,
     UpdatePackageMetadataResponse,
     UpdateResourceRevisionsResponse,
     UploadReview,
@@ -59,6 +58,9 @@ if TYPE_CHECKING:
 from ._request import (
     ExchangeMacaroonRequest,
     MacaroonRequest,
+    PackageDict,
+    PackageLinks,
+    Permission,
     PushResourceRequest,
     PushRevisionRequest,
     ResourceRevisionUpdateRequest,
@@ -344,14 +346,33 @@ class PublisherGateway:
         response_data = response.json()
         return GetMacaroonResponse.unmarshal(response_data)
 
-    def issue_macaroon(self, request: MacaroonRequest) -> MacaroonResponse:
+    def issue_macaroon(
+        self,
+        *,
+        permissions: list[Permission] | None = None,
+        description: str | None = None,
+        ttl: int | None = None,
+        packages: list[PackageDict] | None = None,
+        channels: set[str] | None = None,
+    ) -> MacaroonResponse:
         """Issue a new macaroon with specified permissions and constraints.
 
-        :param request: The macaroon request with permissions and constraints.
+        :param permissions: List of permissions to grant.
+        :param description: Description of the macaroon usage.
+        :param ttl: Time to live in seconds (minimum 10).
+        :param packages: Package restrictions.
+        :param channels: Channel restrictions.
         :returns: The macaroon response with the issued macaroon.
 
         API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
         """
+        request = MacaroonRequest(
+            permissions=permissions,
+            description=description,
+            ttl=ttl,
+            packages=packages,
+            channels=channels,
+        )
         response = self._client.post(
             "/v1/tokens",
             json=request.model_dump(exclude_none=True),
@@ -361,16 +382,15 @@ class PublisherGateway:
             self._check_keys(response, expected_keys={"macaroon"})
         )
 
-    def exchange_macaroons(
-        self, request: ExchangeMacaroonRequest
-    ) -> ExchangeMacaroonResponse:
+    def exchange_macaroons(self, macaroon: str) -> ExchangeMacaroonResponse:
         """Exchange discharged macaroons for store credentials.
 
-        :param request: The exchange request with discharged macaroon.
+        :param macaroon: The discharged macaroon to exchange.
         :returns: The exchanged macaroon response.
 
         API docs: https://api.charmhub.io/docs/default.html#exchange_macaroons
         """
+        request = ExchangeMacaroonRequest(macaroon=macaroon)
         response = self._client.post(
             "/v1/tokens/exchange",
             json=request.model_dump(exclude_none=True),
@@ -399,11 +419,11 @@ class PublisherGateway:
             self._check_keys(response, expected_keys={"macaroon"})
         )
 
-    def revoke_macaroon(self, session_id: str) -> RevokeMacaroonResponse:
+    def revoke_macaroon(self, session_id: str) -> str:
         """Revoke a macaroon.
 
         :param session_id: The session ID of the macaroon to revoke.
-        :returns: The revocation response with updated macaroons list.
+        :returns: The session ID of the revoked macaroon.
 
         API docs: https://api.charmhub.io/docs/default.html#revoke_macaroon
         """
@@ -412,9 +432,7 @@ class PublisherGateway:
             json={"session-id": session_id},
         )
         self._check_error(response)
-        return RevokeMacaroonResponse.unmarshal(
-            self._check_keys(response, expected_keys={"macaroons"})
-        )
+        return session_id
 
     def macaroon_info(self) -> MacaroonInfo:
         """Get information about the authenticated macaroon token.
@@ -466,17 +484,25 @@ class PublisherGateway:
         self,
         name: str,
         resource_name: str,
-        request: PushResourceRequest,
+        *,
+        upload_id: str,
+        resource_type: str | None = None,
+        bases: list[dict[str, Any]] | None = None,
     ) -> PushResourceResponse:
         """Push a resource revision to the server.
 
         :param name: The package name to attach the upload to.
         :param resource_name: The name of the resource.
-        :param request: The push resource request with upload ID and metadata.
+        :param upload_id: ID of the upload.
+        :param resource_type: Resource type.
+        :param bases: Supported bases.
         :returns: The push resource response with status URL.
 
         API docs: https://api.charmhub.io/docs/default.html#push_resource
         """
+        request = PushResourceRequest(
+            upload_id=upload_id, type=resource_type, bases=bases
+        )
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions",
             json=request.model_dump(exclude_none=True),
@@ -490,16 +516,20 @@ class PublisherGateway:
     def push_revision(
         self,
         name: str,
-        request: PushRevisionRequest,
+        *,
+        upload_id: str,
+        release: list[dict[str, Any]] | None = None,
     ) -> PushRevisionResponse:
         """Push/notify a revision to the server.
 
         :param name: The package name to attach the upload to.
-        :param request: The push revision request with upload ID and metadata.
+        :param upload_id: ID of the upload.
+        :param release: Release information.
         :returns: The push revision response with status URL.
 
         API docs: https://api.charmhub.io/docs/default.html#push_revision
         """
+        request = PushRevisionRequest(upload_id=upload_id, release=release)
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/revisions",
             json=request.model_dump(exclude_none=True),
@@ -536,7 +566,7 @@ class PublisherGateway:
 
     def list_resource_revisions(
         self, name: str, resource_name: str
-    ) -> ResourceRevisionsList:
+    ) -> list[CharmResourceRevision]:
         """List the revisions for a specific resource of a specific package.
 
         :param name: The name of the package to query.
@@ -549,21 +579,23 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions"
         )
         self._check_error(response)
-        return ResourceRevisionsList.unmarshal(
-            self._check_keys(response, expected_keys={"revisions"})
-        )
+        response_data = self._check_keys(response, expected_keys={"revisions"})
+        return [
+            CharmResourceRevision.unmarshal(revision)
+            for revision in response_data["revisions"]
+        ]
 
     def update_resource_revisions(
         self,
         name: str,
         resource_name: str,
-        updates: list[ResourceRevisionUpdateRequest],
+        updates: list[tuple[int, list[dict[str, Any]]]],
     ) -> UpdateResourceRevisionsResponse:
         """Update one or more resource revisions.
 
         :param name: The package name.
         :param resource_name: The resource name to update.
-        :param updates: The updates to make to any revisions.
+        :param updates: List of (revision, bases) tuples to update.
         :returns: The number of revisions updated.
 
         API docs: https://api.charmhub.io/docs/default.html#update_resource_revisions
@@ -571,9 +603,14 @@ class PublisherGateway:
         if not updates:
             raise ValueError("Need at least one resource revision to update.")
 
+        request_updates = [
+            ResourceRevisionUpdateRequest(revision=revision, bases=bases)
+            for revision, bases in updates
+        ]
+
         request_body = {
             "resource-revision-updates": [
-                update.model_dump(exclude_none=True) for update in updates
+                update.model_dump(exclude_none=True) for update in request_updates
             ]
         }
 
@@ -596,16 +633,41 @@ class PublisherGateway:
     def update_package_metadata(
         self,
         name: str,
-        request: UpdatePackageMetadataRequest,
+        *,
+        contact: str | None = None,
+        default_track: str | None = None,
+        description: str | None = None,
+        links: PackageLinks | None = None,
+        private: bool | None = None,
+        summary: str | None = None,
+        title: str | None = None,
+        website: str | None = None,
     ) -> UpdatePackageMetadataResponse:
         """Update package metadata.
 
         :param name: The package name to update.
-        :param request: The metadata update request.
+        :param contact: Contact information (legacy).
+        :param default_track: Default track name.
+        :param description: Package description.
+        :param links: Package links.
+        :param private: Whether package is private.
+        :param summary: Package summary.
+        :param title: Package title.
+        :param website: Project website (legacy).
         :returns: The update response.
 
         API docs: https://api.charmhub.io/docs/default.html#update_package_metadata
         """
+        request = UpdatePackageMetadataRequest(
+            contact=contact,
+            default_track=default_track,
+            description=description,
+            links=links,
+            private=private,
+            summary=summary,
+            title=title,
+            website=website,
+        )
         request_data = request.model_dump(exclude_none=True)
         if "default_track" in request_data:
             request_data["default-track"] = request_data.pop("default_track")
