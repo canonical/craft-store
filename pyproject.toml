@@ -102,7 +102,7 @@ dev-dependencies = [
     "build",
     "pyyaml>=6.0.0",
     "coverage[toml]==7.6.2",
-    "pytest==8.3.3",
+    "pytest==8.4.2",
     "pytest-cov==6.0.0",
     "pytest-mock==3.14.0",
     "pytest-check>=2.4",
