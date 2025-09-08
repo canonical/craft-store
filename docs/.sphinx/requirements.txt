@@ -1,7 +1,7 @@
 furo==2025.7.19
 lxd-sphinx-extensions==0.0.16
 myst-parser==4.0.1
-pyspelling==2.10
+pyspelling==2.11
 sphinx==8.1.3
 sphinx-autobuild==2024.10.3
 sphinxcontrib-jquery==4.1
