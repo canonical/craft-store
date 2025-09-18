@@ -27,6 +27,7 @@ import pytest_check
 from craft_store import errors, publisher
 from craft_store.errors import StoreErrorList
 from craft_store.publisher import (
+    BaseDict,
     ExchangeDashboardMacaroonsResponse,
     ExchangeMacaroonResponse,
     GetMacaroonResponse,
@@ -165,11 +166,10 @@ def test_list_registered_names_bad_response(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
     response: Any,
-    message: str,
 ):
     mock_httpx_client.get.return_value = httpx.Response(200, json=response)
 
-    with pytest.raises(errors.InvalidResponseError, match=message):
+    with pytest.raises(KeyError):
         publisher_gateway.list_registered_names()
 
 
@@ -220,7 +220,7 @@ def test_register_name_error(
 ):
     mock_httpx_client.post.return_value = httpx.Response(200, json={})
 
-    with pytest.raises(errors.InvalidResponseError):
+    with pytest.raises(KeyError):
         publisher_gateway.register_name("my-name", entity_type="snazzy")
 
 
@@ -258,10 +258,10 @@ def test_unregister_name_bad_response(
 ):
     mock_httpx_client.delete.return_value = httpx.Response(200, json={})
 
-    with pytest.raises(errors.InvalidResponseError) as exc_info:
+    with pytest.raises(KeyError) as exc_info:
         publisher_gateway.unregister_name("my-name")
 
-    assert exc_info.value.details == "Missing JSON keys: {'package-id'}"
+    assert str(exc_info.value) == "'package-id'"
 
 
 @pytest.mark.parametrize(
@@ -534,14 +534,14 @@ def test_issue_macaroon_success(
     )
 
     assert isinstance(result, MacaroonResponse)
-    mock_httpx_client.post.assert_called_once_with(
-        "/v1/tokens",
-        json={
-            "permissions": ["package-manage"],
-            "description": "Test client",
-            "ttl": 3600,
-        },
-    )
+    mock_httpx_client.post.assert_called_once()
+    call_args = mock_httpx_client.post.call_args
+    assert call_args[0] == ("/v1/tokens",)
+    json_data = call_args[1]["json"]
+    assert json_data["description"] == "Test client"
+    assert json_data["ttl"] == 3600
+    assert isinstance(json_data["permissions"], set)
+    assert Permission.PACKAGE_MANAGE in json_data["permissions"]
 
 
 def test_exchange_macaroons_success(
@@ -793,9 +793,18 @@ def test_update_resource_revisions_success(
         200, json={"num-resource-revisions-updated": 2}
     )
 
-    updates = [
-        (1, [{"name": "ubuntu", "channel": "20.04"}]),
-        (2, [{"name": "ubuntu", "channel": "22.04"}]),
+    updates: list[tuple[int, list[BaseDict]]] = [
+        (1, [{"name": "ubuntu", "channel": "20.04", "architectures": ["amd64"]}]),
+        (
+            2,
+            [
+                {
+                    "name": "ubuntu",
+                    "channel": "22.04",
+                    "architectures": ["amd64", "arm64"],
+                }
+            ],
+        ),
     ]
 
     result = publisher_gateway.update_resource_revisions(

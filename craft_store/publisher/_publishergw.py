@@ -22,8 +22,9 @@ import re
 from collections.abc import Callable, Collection, Sequence
 from json import JSONDecodeError
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
+import annotated_types
 import httpx
 
 from craft_store import errors
@@ -56,7 +57,7 @@ if TYPE_CHECKING:
     from . import _request
 
 from ._request import (
-    ExchangeMacaroonRequest,
+    BaseDict,
     MacaroonRequest,
     PackageDict,
     PackageLinks,
@@ -64,6 +65,7 @@ from ._request import (
     PushResourceRequest,
     PushRevisionRequest,
     ResourceRevisionUpdateRequest,
+    ResourceType,
     UpdatePackageMetadataRequest,
 )
 
@@ -170,8 +172,8 @@ class PublisherGateway:
             params={"include-collaborations": include_collaborations},
         )
         self._check_error(response)
-        results = self._check_keys(response, expected_keys={"results"})["results"]
-        return [RegisteredName.unmarshal(item) for item in results]
+        response_data = response.json()
+        return [RegisteredName.unmarshal(item) for item in response_data["results"]]
 
     def register_name(
         self,
@@ -200,7 +202,7 @@ class PublisherGateway:
 
         response = self._client.post(f"/v1/{self._namespace}", json=request_json)
         self._check_error(response)
-        return str(self._check_keys(response, expected_keys={"id"})["id"])
+        return str(response.json()["id"])
 
     def get_package_metadata(self, name: str) -> RegisteredName:
         """Get general metadata for a package.
@@ -214,9 +216,7 @@ class PublisherGateway:
             url=f"/v1/{self._namespace}/{name}",
         )
         self._check_error(response)
-        return RegisteredName.unmarshal(
-            self._check_keys(response, expected_keys={"metadata"})["metadata"]
-        )
+        return RegisteredName.unmarshal(response.json()["metadata"])
 
     def unregister_name(self, name: str) -> str:
         """Unregister a name with no published packages.
@@ -229,9 +229,7 @@ class PublisherGateway:
         """
         response = self._client.delete(f"/v1/{self._namespace}/{name}")
         self._check_error(response)
-        return str(
-            self._check_keys(response, expected_keys={"package-id"})["package-id"]
-        )
+        return str(response.json()["package-id"])
 
     def list_revisions(
         self,
@@ -322,11 +320,7 @@ class PublisherGateway:
         )
         self._check_error(response)
 
-        return int(
-            self._check_keys(response, expected_keys={"num-tracks-created"})[
-                "num-tracks-created"
-            ]
-        )
+        return int(response.json()["num-tracks-created"])
 
     def get_macaroon(self, include_inactive: bool = False) -> GetMacaroonResponse:
         """Get existing macaroons for authenticated account, or bakery v2 macaroon for unauthenticated.
@@ -349,11 +343,13 @@ class PublisherGateway:
     def issue_macaroon(
         self,
         *,
-        permissions: list[Permission] | None = None,
+        permissions: Annotated[Collection[Permission], annotated_types.MinLen(1)]
+        | None = None,
         description: str | None = None,
-        ttl: int | None = None,
-        packages: list[PackageDict] | None = None,
-        channels: set[str] | None = None,
+        ttl: Annotated[int, annotated_types.Ge(10)] | None = None,
+        packages: Annotated[Collection[PackageDict], annotated_types.MinLen(1)]
+        | None = None,
+        channels: Annotated[Collection[str], annotated_types.MinLen(1)] | None = None,
     ) -> MacaroonResponse:
         """Issue a new macaroon with specified permissions and constraints.
 
@@ -367,20 +363,18 @@ class PublisherGateway:
         API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
         """
         request = MacaroonRequest(
-            permissions=permissions,
+            permissions=set(permissions) if permissions is not None else None,
             description=description,
             ttl=ttl,
-            packages=packages,
-            channels=channels,
+            packages=set(packages) if packages is not None else None,
+            channels=set(channels) if channels is not None else None,
         )
         response = self._client.post(
             "/v1/tokens",
             json=request.model_dump(exclude_none=True),
         )
         self._check_error(response)
-        return MacaroonResponse.unmarshal(
-            self._check_keys(response, expected_keys={"macaroon"})
-        )
+        return MacaroonResponse.unmarshal(response.json())
 
     def exchange_macaroons(self, macaroon: str) -> ExchangeMacaroonResponse:
         """Exchange discharged macaroons for store credentials.
@@ -390,15 +384,12 @@ class PublisherGateway:
 
         API docs: https://api.charmhub.io/docs/default.html#exchange_macaroons
         """
-        request = ExchangeMacaroonRequest(macaroon=macaroon)
         response = self._client.post(
             "/v1/tokens/exchange",
-            json=request.model_dump(exclude_none=True),
+            json={"macaroon": macaroon},
         )
         self._check_error(response)
-        return ExchangeMacaroonResponse.unmarshal(
-            self._check_keys(response, expected_keys={"macaroon"})
-        )
+        return ExchangeMacaroonResponse.unmarshal(response.json())
 
     def offline_exchange_macaroon(
         self, macaroon: str
@@ -415,9 +406,7 @@ class PublisherGateway:
             json={"macaroon": macaroon},
         )
         self._check_error(response)
-        return OfflineExchangeMacaroonResponse.unmarshal(
-            self._check_keys(response, expected_keys={"macaroon"})
-        )
+        return OfflineExchangeMacaroonResponse.unmarshal(response.json())
 
     def revoke_macaroon(self, session_id: str) -> str:
         """Revoke a macaroon.
@@ -476,9 +465,7 @@ class PublisherGateway:
             headers={"Authorization": discharged_macaroons},
         )
         self._check_error(response)
-        return ExchangeDashboardMacaroonsResponse.unmarshal(
-            self._check_keys(response, expected_keys={"macaroon"})
-        )
+        return ExchangeDashboardMacaroonsResponse.unmarshal(response.json())
 
     def push_resource(
         self,
@@ -486,8 +473,8 @@ class PublisherGateway:
         resource_name: str,
         *,
         upload_id: str,
-        resource_type: str | None = None,
-        bases: list[dict[str, Any]] | None = None,
+        resource_type: ResourceType | None = None,
+        bases: Sequence[BaseDict] | None = None,
     ) -> PushResourceResponse:
         """Push a resource revision to the server.
 
@@ -508,7 +495,7 @@ class PublisherGateway:
             json=request.model_dump(exclude_none=True),
         )
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys={"status-url"})
+        response_data = response.json()
         return PushResourceResponse.unmarshal(
             {"status_url": response_data["status-url"]}
         )
@@ -518,24 +505,22 @@ class PublisherGateway:
         name: str,
         *,
         upload_id: str,
-        release: list[dict[str, Any]] | None = None,
     ) -> PushRevisionResponse:
         """Push/notify a revision to the server.
 
         :param name: The package name to attach the upload to.
         :param upload_id: ID of the upload.
-        :param release: Release information.
         :returns: The push revision response with status URL.
 
         API docs: https://api.charmhub.io/docs/default.html#push_revision
         """
-        request = PushRevisionRequest(upload_id=upload_id, release=release)
+        request = PushRevisionRequest(upload_id=upload_id)
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/revisions",
             json=request.model_dump(exclude_none=True),
         )
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys={"status-url"})
+        response_data = response.json()
         return PushRevisionResponse.unmarshal(
             {"status_url": response_data["status-url"]}
         )
@@ -559,7 +544,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/resources", params=params
         )
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys={"resources"})
+        response_data = response.json()
         return [
             ResourceInfo.unmarshal(resource) for resource in response_data["resources"]
         ]
@@ -579,7 +564,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions"
         )
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys={"revisions"})
+        response_data = response.json()
         return [
             CharmResourceRevision.unmarshal(revision)
             for revision in response_data["revisions"]
@@ -589,7 +574,7 @@ class PublisherGateway:
         self,
         name: str,
         resource_name: str,
-        updates: list[tuple[int, list[dict[str, Any]]]],
+        updates: Sequence[tuple[int, Sequence[BaseDict]]],
     ) -> UpdateResourceRevisionsResponse:
         """Update one or more resource revisions.
 
@@ -677,9 +662,7 @@ class PublisherGateway:
             json=request_data,
         )
         self._check_error(response)
-        return UpdatePackageMetadataResponse.unmarshal(
-            self._check_keys(response, expected_keys={"metadata"})
-        )
+        return UpdatePackageMetadataResponse.unmarshal(response.json())
 
     def list_upload_reviews(
         self, name: str, *, upload_id: str | None = None
@@ -700,7 +683,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/revisions/review", params=params
         )
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys={"revisions"})
+        response_data = response.json()
         return [UploadReview.unmarshal(review) for review in response_data["revisions"]]
 
     def oci_image_resource_upload_credentials(

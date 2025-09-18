@@ -16,8 +16,8 @@
 """Package containing the Publisher Gateway client and relevant metadata."""
 
 from ._request import (
+    BaseDict,
     CreateTrackRequest,
-    ExchangeMacaroonRequest,
     IdPackage,
     MacaroonRequest,
     NamePackage,
@@ -29,6 +29,7 @@ from ._request import (
     PushRevisionRequest,
     ResourceReleaseRequest,
     ResourceRevisionUpdateRequest,
+    ResourceType,
     ReleaseRequest,
     UpdatePackageMetadataRequest,
 )
@@ -91,8 +92,8 @@ from craft_store.models.track_model import TrackModel as Track
 
 __all__ = [
     "Account",
+    "BaseDict",
     "CreateTrackRequest",
-    "ExchangeMacaroonRequest",
     "IdPackage",
     "MacaroonRequest",
     "Media",
@@ -107,6 +108,7 @@ __all__ = [
     "ReleaseRequest",
     "ResourceReleaseRequest",
     "ResourceRevisionUpdateRequest",
+    "ResourceType",
     "TrackGuardrail",
     "Track",
     "UpdatePackageMetadataRequest",

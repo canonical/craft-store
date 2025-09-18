@@ -21,6 +21,7 @@ from typing import Annotated, Any
 
 import annotated_types
 import pydantic
+from pydantic import field_validator, model_validator
 
 from craft_store.models import _base_model
 from craft_store.models._charm_model import CharmBaseModel as Base
@@ -197,11 +198,31 @@ class ExistingMacaroon(_base_model.MarshableModel):
     description: str | None = pydantic.Field(
         default=None, description="Macaroon description"
     )
-    revoked_at: str | None = pydantic.Field(default=None, description="When revoked")
+    revoked_at: datetime.datetime | str | None = pydantic.Field(
+        default=None, description="When revoked"
+    )
     revoked_by: str | None = pydantic.Field(default=None, description="Who revoked it")
     session_id: str = pydantic.Field(description="Session ID")
     valid_since: datetime.datetime = pydantic.Field(description="Valid from date")
     valid_until: datetime.datetime = pydantic.Field(description="Valid until date")
+
+    @field_validator("revoked_at", mode="before")
+    @classmethod
+    def parse_revoked_at(
+        cls, v: datetime.datetime | str | None
+    ) -> datetime.datetime | str | None:
+        """Parse revoked_at as datetime, fallback to string if invalid."""
+        if v is None:
+            return None
+        if isinstance(v, datetime.datetime):
+            return v
+        if isinstance(v, str):
+            try:
+                return datetime.datetime.fromisoformat(v.replace("Z", "+00:00"))
+            except (ValueError, TypeError):
+                # Fall back to string if parsing fails
+                return v
+        return v
 
 
 class GetMacaroonResponse(_base_model.MarshableModel):
@@ -213,6 +234,20 @@ class GetMacaroonResponse(_base_model.MarshableModel):
     macaroons: list[ExistingMacaroon] | None = pydantic.Field(
         default=None, description="Existing macaroons"
     )
+
+    @model_validator(mode="after")
+    def validate_exactly_one_field(self) -> "GetMacaroonResponse":
+        """Ensure exactly one of macaroon or macaroons is present."""
+        macaroon_present = self.macaroon is not None
+        macaroons_present = self.macaroons is not None
+
+        if not (macaroon_present or macaroons_present):
+            raise ValueError("Either 'macaroon' or 'macaroons' must be present")
+
+        if macaroon_present and macaroons_present:
+            raise ValueError("Cannot have both 'macaroon' and 'macaroons' present")
+
+        return self
 
 
 class MacaroonAccount(_base_model.MarshableModel):

@@ -10,6 +10,8 @@ from pathlib import Path
 from craft_store.publisher import (
     PublisherGateway,
     Permission,
+    ResourceType,
+    BaseDict,
 )
 from craft_store.auth import Auth
 
@@ -110,7 +112,7 @@ def complete_workflow_example():
         package_name,
         "my-resource",
         upload_id=resource_upload_id,
-        resource_type="file"
+        resource_type=ResourceType.FILE
     )
     print(f"Resource pushed. Status URL: {resource_response.status_url}")
 
@@ -121,10 +123,10 @@ def complete_workflow_example():
     print(f"Resource has {len(revisions)} revisions")
 
     if revisions:
-        updates = [
+        updates: list[tuple[int, list[BaseDict]]] = [
             (revisions[0].revision, [
-                {"name": "ubuntu", "channel": "20.04"},
-                {"name": "ubuntu", "channel": "22.04"}
+                {"name": "ubuntu", "channel": "20.04", "architectures": ["amd64"]},
+                {"name": "ubuntu", "channel": "22.04", "architectures": ["amd64", "arm64"]}
             ])
         ]
 

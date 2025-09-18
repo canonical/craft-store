@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Request models for the publisher gateway."""
 
+from collections.abc import Sequence
 from enum import Enum
-from typing import Annotated, Any
+from typing import Annotated
 
 import annotated_types
 from pydantic import BaseModel, Field
@@ -52,6 +53,24 @@ class NamePackage(TypedDict):
 
 
 PackageDict = IdPackage | NamePackage
+
+
+class BaseDict(TypedDict):
+    """Base structure for resource bases."""
+
+    name: str
+    channel: str
+    architectures: Annotated[list[str], annotated_types.MinLen(1)]
+
+
+class ResourceType(str, Enum):
+    """Enumeration of valid resource types."""
+
+    FILE = "file"
+    OCI_IMAGE = "oci-image"
+    COMPONENT_TEST = "component/test"
+    COMPONENT_KERNEL_MODULES = "component/kernel-modules"
+    COMPONENT_STANDARD = "component/standard"
 
 
 class Permission(str, Enum):
@@ -109,23 +128,17 @@ class ReleaseRequest(TypedDict):
 class MacaroonRequest(BaseModel):
     """Request for issuing a macaroon."""
 
-    permissions: list[Permission] | None = Field(
-        default=None, description="List of permissions to grant"
+    permissions: set[Permission] | None = Field(
+        default=None, description="Set of permissions to grant"
     )
     description: str | None = Field(
         default=None, description="Description of the macaroon usage"
     )
     ttl: int | None = Field(default=None, description="Time to live in seconds", ge=10)
-    packages: list[PackageDict] | None = Field(
+    packages: set[PackageDict] | None = Field(
         default=None, description="Package restrictions"
     )
     channels: set[str] | None = Field(default=None, description="Channel restrictions")
-
-
-class ExchangeMacaroonRequest(BaseModel):
-    """Request for exchanging macaroons."""
-
-    macaroon: str = Field(description="Discharged macaroon to exchange")
 
 
 class ExchangeDashboardMacaroonsRequest(BaseModel):
@@ -154,22 +167,22 @@ class RevokeMacaroonRequest(BaseModel):
 class PackageLinks(BaseModel):
     """Links structure for package metadata."""
 
-    contact: list[str] | None = Field(
+    contact: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Contact URLs", max_length=5
     )
-    docs: list[str] | None = Field(
+    docs: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Documentation URLs", max_length=5
     )
-    donations: list[str] | None = Field(
+    donations: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Donation URLs", max_length=5
     )
-    issues: list[str] | None = Field(
+    issues: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Issues tracker URLs", max_length=5
     )
-    source: list[str] | None = Field(
+    source: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Source repository URLs", max_length=5
     )
-    website: list[str] | None = Field(
+    website: Sequence[Annotated[str, annotated_types.MaxLen(2000)]] | None = Field(
         default=None, description="Website URLs", max_length=5
     )
 
@@ -193,8 +206,8 @@ class PushResourceRequest(BaseModel):
     """Request for pushing a resource revision."""
 
     upload_id: str = Field(description="ID of the upload")
-    type: str | None = Field(default=None, description="Resource type")
-    bases: list[dict[str, Any]] | None = Field(
+    type: ResourceType | None = Field(default=None, description="Resource type")
+    bases: Sequence[BaseDict] | None = Field(
         default=None, description="Supported bases"
     )
 
@@ -203,16 +216,13 @@ class PushRevisionRequest(BaseModel):
     """Request for pushing/notifying a revision."""
 
     upload_id: str = Field(description="ID of the upload")
-    release: list[dict[str, Any]] | None = Field(
-        default=None, description="Release information"
-    )
 
 
 class ResourceRevisionUpdateRequest(BaseModel):
     """Request for updating resource revisions."""
 
     revision: int = Field(description="Resource revision number")
-    bases: list[dict[str, Any]] = Field(description="Supported bases")
+    bases: Sequence[BaseDict] = Field(description="Supported bases")
 
 
 class OciImageResourceBlobRequest(BaseModel):
