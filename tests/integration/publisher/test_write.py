@@ -160,3 +160,34 @@ def test_release(
     )
     assert results[0].revision == revision_to_release.revision
     assert results[0].channel in ("latest/edge", "edge")  # Could be either!
+
+
+@pytest.mark.slow
+@needs_charmhub_credentials()
+def test_list_resources_integration(
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
+):
+    """Test listing resources for a package."""
+    try:
+        resources = publisher_gateway.list_resources(charmhub_charm_name)
+        assert isinstance(resources, list)
+    except errors.CraftStoreError as e:
+        if "not found" not in str(e).lower():
+            raise
+
+
+@pytest.mark.slow
+@needs_charmhub_credentials()
+def test_list_upload_reviews_integration(
+    publisher_gateway: publisher.PublisherGateway, charmhub_charm_name: str
+):
+    """Test listing upload reviews for a package."""
+    try:
+        reviews = publisher_gateway.list_upload_reviews(charmhub_charm_name)
+        assert isinstance(reviews, list)
+    except errors.CraftStoreError as e:
+        if (
+            "not found" not in str(e).lower()
+            and "not implemented" not in str(e).lower()
+        ):
+            raise
