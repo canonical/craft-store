@@ -188,7 +188,7 @@ class TestGetMacaroonResponse:
         errors = exc_info.value.errors()
         assert len(errors) == 1
         assert "Cannot have both 'macaroon' and 'macaroons' present" in str(
-            errors[0]["ctx"]["error"]
+            errors[0].get("ctx", {}).get("error", "")
         )
 
     def test_get_macaroon_rejects_neither_field(self):
@@ -199,7 +199,7 @@ class TestGetMacaroonResponse:
         errors = exc_info.value.errors()
         assert len(errors) == 1
         assert "Either 'macaroon' or 'macaroons' must be present" in str(
-            errors[0]["ctx"]["error"]
+            errors[0].get("ctx", {}).get("error", "")
         )
 
     def test_get_macaroon_unmarshalling_with_macaroon(self):
