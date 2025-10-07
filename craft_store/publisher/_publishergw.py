@@ -172,7 +172,7 @@ class PublisherGateway:
             params={"include-collaborations": include_collaborations},
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"results"})
         return [RegisteredName.unmarshal(item) for item in response_data["results"]]
 
     def register_name(
@@ -202,7 +202,8 @@ class PublisherGateway:
 
         response = self._client.post(f"/v1/{self._namespace}", json=request_json)
         self._check_error(response)
-        return str(response.json()["id"])
+        response_data = self._check_keys(response, expected_keys={"id"})
+        return str(response_data["id"])
 
     def get_package_metadata(self, name: str) -> RegisteredName:
         """Get general metadata for a package.
@@ -229,7 +230,8 @@ class PublisherGateway:
         """
         response = self._client.delete(f"/v1/{self._namespace}/{name}")
         self._check_error(response)
-        return str(response.json()["package-id"])
+        response_data = self._check_keys(response, expected_keys={"package-id"})
+        return str(response_data["package-id"])
 
     def list_revisions(
         self,
@@ -363,11 +365,11 @@ class PublisherGateway:
         API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
         """
         request = MacaroonRequest(
-            permissions=set(permissions) if permissions is not None else None,
+            permissions=permissions,
             description=description,
             ttl=ttl,
-            packages=set(packages) if packages is not None else None,
-            channels=set(channels) if channels is not None else None,
+            packages=packages,
+            channels=channels,
         )
         response = self._client.post(
             "/v1/tokens",
@@ -495,7 +497,7 @@ class PublisherGateway:
             json=request.model_dump(exclude_none=True),
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"status-url"})
         return PushResourceResponse.unmarshal(
             {"status_url": response_data["status-url"]}
         )
@@ -520,7 +522,7 @@ class PublisherGateway:
             json=request.model_dump(exclude_none=True),
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"status-url"})
         return PushRevisionResponse.unmarshal(
             {"status_url": response_data["status-url"]}
         )
@@ -544,7 +546,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/resources", params=params
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"resources"})
         return [
             ResourceInfo.unmarshal(resource) for resource in response_data["resources"]
         ]
@@ -564,7 +566,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions"
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"revisions"})
         return [
             CharmResourceRevision.unmarshal(revision)
             for revision in response_data["revisions"]
@@ -683,7 +685,7 @@ class PublisherGateway:
             f"/v1/{self._namespace}/{name}/revisions/review", params=params
         )
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys={"revisions"})
         return [UploadReview.unmarshal(review) for review in response_data["revisions"]]
 
     def oci_image_resource_upload_credentials(
