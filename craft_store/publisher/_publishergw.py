@@ -34,6 +34,7 @@ from craft_store.models import RegisteredNameModel as RegisteredName
 from craft_store.models.resource_revision_model import CharmResourceRevision
 
 from ._response import (
+    AuthenticatedMacaroonResponse,
     ExchangeDashboardMacaroonsResponse,
     ExchangeMacaroonResponse,
     GetMacaroonResponse,
@@ -48,6 +49,7 @@ from ._response import (
     Releases,
     ResourceInfo,
     Revision,
+    UnauthenticatedMacaroonResponse,
     UpdatePackageMetadataResponse,
     UpdateResourceRevisionsResponse,
     UploadReview,
@@ -340,7 +342,11 @@ class PublisherGateway:
         self._check_error(response)
 
         response_data = response.json()
-        return GetMacaroonResponse.unmarshal(response_data)
+        # Try to unmarshal as AuthenticatedMacaroonResponse first
+        if "macaroons" in response_data:
+            return AuthenticatedMacaroonResponse.unmarshal(response_data)
+        # Otherwise, unmarshal as UnauthenticatedMacaroonResponse
+        return UnauthenticatedMacaroonResponse.unmarshal(response_data)
 
     def issue_macaroon(
         self,
@@ -365,11 +371,11 @@ class PublisherGateway:
         API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
         """
         request = MacaroonRequest(
-            permissions=permissions,
+            permissions=set(permissions) if permissions is not None else None,
             description=description,
             ttl=ttl,
-            packages=packages,
-            channels=channels,
+            packages=set(packages) if packages is not None else None,
+            channels=set(channels) if channels is not None else None,
         )
         response = self._client.post(
             "/v1/tokens",
@@ -609,13 +615,7 @@ class PublisherGateway:
         response_data = self._check_keys(
             response, expected_keys={"num-resource-revisions-updated"}
         )
-        return UpdateResourceRevisionsResponse.unmarshal(
-            {
-                "num_resource_revisions_updated": response_data[
-                    "num-resource-revisions-updated"
-                ]
-            }
-        )
+        return UpdateResourceRevisionsResponse.unmarshal(response_data)
 
     def update_package_metadata(
         self,
@@ -655,13 +655,9 @@ class PublisherGateway:
             title=title,
             website=website,
         )
-        request_data = request.model_dump(exclude_none=True)
-        if "default_track" in request_data:
-            request_data["default-track"] = request_data.pop("default_track")
-
         response = self._client.patch(
             f"/v1/{self._namespace}/{name}",
-            json=request_data,
+            json=request.model_dump(exclude_none=True, by_alias=True),
         )
         self._check_error(response)
         return UpdatePackageMetadataResponse.unmarshal(response.json())

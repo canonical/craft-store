@@ -193,7 +193,11 @@ class UpdatePackageMetadataRequest(BaseModel):
     contact: str | None = Field(
         default=None, description="Contact information (legacy)"
     )
-    default_track: str | None = Field(default=None, description="Default track name")
+    default_track: str | None = Field(
+        default=None,
+        serialization_alias="default-track",
+        description="Default track name",
+    )
     description: str | None = Field(default=None, description="Package description")
     links: PackageLinks | None = Field(default=None, description="Package links")
     private: bool | None = Field(default=None, description="Whether package is private")

@@ -21,7 +21,7 @@ from typing import Annotated, Any
 
 import annotated_types
 import pydantic
-from pydantic import field_validator, model_validator
+from pydantic import field_validator
 
 from craft_store.models import _base_model
 from craft_store.models._charm_model import CharmBaseModel as Base
@@ -225,29 +225,24 @@ class ExistingMacaroon(_base_model.MarshableModel):
         return v
 
 
-class GetMacaroonResponse(_base_model.MarshableModel):
-    """Response from get_macaroon endpoint."""
+class UnauthenticatedMacaroonResponse(_base_model.MarshableModel):
+    """Response with bakery v2 macaroon for unauthenticated requests."""
 
-    macaroon: str | None = pydantic.Field(
-        default=None, description="Bakery v2 macaroon for discharge"
-    )
-    macaroons: list[ExistingMacaroon] | None = pydantic.Field(
-        default=None, description="Existing macaroons"
-    )
+    macaroon: str = pydantic.Field(description="Bakery v2 macaroon for discharge")
 
-    @model_validator(mode="after")
-    def validate_exactly_one_field(self) -> "GetMacaroonResponse":
-        """Ensure exactly one of macaroon or macaroons is present."""
-        macaroon_present = self.macaroon is not None
-        macaroons_present = self.macaroons is not None
 
-        if not (macaroon_present or macaroons_present):
-            raise ValueError("Either 'macaroon' or 'macaroons' must be present")
+class AuthenticatedMacaroonResponse(_base_model.MarshableModel):
+    """Response with existing macaroons for authenticated requests."""
 
-        if macaroon_present and macaroons_present:
-            raise ValueError("Cannot have both 'macaroon' and 'macaroons' present")
+    macaroons: list[ExistingMacaroon] = pydantic.Field(description="Existing macaroons")
 
-        return self
+
+GetMacaroonResponse = UnauthenticatedMacaroonResponse | AuthenticatedMacaroonResponse
+"""Response from get_macaroon endpoint.
+
+This is a union type representing either an unauthenticated response (with a single
+macaroon string) or an authenticated response (with a list of existing macaroons).
+"""
 
 
 class MacaroonAccount(_base_model.MarshableModel):
@@ -361,7 +356,8 @@ class UpdateResourceRevisionsResponse(_base_model.MarshableModel):
     """Response from updating resource revisions."""
 
     num_resource_revisions_updated: int = pydantic.Field(
-        description="Number of resource revisions updated"
+        validation_alias="num-resource-revisions-updated",
+        description="Number of resource revisions updated",
     )
 
 

@@ -17,9 +17,11 @@
 
 import datetime
 
-import pydantic
-import pytest
-from craft_store.publisher._response import ExistingMacaroon, GetMacaroonResponse
+from craft_store.publisher._response import (
+    AuthenticatedMacaroonResponse,
+    ExistingMacaroon,
+    UnauthenticatedMacaroonResponse,
+)
 
 
 class TestExistingMacaroon:
@@ -147,70 +149,41 @@ class TestExistingMacaroon:
         assert macaroon.revoked_by == "admin@example.com"
 
 
-class TestGetMacaroonResponse:
-    """Tests for GetMacaroonResponse oneOf validation."""
+class TestUnauthenticatedMacaroonResponse:
+    """Tests for UnauthenticatedMacaroonResponse."""
 
-    def test_get_macaroon_with_macaroon_field(self):
-        """Test GetMacaroonResponse with only macaroon field."""
-        response = GetMacaroonResponse(macaroon="bakery-v2-macaroon-string")
+    def test_unauthenticated_macaroon_response(self):
+        """Test UnauthenticatedMacaroonResponse with macaroon field."""
+        response = UnauthenticatedMacaroonResponse(macaroon="bakery-v2-macaroon-string")
 
         assert response.macaroon == "bakery-v2-macaroon-string"
-        assert response.macaroons is None
 
-    def test_get_macaroon_with_macaroons_field(self):
-        """Test GetMacaroonResponse with only macaroons field."""
-        macaroons = [
-            ExistingMacaroon(
-                session_id="session-1",
-                valid_since=datetime.datetime(2024, 1, 1, 0, 0, 0),
-                valid_until=datetime.datetime(2024, 12, 31, 23, 59, 59),
-            )
-        ]
-        response = GetMacaroonResponse(macaroons=macaroons)
-
-        assert response.macaroon is None
-        assert response.macaroons is not None
-        assert len(response.macaroons) == 1
-
-    def test_get_macaroon_rejects_both_fields(self):
-        """Test that GetMacaroonResponse rejects having both fields set."""
-        macaroons = [
-            ExistingMacaroon(
-                session_id="session-1",
-                valid_since=datetime.datetime(2024, 1, 1, 0, 0, 0),
-                valid_until=datetime.datetime(2024, 12, 31, 23, 59, 59),
-            )
-        ]
-
-        with pytest.raises(pydantic.ValidationError) as exc_info:
-            GetMacaroonResponse(macaroon="bakery-v2-macaroon", macaroons=macaroons)
-
-        errors = exc_info.value.errors()
-        assert len(errors) == 1
-        assert "Cannot have both 'macaroon' and 'macaroons' present" in str(
-            errors[0].get("ctx", {}).get("error", "")
-        )
-
-    def test_get_macaroon_rejects_neither_field(self):
-        """Test that GetMacaroonResponse rejects having neither field set."""
-        with pytest.raises(pydantic.ValidationError) as exc_info:
-            GetMacaroonResponse()
-
-        errors = exc_info.value.errors()
-        assert len(errors) == 1
-        assert "Either 'macaroon' or 'macaroons' must be present" in str(
-            errors[0].get("ctx", {}).get("error", "")
-        )
-
-    def test_get_macaroon_unmarshalling_with_macaroon(self):
+    def test_unauthenticated_macaroon_response_unmarshalling(self):
         """Test unmarshalling JSON with macaroon field."""
         data = {"macaroon": "test-macaroon-string"}
-        response = GetMacaroonResponse.unmarshal(data)
+        response = UnauthenticatedMacaroonResponse.unmarshal(data)
 
         assert response.macaroon == "test-macaroon-string"
-        assert response.macaroons is None
 
-    def test_get_macaroon_unmarshalling_with_macaroons(self):
+
+class TestAuthenticatedMacaroonResponse:
+    """Tests for AuthenticatedMacaroonResponse."""
+
+    def test_authenticated_macaroon_response(self):
+        """Test AuthenticatedMacaroonResponse with macaroons field."""
+        macaroons = [
+            ExistingMacaroon(
+                session_id="session-1",
+                valid_since=datetime.datetime(2024, 1, 1, 0, 0, 0),
+                valid_until=datetime.datetime(2024, 12, 31, 23, 59, 59),
+            )
+        ]
+        response = AuthenticatedMacaroonResponse(macaroons=macaroons)
+
+        assert len(response.macaroons) == 1
+        assert response.macaroons[0].session_id == "session-1"
+
+    def test_authenticated_macaroon_response_unmarshalling(self):
         """Test unmarshalling JSON with macaroons field."""
         data = {
             "macaroons": [
@@ -221,9 +194,7 @@ class TestGetMacaroonResponse:
                 }
             ]
         }
-        response = GetMacaroonResponse.unmarshal(data)
+        response = AuthenticatedMacaroonResponse.unmarshal(data)
 
-        assert response.macaroon is None
-        assert response.macaroons is not None
         assert len(response.macaroons) == 1
         assert response.macaroons[0].session_id == "session-1"

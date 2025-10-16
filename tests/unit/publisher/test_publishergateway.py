@@ -27,10 +27,10 @@ import pytest_check
 from craft_store import errors, publisher
 from craft_store.errors import StoreErrorList
 from craft_store.publisher import (
+    AuthenticatedMacaroonResponse,
     BaseDict,
     ExchangeDashboardMacaroonsResponse,
     ExchangeMacaroonResponse,
-    GetMacaroonResponse,
     MacaroonInfo,
     MacaroonResponse,
     OciImageResourceBlobResponse,
@@ -42,6 +42,7 @@ from craft_store.publisher import (
     RegisteredName,
     ReleaseResult,
     Revision,
+    UnauthenticatedMacaroonResponse,
     UpdatePackageMetadataResponse,
     UpdateResourceRevisionsResponse,
 )
@@ -497,8 +498,7 @@ def test_get_macaroon_success_with_existing_macaroons(
 
     result = publisher_gateway.get_macaroon()
 
-    assert isinstance(result, GetMacaroonResponse)
-    assert result.macaroons is not None
+    assert isinstance(result, AuthenticatedMacaroonResponse)
     assert len(result.macaroons) == 1
     assert result.macaroons[0].session_id == "session-123"
     mock_httpx_client.get.assert_called_once_with("/v1/tokens", params={})
@@ -513,7 +513,7 @@ def test_get_macaroon_success_with_bakery_macaroon(
 
     result = publisher_gateway.get_macaroon(include_inactive=True)
 
-    assert isinstance(result, GetMacaroonResponse)
+    assert isinstance(result, UnauthenticatedMacaroonResponse)
     assert result.macaroon == "bakery-v2-macaroon"
     mock_httpx_client.get.assert_called_once_with(
         "/v1/tokens", params={"include-inactive": "true"}
