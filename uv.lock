@@ -578,7 +578,7 @@ requires-dist = [
     { name = "overrides", specifier = ">=7.0.0" },
     { name = "pydantic", specifier = "~=2.8" },
     { name = "pylint", marker = "extra == 'tics'" },
-    { name = "pyspelling", marker = "extra == 'docs'", specifier = "==2.11" },
+    { name = "pyspelling", marker = "extra == 'docs'", specifier = "==2.12.1" },
     { name = "pyxdg", specifier = ">=0.26" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "requests-toolbelt", specifier = ">=1.0.0" },
@@ -1643,7 +1643,7 @@ wheels = [
 
 [[package]]
 name = "pyspelling"
-version = "2.11"
+version = "2.12.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -1654,9 +1654,9 @@ dependencies = [
     { name = "soupsieve" },
     { name = "wcmatch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/94/7975a04dd17c815b45f5f75fa07a49770b5f230320672dea155ea0a3ca14/pyspelling-2.11.tar.gz", hash = "sha256:94cc6efa979c26779601ad666f8d986adf52d247b313337ad67aac7163749d0e", size = 149444, upload-time = "2025-08-27T15:37:59.626Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/ed/3fe00b8a3f8a74a993e1e08931d674cde7bd718c1af44ef415ff1f6b000b/pyspelling-2.12.1.tar.gz", hash = "sha256:9108981dc174d6400a7ed4917cf4af91daf3eb83578d4570c0726b92c2a32e7a", size = 163855, upload-time = "2025-11-26T21:46:59.282Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/3d/8e0b77306de02d45ce8dec40fc999c8723e4c9735c5576db0f2026c63bab/pyspelling-2.11-py3-none-any.whl", hash = "sha256:2690a233131e7d6c3a3d47b15beb1452826b3b0702d5f241a2bcbec0102f3893", size = 45362, upload-time = "2025-08-27T15:37:58.054Z" },
+    { url = "https://files.pythonhosted.org/packages/84/af/2526f6300004267ee82d3f3ca2eaa4830232852edb99deb2db751427234f/pyspelling-2.12.1-py3-none-any.whl", hash = "sha256:0213266bea0acb4877541499087dc89d69e04808867a49270094773047a66f25", size = 45388, upload-time = "2025-11-26T21:46:58.112Z" },
 ]
 
 [[package]]
