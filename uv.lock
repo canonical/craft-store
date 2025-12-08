@@ -586,7 +586,7 @@ requires-dist = [
     { name = "sphinx-autobuild", marker = "extra == 'docs'", specifier = "==2024.10.3" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "==0.5.2" },
     { name = "sphinx-design", marker = "extra == 'docs'", specifier = "==0.6.1" },
-    { name = "sphinx-lint", marker = "extra == 'docs'", specifier = "==1.0.0" },
+    { name = "sphinx-lint", marker = "extra == 'docs'", specifier = "==1.0.2" },
     { name = "sphinx-notfound-page", marker = "extra == 'docs'", specifier = "==1.1.0" },
     { name = "sphinx-reredirects", marker = "extra == 'docs'", specifier = "==0.1.6" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=3.0" },
@@ -2201,15 +2201,15 @@ wheels = [
 
 [[package]]
 name = "sphinx-lint"
-version = "1.0.0"
+version = "1.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "polib" },
     { name = "regex" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/46/f2dad36a4076e9ce88498b25b3f0de82eb7d341ea0ef715cd6c48005bcef/sphinx_lint-1.0.0.tar.gz", hash = "sha256:6eafdb44172ce526f405bf36c713eb246f1340ec2d667e7298e2487ed76decd2", size = 33574, upload-time = "2024-09-11T15:32:54.203Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/19/9258497fee6e2a0bdb93e8ecea6ef6864afb5d83e996a1606a853f96c658/sphinx_lint-1.0.2.tar.gz", hash = "sha256:4e7fc12f44f750b0006eaad237d7db9b1d8aba92adda9c838af891654b371d35", size = 36870, upload-time = "2025-11-19T08:28:12.269Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/31/d2/a130ffba531af7cbbb0e7ad24c7d577d3de0b797437f61d3a7234ed6d836/sphinx_lint-1.0.0-py3-none-any.whl", hash = "sha256:6117a0f340b2dc73eadfc57db7531d4477e0929f92a0c1a2f61e6edbc272f0bc", size = 20163, upload-time = "2024-09-11T15:32:53.201Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/62/f29a2988ff706ac01d3c63d0b4cc4ed62d2c83b447916e0317790ca156cf/sphinx_lint-1.0.2-py3-none-any.whl", hash = "sha256:edcd0fa4d916386c5a3ef7ef0f5136f0bb4a15feefc83c1068ba15bc16eec652", size = 20670, upload-time = "2025-11-19T08:28:10.656Z" },
 ]
 
 [[package]]
