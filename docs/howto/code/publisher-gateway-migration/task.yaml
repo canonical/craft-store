@@ -1,0 +1,39 @@
+summary: PublisherGateway Migration Example
+
+description: |
+  This example demonstrates how to migrate from the legacy BaseClient API
+  to the new PublisherGateway API. It shows:
+
+  - Setting up PublisherGateway with proper authentication
+  - Migrating common operations like uploads and revisions
+  - Using type-safe Pydantic models for requests
+  - Taking advantage of new features like metadata updates
+  - Complete workflow examples
+
+  The migration_example.py file contains three key functions:
+
+  1. legacy_approach() - Shows the old BaseClient way (deprecated)
+  2. modern_approach() - Shows the equivalent PublisherGateway way
+  3. complete_workflow_example() - Demonstrates a full workflow
+
+  Run this example after setting up your authentication credentials.
+
+execute: |
+  # Install craft-store with PublisherGateway support
+  pip install craft-store
+
+  # Set up your authentication (example for charmhub)
+  export CHARMCRAFT_AUTH="your-credentials-here"
+
+  # Run the migration example
+  python migration_example.py
+
+prepare: |
+  # Ensure you have valid credentials for the store you're targeting
+  # For Charmhub: set CHARMCRAFT_AUTH environment variable
+  # For Snap Store: set SNAPCRAFT_STORE_CREDENTIALS environment variable
+
+environment:
+  PYTHONPATH: .
+
+manual: true
