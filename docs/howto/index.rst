@@ -9,3 +9,4 @@ How-to guides
    environment-credentials
    craft-cli-upload-progress
    upload-package-with-resources
+   migrate-to-publisher-gateway

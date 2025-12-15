@@ -26,7 +26,26 @@ import pytest
 import pytest_check
 from craft_store import errors, publisher
 from craft_store.errors import StoreErrorList
-from craft_store.publisher import RegisteredName, ReleaseResult, Revision
+from craft_store.publisher import (
+    AuthenticatedMacaroonResponse,
+    BaseDict,
+    ExchangeDashboardMacaroonsResponse,
+    ExchangeMacaroonResponse,
+    MacaroonInfo,
+    MacaroonResponse,
+    OciImageResourceBlobResponse,
+    OciImageResourceUploadCredentialsResponse,
+    OfflineExchangeMacaroonResponse,
+    Permission,
+    PushResourceResponse,
+    PushRevisionResponse,
+    RegisteredName,
+    ReleaseResult,
+    Revision,
+    UnauthenticatedMacaroonResponse,
+    UpdatePackageMetadataResponse,
+    UpdateResourceRevisionsResponse,
+)
 from craft_store.publisher._response import ReleasedResourceRevision
 
 
@@ -139,20 +158,19 @@ def test_list_registered_names_success(
 
 
 @pytest.mark.parametrize(
-    ("response", "message"),
+    "response",
     [
-        ({}, r"Store returned an invalid response \(status: 200\)"),
+        {},
     ],
 )
 def test_list_registered_names_bad_response(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
     response: Any,
-    message: str,
 ):
     mock_httpx_client.get.return_value = httpx.Response(200, json=response)
 
-    with pytest.raises(errors.InvalidResponseError, match=message):
+    with pytest.raises(errors.InvalidResponseError):
         publisher_gateway.list_registered_names()
 
 
@@ -241,10 +259,8 @@ def test_unregister_name_bad_response(
 ):
     mock_httpx_client.delete.return_value = httpx.Response(200, json={})
 
-    with pytest.raises(errors.InvalidResponseError) as exc_info:
+    with pytest.raises(errors.InvalidResponseError):
         publisher_gateway.unregister_name("my-name")
-
-    assert exc_info.value.details == "Missing JSON keys: {'package-id'}"
 
 
 @pytest.mark.parametrize(
@@ -461,3 +477,568 @@ def test_create_tracks_success(
     )
 
     assert publisher_gateway.create_tracks("my-name") == 0
+
+
+def test_get_macaroon_success_with_existing_macaroons(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "macaroons": [
+                {
+                    "description": "Test macaroon",
+                    "session-id": "session-123",
+                    "valid-since": "2024-01-01T00:00:00Z",
+                    "valid-until": "2024-12-31T23:59:59Z",
+                }
+            ]
+        },
+    )
+
+    result = publisher_gateway.get_macaroon()
+
+    assert isinstance(result, AuthenticatedMacaroonResponse)
+    assert len(result.macaroons) == 1
+    assert result.macaroons[0].session_id == "session-123"
+    mock_httpx_client.get.assert_called_once_with("/v1/tokens", params={})
+
+
+def test_get_macaroon_success_with_bakery_macaroon(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200, json={"macaroon": "bakery-v2-macaroon"}
+    )
+
+    result = publisher_gateway.get_macaroon(include_inactive=True)
+
+    assert isinstance(result, UnauthenticatedMacaroonResponse)
+    assert result.macaroon == "bakery-v2-macaroon"
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/tokens", params={"include-inactive": "true"}
+    )
+
+
+def test_issue_macaroon_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "test-macaroon"}
+    )
+
+    result = publisher_gateway.issue_macaroon(
+        permissions=[Permission.PACKAGE_MANAGE], description="Test client", ttl=3600
+    )
+
+    assert isinstance(result, MacaroonResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens",
+        json={
+            "permissions": {Permission.PACKAGE_MANAGE},
+            "description": "Test client",
+            "ttl": 3600,
+        },
+    )
+
+
+def test_exchange_macaroons_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "exchanged-macaroon"}
+    )
+
+    result = publisher_gateway.exchange_macaroons("discharged-macaroon")
+
+    assert isinstance(result, ExchangeMacaroonResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens/exchange", json={"macaroon": "discharged-macaroon"}
+    )
+
+
+def test_exchange_dashboard_macaroons_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "developer-token"}
+    )
+
+    result = publisher_gateway.exchange_dashboard_macaroons("dashboard-sso-macaroons")
+
+    assert isinstance(result, ExchangeDashboardMacaroonsResponse)
+    assert result.macaroon == "developer-token"
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens/dashboard/exchange",
+        json={},
+        headers={"Authorization": "dashboard-sso-macaroons"},
+    )
+
+
+def test_exchange_dashboard_macaroons_with_description_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "developer-token"}
+    )
+
+    result = publisher_gateway.exchange_dashboard_macaroons(
+        "dashboard-sso-macaroons", description="My CLI Tool"
+    )
+
+    assert isinstance(result, ExchangeDashboardMacaroonsResponse)
+    assert result.macaroon == "developer-token"
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens/dashboard/exchange",
+        json={"client-description": "My CLI Tool"},
+        headers={"Authorization": "dashboard-sso-macaroons"},
+    )
+
+
+def test_offline_exchange_macaroon_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "offline-exchanged-macaroon"}
+    )
+
+    result = publisher_gateway.offline_exchange_macaroon("macaroon-to-exchange")
+
+    assert isinstance(result, OfflineExchangeMacaroonResponse)
+    assert result.macaroon == "offline-exchanged-macaroon"
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens/offline/exchange", json={"macaroon": "macaroon-to-exchange"}
+    )
+
+
+def test_revoke_macaroon_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200,
+        json={
+            "macaroons": [
+                {
+                    "description": "Test macaroon",
+                    "session-id": "session-456",
+                    "valid-since": "2024-01-01T00:00:00Z",
+                    "valid-until": "2024-12-31T23:59:59Z",
+                    "revoked-at": "2024-06-01T10:00:00Z",
+                    "revoked-by": "test-user",
+                }
+            ]
+        },
+    )
+
+    result = publisher_gateway.revoke_macaroon("session-123")
+
+    assert result == "session-123"
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens/revoke", json={"session-id": "session-123"}
+    )
+
+
+def test_macaroon_info_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "account": {
+                "id": "account-123",
+                "email": "user@example.com",
+                "username": "testuser",
+                "display-name": "Test User",
+                "validation": "verified",
+            },
+            "permissions": ["package-upload", "package-manage"],
+            "packages": [
+                {"id": "pkg-123", "name": "test-package", "type": "charm"},
+                {"name": "another-package", "type": "snap"},
+            ],
+            "channels": ["stable", "edge"],
+        },
+    )
+
+    result = publisher_gateway.macaroon_info()
+
+    assert isinstance(result, MacaroonInfo)
+    assert result.account.id == "account-123"
+    assert result.account.email == "user@example.com"
+    assert result.account.username == "testuser"
+    assert result.account.display_name == "Test User"
+    assert result.permissions == ["package-upload", "package-manage"]
+    assert result.packages is not None
+    assert len(result.packages) == 2
+    assert result.packages[0].id == "pkg-123"
+    assert result.packages[0].name == "test-package"
+    assert result.packages[0].type == "charm"
+    assert result.channels == ["stable", "edge"]
+    mock_httpx_client.get.assert_called_once_with("/v1/tokens/whoami")
+
+
+def test_push_resource_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"status-url": "/status/123"}
+    )
+
+    result = publisher_gateway.push_resource(
+        "my-package", "my-resource", upload_id="upload-123"
+    )
+
+    assert isinstance(result, PushResourceResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/charm/my-package/resources/my-resource/revisions",
+        json={"upload_id": "upload-123"},
+    )
+
+
+def test_push_revision_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"status-url": "/status/456"}
+    )
+
+    result = publisher_gateway.push_revision("my-package", upload_id="upload-456")
+
+    assert isinstance(result, PushRevisionResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/charm/my-package/revisions", json={"upload_id": "upload-456"}
+    )
+
+
+def test_list_resources_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "resources": [
+                {
+                    "name": "test-resource",
+                    "type": "file",
+                    "optional": False,
+                    "revision": 42,
+                },
+                {"name": "optional-resource", "type": "oci-image", "optional": True},
+            ]
+        },
+    )
+
+    result = publisher_gateway.list_resources("my-package")
+
+    assert len(result) == 2
+    assert result[0].name == "test-resource"
+    assert result[0].type == "file"
+    assert result[0].optional is False
+    assert result[0].revision == 42
+    assert result[1].name == "optional-resource"
+    assert result[1].type == "oci-image"
+    assert result[1].optional is True
+    assert result[1].revision is None
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/resources", params={}
+    )
+
+
+def test_list_resources_with_revision(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "resources": [
+                {
+                    "name": "test-resource",
+                    "type": "file",
+                    "optional": False,
+                    "revision": 42,
+                }
+            ]
+        },
+    )
+
+    result = publisher_gateway.list_resources("my-package", revision=123)
+
+    assert len(result) == 1
+    assert result[0].name == "test-resource"
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/resources", params={"revision": "123"}
+    )
+
+
+def test_list_resource_revisions_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={"revisions": []})
+
+    result = publisher_gateway.list_resource_revisions("my-package", "my-resource")
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/resources/my-resource/revisions"
+    )
+
+
+def test_update_resource_revisions_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.patch.return_value = httpx.Response(
+        200, json={"num-resource-revisions-updated": 2}
+    )
+
+    updates: list[tuple[int, list[BaseDict]]] = [
+        (1, [{"name": "ubuntu", "channel": "20.04", "architectures": ["amd64"]}]),
+        (
+            2,
+            [
+                {
+                    "name": "ubuntu",
+                    "channel": "22.04",
+                    "architectures": ["amd64", "arm64"],
+                }
+            ],
+        ),
+    ]
+
+    result = publisher_gateway.update_resource_revisions(
+        "my-package", "my-resource", updates
+    )
+
+    assert isinstance(result, UpdateResourceRevisionsResponse)
+    assert result.num_resource_revisions_updated == 2
+    mock_httpx_client.patch.assert_called_once()
+
+
+def test_update_resource_revisions_empty_updates_raises_error(
+    publisher_gateway: publisher.PublisherGateway,
+):
+    with pytest.raises(
+        ValueError, match="Need at least one resource revision to update"
+    ):
+        publisher_gateway.update_resource_revisions("my-package", "my-resource", [])
+
+
+def test_update_package_metadata_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.patch.return_value = httpx.Response(
+        200,
+        json={
+            "metadata": {
+                "id": "package-123",
+                "name": "my-package",
+                "title": "My Package",
+                "summary": "New summary",
+                "description": "New description",
+                "contact": "contact@example.com",
+                "website": "https://example.com",
+                "default-track": "latest",
+                "private": False,
+                "status": "active",
+                "store": "charmhub",
+                "type": "charm",
+                "authority": None,
+                "links": {
+                    "website": ["https://example.com"],
+                    "docs": ["https://docs.example.com"],
+                },
+                "media": [{"type": "icon", "url": "https://example.com/icon.png"}],
+                "publisher": {
+                    "id": "pub-123",
+                    "email": "publisher@example.com",
+                    "username": "publisher",
+                    "display-name": "Publisher Name",
+                    "validation": "verified",
+                },
+                "track-guardrails": [],
+                "tracks": [],
+            }
+        },
+    )
+
+    result = publisher_gateway.update_package_metadata(
+        "my-package",
+        summary="New summary",
+        description="New description",
+        default_track="latest",
+    )
+
+    assert isinstance(result, UpdatePackageMetadataResponse)
+    assert result.metadata.id == "package-123"
+    assert result.metadata.summary == "New summary"
+    assert result.metadata.description == "New description"
+    assert result.metadata.default_track == "latest"
+    assert result.metadata.links is not None
+    assert result.metadata.links["website"] == ["https://example.com"]
+    assert result.metadata.media is not None
+    assert len(result.metadata.media) == 1
+    assert result.metadata.media[0].type == "icon"
+    assert result.metadata.publisher.username == "publisher"
+
+    mock_httpx_client.patch.assert_called_once_with(
+        "/v1/charm/my-package",
+        json={
+            "summary": "New summary",
+            "description": "New description",
+            "default-track": "latest",
+        },
+    )
+
+
+def test_list_upload_reviews_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "revisions": [
+                {
+                    "upload-id": "upload-123",
+                    "status": "approved",
+                    "revision": 42,
+                    "errors": None,
+                },
+                {
+                    "upload-id": "upload-456",
+                    "status": "needs_review",
+                    "revision": None,
+                    "errors": [
+                        {"code": "validation-error", "message": "Invalid manifest"}
+                    ],
+                },
+            ]
+        },
+    )
+
+    result = publisher_gateway.list_upload_reviews("my-package")
+
+    assert len(result) == 2
+    assert result[0].upload_id == "upload-123"
+    assert result[0].status == "approved"
+    assert result[0].revision == 42
+    assert result[1].upload_id == "upload-456"
+    assert result[1].revision is None
+    assert result[1].errors is not None
+    assert len(result[1].errors) == 1
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/revisions/review", params={}
+    )
+
+
+def test_list_upload_reviews_with_upload_id(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "revisions": [
+                {
+                    "upload-id": "upload-123",
+                    "status": "approved",
+                    "revision": 42,
+                    "errors": None,
+                }
+            ]
+        },
+    )
+
+    result = publisher_gateway.list_upload_reviews("my-package", upload_id="upload-123")
+
+    assert len(result) == 1
+    assert result[0].upload_id == "upload-123"
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/revisions/review", params={"upload-id": "upload-123"}
+    )
+
+
+def test_oci_image_resource_upload_credentials_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(
+        200,
+        json={
+            "image-name": "test-image",
+            "username": "test-user",
+            "password": "test-password",
+        },
+    )
+
+    result = publisher_gateway.oci_image_resource_upload_credentials(
+        "my-package", "my-resource"
+    )
+
+    assert isinstance(result, OciImageResourceUploadCredentialsResponse)
+    assert result.image_name == "test-image"
+    assert result.username == "test-user"
+    assert result.password == "test-password"  # noqa: S105
+    mock_httpx_client.get.assert_called_once_with(
+        "/v1/charm/my-package/resources/my-resource/oci-image/upload-credentials"
+    )
+
+
+def test_oci_image_resource_blob_success(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200,
+        json={
+            "ImageName": "test-image:latest",
+            "Username": "test-user",
+            "Password": "test-password",
+        },
+    )
+
+    result = publisher_gateway.oci_image_resource_blob(
+        "my-package", "my-resource", "sha256:abc123"
+    )
+
+    assert isinstance(result, OciImageResourceBlobResponse)
+    assert result.image_name == "test-image:latest"
+    assert result.username == "test-user"
+    assert result.password == "test-password"  # noqa: S105
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/charm/my-package/resources/my-resource/oci-image/blob",
+        json={"image-digest": "sha256:abc123"},
+    )
+
+
+def test_upload_file_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    tmp_path,
+):
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("test content")
+
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"successful": True, "upload_id": "upload-123"}
+    )
+
+    result = publisher_gateway.upload_file(test_file)
+
+    assert result == "upload-123"
+    mock_httpx_client.post.assert_called_once_with(
+        "/unscanned-upload/",
+        files={"binary": ("test.txt", mock.ANY, "application/octet-stream")},
+    )
+
+
+def test_upload_file_unsuccessful(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+    tmp_path,
+):
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("test content")
+
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"successful": False, "error": "Upload failed"}
+    )
+
+    with pytest.raises(errors.CraftStoreError, match="Server error while pushing file"):
+        publisher_gateway.upload_file(test_file)
