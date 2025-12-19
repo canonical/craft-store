@@ -143,7 +143,7 @@ def fake_charms(
     files = [
         _make_charm(tmp_path, charmhub_charm_name, [arch]) for arch in architectures
     ]
-    files.append(_make_charm(tmp_path, charmhub_charm_name, architectures))
+    files.append(_make_charm(tmp_path, charmhub_charm_name, list(architectures)))
     return files
 
 
