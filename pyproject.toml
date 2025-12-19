@@ -1,7 +1,7 @@
 [project]
 name = "craft-store"
-description="Store bindings for Snaps and Charms"
-dynamic = ["version", "readme"]
+description="Store bindings for craft tools"
+dynamic = ["version"]
 authors = [
     {name = "Canonical Ltd.", email = "snapcraft@lists.snapcraft.io"},
 ]
@@ -21,7 +21,6 @@ dependencies = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
@@ -30,16 +29,33 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 requires-python = ">=3.10"
+license = "LGPL-3.0"
+readme = { file = "README.md", content-type = "text/markdown" }
 
 [project.urls]
-"Documentation" = "https://craft-store.readthedocs.io/en/latest/"
+"Documentation" = "https://canonical-craft-store.readthedocs-hosted.com/"
 "Source" = "https://github.com/canonical/craft-store"
 "Issues" = "https://github.com/canonical/craft-store/issues"
 
-[project.optional-dependencies]
+[dependency-groups]
+dev = [
+    "build",
+    "pyyaml>=6.0.0",
+    "coverage[toml]==7.13.0",
+    "pytest==8.4.2",
+    "pytest-cov==7.0.0",
+    "pytest-mock==3.15.1",
+    "pytest-check>=2.4",
+    "pytest-subprocess>=1.5",
+    "pytest-timeout>=2.0",
+    "pytest-httpx>=0.35",
+    "pytest-randomly>=3.16.0",
+    { include-group = "types" },
+    { include-group = "lint" },
+]
 lint = [
     "codespell[toml]~=2.3",
-    "yamllint~=1.35"
+    { include-group = "types" },
 ]
 types = [
     "mypy[reports]~=1.13",
@@ -67,10 +83,6 @@ docs = [
     "sphinx-rtd-theme>=3.0",
     "sphinx-tabs==3.4.7",
     "sphinx-toolbox>=2.5.0",
-]
-release = [
-    "twine",
-    "wheel",
 ]
 tics = [
     "flake8",
@@ -105,19 +117,6 @@ constraint-dependencies = [
     "webencodings>=0.4.0",
     "wheel>=0.38",
 ]
-dev-dependencies = [
-    "build",
-    "pyyaml>=6.0.0",
-    "coverage[toml]==7.13.0",
-    "pytest==8.4.2",
-    "pytest-cov==7.0.0",
-    "pytest-mock==3.15.1",
-    "pytest-check>=2.4",
-    "pytest-subprocess>=1.5",
-    "pytest-timeout>=2.0",
-    "pytest-httpx>=0.35",
-    "pytest-randomly>=3.16.0",
-]
 
 [build-system]
 requires = [
@@ -128,9 +127,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-data = {"craft_store" = ["py.typed"]}
-
-[tool.setuptools.dynamic]
-readme = {file = "README.md"}
 
 [tool.setuptools_scm]
 write_to = "craft_store/_version.py"
@@ -147,14 +143,20 @@ version_scheme = "post-release"
 # deviations from the default 'git describe' command:
 # - only match annotated tags
 # - only match tags formatted as 'X.Y.Z'
-git_describe_command = "git describe --dirty --long --match '[0-9]*.[0-9]*.[0-9]*' --exclude '*[^0-9.]*'"
+git_describe_command = [
+    "git",
+    "describe",
+    "--dirty",
+    "--long",
+    "--match",
+    "[0-9]*.[0-9]*.[0-9]*",
+    "--exclude",
+    "*[^0-9.]*",
+]
 
 [tool.setuptools.packages.find]
 include = ["*craft*"]
 namespaces = false
-
-[tool.black]
-target-version = ["py310"]
 
 [tool.codespell]
 ignore-words-list = "buildd,crate,keyserver,comandos,ro,dedent,dedented"
@@ -188,22 +190,6 @@ skip_empty = true
 exclude_also = [
     "if (typing\\.)?TYPE_CHECKING:",
 ]
-
-[tool.pylint.messages_control]
-disable = "too-many-ancestors,too-few-public-methods,fixme,unspecified-encoding,use-implicit-booleaness-not-comparison,unnecessary-lambda-assignment"
-
-[tool.pylint.similarities]
-min-similarity-lines=12
-
-[tool.pylint.format]
-max-line-length = "100"
-max-locals = 16
-
-[tool.pylint.MASTER]
-extension-pkg-whitelist = [
-    "pydantic"
-]
-load-plugins = "pylint_fixme_info,pylint_pytest"
 
 [tool.pyright]
 #strict = ["craft_store"]  # Disabled because pyrightconfig.json didn't include this.
@@ -260,7 +246,6 @@ src = ["craft_store", "tests"]
 extend-exclude = [
     "docs",
     "__pycache__",
-    "docs/sphinx-docs-starter-pack",
 ]
 
 [tool.ruff.lint]
