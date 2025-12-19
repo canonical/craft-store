@@ -212,7 +212,7 @@ class DeveloperToken(BaseModel):
     ) -> Self:
         """Deserialize previously stored developer token."""
         try:
-            return super().model_validate_json(json_data, **kwargs)
+            return super().model_validate_json(json_data, **kwargs)  # ty: ignore[invalid-return-type]
         except pydantic.ValidationError as err:
             raise errors.CredentialsNotParseable(
                 "Expected valid developer token credentials"
