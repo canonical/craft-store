@@ -65,13 +65,10 @@ extensions = [
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "canonical_sphinx",
     "sphinx_design",
     "sphinx_tabs.tabs",
     "sphinx_reredirects",
-    "youtube-links",
-    "related-links",
-    "custom-rst-roles",
-    "terminal-output",
     "sphinx_copybutton",
     "sphinxext.opengraph",
     "myst_parser",

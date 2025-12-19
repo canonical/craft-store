@@ -67,6 +67,7 @@ types = [
     "types-setuptools",
 ]
 docs = [
+    "canonical-sphinx[full]",
     "furo==2025.9.25",
     "lxd-sphinx-extensions==0.0.16",
     "myst-parser==4.0.1",

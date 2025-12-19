@@ -208,6 +208,35 @@ filecache = [
 ]
 
 [[package]]
+name = "canonical-sphinx"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "furo" },
+    { name = "linkify-it-py" },
+    { name = "myst-parser" },
+    { name = "sphinx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5e/47/f7add56cc67e06c917a86a9d2a74a5af31ddf47b80f8b1577be4e8d53bee/canonical_sphinx-0.5.1.tar.gz", hash = "sha256:3b94e564870270dc84ad69cf91dc152f9f009a6f90e6e55fead028f5b615402c", size = 1053111, upload-time = "2025-07-14T00:48:03.052Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/90/4fbdf7de70ee86ecf03f3eb07771bbc9b121e05985dfcbee44a8dfd2f267/canonical_sphinx-0.5.1-py3-none-any.whl", hash = "sha256:8c2c2e7c3f0d1a6b19136e1f906bdc5d2f024b9bf7f7b50ca9df7de646239391", size = 1030533, upload-time = "2025-07-14T00:48:01.315Z" },
+]
+
+[package.optional-dependencies]
+full = [
+    { name = "canonical-sphinx-extensions" },
+    { name = "pyspelling" },
+    { name = "sphinx-autobuild" },
+    { name = "sphinx-copybutton" },
+    { name = "sphinx-design" },
+    { name = "sphinx-notfound-page" },
+    { name = "sphinx-reredirects" },
+    { name = "sphinx-tabs" },
+    { name = "sphinxcontrib-jquery" },
+    { name = "sphinxext-opengraph" },
+]
+
+[[package]]
 name = "canonical-sphinx-extensions"
 version = "0.0.27"
 source = { registry = "https://pypi.org/simple" }
@@ -529,6 +558,7 @@ dev = [
     { name = "types-setuptools" },
 ]
 docs = [
+    { name = "canonical-sphinx", extra = ["full"] },
     { name = "furo" },
     { name = "lxd-sphinx-extensions" },
     { name = "myst-parser" },
@@ -608,6 +638,7 @@ dev = [
     { name = "types-setuptools" },
 ]
 docs = [
+    { name = "canonical-sphinx", extras = ["full"] },
     { name = "furo", specifier = "==2025.9.25" },
     { name = "lxd-sphinx-extensions", specifier = "==0.0.16" },
     { name = "myst-parser", specifier = "==4.0.1" },
@@ -985,6 +1016,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/70/09/d904a6e96f76ff214be59e7aa6ef7190008f52a0ab6689760a98de0bf37d/keyring-25.6.0.tar.gz", hash = "sha256:0b39998aa941431eb3d9b0d4b2460bc773b9df6fed7621c2dfb291a7e0187a66", size = 62750, upload-time = "2024-12-25T15:26:45.782Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d3/32/da7f44bcb1105d3e88a0b74ebdca50c59121d2ddf71c9e34ba47df7f3a56/keyring-25.6.0-py3-none-any.whl", hash = "sha256:552a3f7af126ece7ed5c89753650eec89c7eaae8617d0aa4d9ad2b75111266bd", size = 39085, upload-time = "2024-12-25T15:26:44.377Z" },
+]
+
+[[package]]
+name = "linkify-it-py"
+version = "2.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "uc-micro-py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2a/ae/bb56c6828e4797ba5a4821eec7c43b8bf40f69cda4d4f5f8c8a2810ec96a/linkify-it-py-2.0.3.tar.gz", hash = "sha256:68cda27e162e9215c17d786649d1da0021a451bdc436ef9e0fa0ba5234b9b048", size = 27946, upload-time = "2024-02-04T14:48:04.179Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/1e/b832de447dee8b582cac175871d2f6c3d5077cc56d5575cadba1fd1cccfa/linkify_it_py-2.0.3-py3-none-any.whl", hash = "sha256:6bcbc417b0ac14323382aef5c5192c0075bf8a9d6b41820a2b66371eac6b6d79", size = 19820, upload-time = "2024-02-04T14:48:02.496Z" },
 ]
 
 [[package]]
@@ -2486,6 +2529,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/82/5c/e6082df02e215b846b4b8c0b887a64d7d08ffaba30605502639d44c06b82/typing_inspection-0.4.0.tar.gz", hash = "sha256:9765c87de36671694a67904bf2c96e395be9c6439bb6c87b5142569dcdd65122", size = 76222, upload-time = "2025-02-25T17:27:59.638Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/31/08/aa4fdfb71f7de5176385bd9e90852eaf6b5d622735020ad600f2bab54385/typing_inspection-0.4.0-py3-none-any.whl", hash = "sha256:50e72559fcd2a6367a19f7a7e610e6afcb9fac940c650290eed893d61386832f", size = 14125, upload-time = "2025-02-25T17:27:57.754Z" },
+]
+
+[[package]]
+name = "uc-micro-py"
+version = "1.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/91/7a/146a99696aee0609e3712f2b44c6274566bc368dfe8375191278045186b8/uc-micro-py-1.0.3.tar.gz", hash = "sha256:d321b92cff673ec58027c04015fcaa8bb1e005478643ff4a500882eaab88c48a", size = 6043, upload-time = "2024-02-09T16:52:01.654Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/87/1f677586e8ac487e29672e4b17455758fce261de06a0d086167bb760361a/uc_micro_py-1.0.3-py3-none-any.whl", hash = "sha256:db1dffff340817673d7b466ec86114a9dc0e9d4d9b5ba229d9d60e5c12600cd5", size = 6229, upload-time = "2024-02-09T16:52:00.371Z" },
 ]
 
 [[package]]
