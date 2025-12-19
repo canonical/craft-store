@@ -4,9 +4,9 @@ path: /craft-store
 environment:
   PROJECT_PATH: /craft-store
   PATH: /snap/bin:$PATH:$PROJECT_PATH/tools/spread
-  CRAFT_STORE_CHARMCRAFT_CREDENTIALS: '$(HOST: echo ${CRAFT_STORE_CHARMCRAFT_CREDENTIALS:-})'
-  SNAPCRAFT_STORE_CREDENTIALS: '$(HOST: echo ${SNAPCRAFT_STORE_CREDENTIALS:-})'
-  CRAFT_STORE_TEST_CHARM: '$(HOST: echo ${CRAFT_STORE_TEST_CHARM:-})'
+  CRAFT_STORE_CHARMCRAFT_CREDENTIALS: "$(HOST: echo ${CRAFT_STORE_CHARMCRAFT_CREDENTIALS:-})"
+  SNAPCRAFT_STORE_CREDENTIALS: "$(HOST: echo ${SNAPCRAFT_STORE_CREDENTIALS:-})"
+  CRAFT_STORE_TEST_CHARM: "$(HOST: echo ${CRAFT_STORE_TEST_CHARM:-})"
 
 backends:
   google:
@@ -58,11 +58,10 @@ prepare: |
   apt-get --yes install python3.10-venv
 
 suites:
-#  docs/tutorials/code/:
-#    summary: tests basic tutorials from the docs
+  #  docs/tutorials/code/:
+  #    summary: tests basic tutorials from the docs
 
   docs/howto/code/:
     summary: tests how-to guides from the docs
-
 #  docs/reference/code/:
 #    summary: tests reference code from the docs
