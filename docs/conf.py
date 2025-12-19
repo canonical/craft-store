@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import datetime
+import os
 
 project = "Craft Store"
 author = "Canonical"
@@ -48,11 +48,11 @@ templates_path = ["_templates"]
 
 # Static resources for Google Analytics
 html_css_files = [
-    'css/cookie-banner.css'
+    "css/cookie-banner.css"
 ]
 
 html_js_files = [
-    'js/bundle.js',
+    "js/bundle.js",
 ]
 
 extensions = [
@@ -64,20 +64,26 @@ extensions = [
 # region General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions.extend(
-    [
-        "sphinx.ext.intersphinx",
-        "sphinx.ext.viewcode",
-        "sphinx.ext.coverage",
-        "sphinx.ext.doctest",
-        "sphinx-pydantic",
-        "sphinx_sitemap",
-        "sphinx_toolbox",
-        "sphinx_toolbox.more_autodoc",
-        "sphinx.ext.autodoc",  # Must be loaded after more_autodoc
-        "sphinxext.rediraffe",
-    ]
-)
+extensions = [
+    "sphinx_design",
+    "sphinx_tabs.tabs",
+    "sphinx_reredirects",
+    "youtube-links",
+    "related-links",
+    "custom-rst-roles",
+    "terminal-output",
+    "sphinx_copybutton",
+    "sphinxext.opengraph",
+    "myst_parser",
+    "sphinxcontrib.jquery",
+    "notfound.extension",
+    "sphinx.ext.autodoc",
+    "sphinx_toolbox.collapse"
+]
+
+exclude_patterns = [
+    "sphinx-docs-starter-pack"
+]
 
 # endregion
 
