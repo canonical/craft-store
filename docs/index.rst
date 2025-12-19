@@ -9,7 +9,6 @@ Craft Store
    how-to/index
    reference/index
    explanation/index
-   release-notes/index
 
 
 .. list-table::
