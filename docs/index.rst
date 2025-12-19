@@ -9,7 +9,6 @@ Craft Store
    how-to/index
    reference/index
    explanation/index
-   release-notes/index
 
 
 .. list-table::
@@ -19,7 +18,7 @@ Craft Store
     * - | :ref:`How-to guides <how-to>`
         | **Step-by-step guides** covering key operations and common tasks
     * - | :ref:`Reference <reference>`
-        | **Technical information** about Starcraft
+        | **Technical information** about Craft Store
     * - | :ref:`Explanation <explanation>`
         | **Discussion and clarification** of key topics
 
