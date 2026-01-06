@@ -61,7 +61,7 @@ suites:
   #  docs/tutorials/code/:
   #    summary: tests basic tutorials from the docs
 
-  docs/howto/code/:
+  docs/how-to/code/:
     summary: tests how-to guides from the docs
 #  docs/reference/code/:
 #    summary: tests reference code from the docs

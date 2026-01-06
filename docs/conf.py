@@ -40,7 +40,7 @@ html_context = {
 
 # Target repository for the edit button on pages
 html_theme_options = {
-    "source_edit_link": "https://github.com/canonical/craft",
+    "source_edit_link": "https://github.com/canonical/craft-store",
 }
 
 html_static_path = ["_static"]
@@ -64,7 +64,7 @@ extensions = [
     "canonical_sphinx",
     "sphinx_design",
     "sphinx_tabs.tabs",
-    "sphinx_reredirects",
+    "sphinxext.rediraffe",
     "sphinx_copybutton",
     "sphinxext.opengraph",
     "myst_parser",
