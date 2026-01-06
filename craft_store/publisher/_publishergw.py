@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 TRACK_NAME_REGEX = re.compile(r"^[a-zA-Z0-9](?:[_.-]?[a-zA-Z0-9])*$")
 """A regular expression guarding track names.
 
-Retrieved from https://api.staging.charmhub.io/docs/default.html#create_tracks
+Retrieved from https://api.staging.charmhub.io/docs/default/#create-tracks
 """
 
 logger = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ class PublisherGateway:
             collaborator on but does not own.
         :returns: A sequence of names registered to the user.
 
-        API docs: https://api.charmhub.io/docs/default.html#list_registered_names
+        API docs: https://api.charmhub.io/docs/default/#list-registered-names
         """
         response = self._client.get(
             f"/v1/{self._namespace}",
@@ -181,7 +181,7 @@ class PublisherGateway:
         :param name: The name of the package to query.
         :returns: A dictionary matching the result from the publisher gateway.
 
-        API docs: https://api.charmhub.io/docs/default.html#package_metadata
+        API docs: https://api.charmhub.io/docs/default/#package-metadata
         """
         response = self._client.get(
             url=f"/v1/{self._namespace}/{name}",
@@ -198,7 +198,7 @@ class PublisherGateway:
 
         :returns: the ID of the deleted name.
 
-        API docs: https://api.charmhub.io/docs/default.html#unregister_package
+        API docs: https://api.charmhub.io/docs/default/#unregister-package
         """
         response = self._client.delete(f"/v1/{self._namespace}/{name}")
         self._check_error(response)
@@ -223,7 +223,7 @@ class PublisherGateway:
         :param revision: If provided, get only the specified revision.
         :returns: A list of revisions in the store and their metadata.
 
-        API docs: https://api.charmhub.io/docs/default.html#list_revisions
+        API docs: https://api.charmhub.io/docs/default/#list-revisions
         """
         params = {}
         if fields is not None:
@@ -248,7 +248,7 @@ class PublisherGateway:
         The revision information returned is only for the revisions that are currently
         published in a channel.
 
-        API docs: https://api.charmhub.io/docs/default.html#list_releases
+        API docs: https://api.charmhub.io/docs/default/#list-releases
         """
         response = self._client.get(f"/v1/{self._namespace}/{name}/releases")
         self._check_error(response)
@@ -276,7 +276,7 @@ class PublisherGateway:
         :returns: The number of tracks created by the store.
         :raises: InvalidRequestError if the name field of any passed track is invalid.
 
-        API docs: https://api.charmhub.io/docs/default.html#create_tracks
+        API docs: https://api.charmhub.io/docs/default/#create-tracks
         """
         bad_track_names = {
             track["name"]

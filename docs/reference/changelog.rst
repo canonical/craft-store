@@ -107,7 +107,7 @@ Bug fixes:
   <https://canonical-craft-store.readthedocs-hosted.com/en/latest/reference/
   auto-generated/#craft_store.BaseClient.push_resource>`_
 - Document the `workflow for uploading and releasing a package
-  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/howto/
+  <https://canonical-craft-store.readthedocs-hosted.com/en/latest/how-to/
   upload-package-with-resources/>`_
 
 2.5.0 (2023-11-23)
