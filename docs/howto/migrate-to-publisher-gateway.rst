@@ -180,8 +180,8 @@ Resource Operations
 
     # Update resource revisions with new bases - simplified tuple format
     updates = [
-        (1, [{"name": "ubuntu", "channel": "20.04"}]),
-        (2, [{"name": "ubuntu", "channel": "22.04"}])
+        (1, [{"name": "ubuntu", "channel": "20.04", "architectures": ["amd64"]}]),
+        (2, [{"name": "ubuntu", "channel": "22.04", "architectures": ["amd64"]}])
     ]
 
     result = gateway.update_resource_revisions(

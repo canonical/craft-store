@@ -157,18 +157,11 @@ def test_list_registered_names_success(
     publisher_gateway.list_registered_names()
 
 
-@pytest.mark.parametrize(
-    "response",
-    [
-        {},
-    ],
-)
 def test_list_registered_names_bad_response(
     mock_httpx_client: mock.Mock,
     publisher_gateway: publisher.PublisherGateway,
-    response: Any,
 ):
-    mock_httpx_client.get.return_value = httpx.Response(200, json=response)
+    mock_httpx_client.get.return_value = httpx.Response(200, json={})
 
     with pytest.raises(errors.InvalidResponseError):
         publisher_gateway.list_registered_names()
@@ -259,8 +252,10 @@ def test_unregister_name_bad_response(
 ):
     mock_httpx_client.delete.return_value = httpx.Response(200, json={})
 
-    with pytest.raises(errors.InvalidResponseError):
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
         publisher_gateway.unregister_name("my-name")
+
+    assert exc_info.value.details == "Missing JSON keys: {'package-id'}"
 
 
 @pytest.mark.parametrize(

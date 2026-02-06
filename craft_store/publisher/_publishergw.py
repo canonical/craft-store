@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Callable, Collection, Sequence
+from collections.abc import Collection, Sequence
 from json import JSONDecodeError
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any
@@ -736,20 +736,10 @@ class PublisherGateway:
             )
         )
 
-    def upload_file(
-        self,
-        filepath: Path,
-        monitor_callback: Callable | None = None,  # type: ignore[type-arg] # noqa: ARG002
-    ) -> str:
+    def upload_file(self, filepath: Path) -> str:
         """Upload filepath to storage.
 
-        The monitor_callback is a method receiving one argument of type
-        ``MultipartEncoder``, the total length of the upload can be accessed
-        from this encoder from the ``len`` attribute to setup a progress bar
-        instance.
-
         :param filepath: Path to the file to upload.
-        :param monitor_callback: A callback to monitor progress.
         :returns: The upload ID.
 
         API docs: https://api.charmhub.io/docs/default.html#upload
