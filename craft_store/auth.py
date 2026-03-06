@@ -209,7 +209,7 @@ class Auth:
             self.set_credentials(self.decode_credentials(environment_auth_value))
 
     def _fallback_to_file_keyring(self, application_name: str) -> None:
-        logger.warning("Falling back to file based storage")
+        logger.debug("Falling back to file based storage")
         keyring.set_keyring(FileKeyring(application_name))
         self._keyring = keyring.get_keyring()
 
