@@ -41,6 +41,7 @@ from craft_store.publisher import (
     PushRevisionResponse,
     RegisteredName,
     ReleaseResult,
+    ResourceType,
     Revision,
     UnauthenticatedMacaroonResponse,
     UpdatePackageMetadataResponse,
@@ -233,6 +234,18 @@ def test_get_package_metadata(
     assert actual == fake_registered_name_model
 
     mock_httpx_client.get.assert_called_once_with(url="/v1/charm/my-package")
+
+
+def test_get_package_metadata_bad_response(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
+        publisher_gateway.get_package_metadata("my-package")
+
+    assert exc_info.value.details == "Missing JSON keys: {'metadata'}"
 
 
 def test_unregister_name_success(
@@ -474,6 +487,17 @@ def test_create_tracks_success(
     assert publisher_gateway.create_tracks("my-name") == 0
 
 
+def test_create_tracks_bad_response(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
+        publisher_gateway.create_tracks("my-name")
+
+    assert exc_info.value.details == "Missing JSON keys: {'num-tracks-created'}"
+
+
 def test_get_macaroon_success_with_existing_macaroons(
     mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
 ):
@@ -515,6 +539,18 @@ def test_get_macaroon_success_with_bakery_macaroon(
     )
 
 
+def test_get_macaroon_bad_response(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.get.return_value = httpx.Response(200, json={})
+
+    with pytest.raises(errors.InvalidResponseError) as exc_info:
+        publisher_gateway.get_macaroon()
+
+    assert "macaroons" in exc_info.value.details
+    assert "macaroon" in exc_info.value.details
+
+
 def test_issue_macaroon_success(
     mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
 ):
@@ -530,9 +566,37 @@ def test_issue_macaroon_success(
     mock_httpx_client.post.assert_called_once_with(
         "/v1/tokens",
         json={
-            "permissions": {Permission.PACKAGE_MANAGE},
+            "permissions": ["package-manage"],
             "description": "Test client",
             "ttl": 3600,
+        },
+    )
+
+
+def test_issue_macaroon_with_packages(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"macaroon": "test-macaroon"}
+    )
+
+    result = publisher_gateway.issue_macaroon(
+        permissions=[Permission.PACKAGE_MANAGE],
+        description="Test client",
+        ttl=3600,
+        packages=[{"name": "my-charm", "type": "charm"}],
+        channels=["stable"],
+    )
+
+    assert isinstance(result, MacaroonResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/tokens",
+        json={
+            "permissions": ["package-manage"],
+            "description": "Test client",
+            "ttl": 3600,
+            "packages": [{"name": "my-charm", "type": "charm"}],
+            "channels": ["stable"],
         },
     )
 
@@ -687,6 +751,34 @@ def test_push_resource_success(
     mock_httpx_client.post.assert_called_once_with(
         "/v1/charm/my-package/resources/my-resource/revisions",
         json={"upload_id": "upload-123"},
+    )
+
+
+def test_push_resource_with_type_and_bases(
+    mock_httpx_client: mock.Mock, publisher_gateway: publisher.PublisherGateway
+):
+    mock_httpx_client.post.return_value = httpx.Response(
+        200, json={"status-url": "/status/456"}
+    )
+
+    result = publisher_gateway.push_resource(
+        "my-package",
+        "my-resource",
+        upload_id="upload-123",
+        resource_type=ResourceType.OCI_IMAGE,
+        bases=[{"name": "ubuntu", "channel": "22.04", "architectures": ["amd64"]}],
+    )
+
+    assert isinstance(result, PushResourceResponse)
+    mock_httpx_client.post.assert_called_once_with(
+        "/v1/charm/my-package/resources/my-resource/revisions",
+        json={
+            "upload_id": "upload-123",
+            "type": "oci-image",
+            "bases": [
+                {"name": "ubuntu", "channel": "22.04", "architectures": ["amd64"]}
+            ],
+        },
     )
 
 

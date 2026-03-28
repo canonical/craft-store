@@ -219,7 +219,8 @@ class PublisherGateway:
             url=f"/v1/{self._namespace}/{name}",
         )
         self._check_error(response)
-        return RegisteredName.unmarshal(response.json()["metadata"])
+        response_data = self._check_keys(response, expected_keys={"metadata"})
+        return RegisteredName.unmarshal(response_data["metadata"])
 
     def unregister_name(self, name: str) -> str:
         """Unregister a name with no published packages.
@@ -324,7 +325,8 @@ class PublisherGateway:
         )
         self._check_error(response)
 
-        return int(response.json()["num-tracks-created"])
+        response_data = self._check_keys(response, expected_keys={"num-tracks-created"})
+        return int(response_data["num-tracks-created"])
 
     def get_macaroon(self, include_inactive: bool = False) -> GetMacaroonResponse:
         """Get existing macaroons for authenticated account, or bakery v2 macaroon for unauthenticated.
@@ -341,7 +343,23 @@ class PublisherGateway:
         response = self._client.get("/v1/tokens", params=params)
         self._check_error(response)
 
-        response_data = response.json()
+        try:
+            response_data = response.json()
+        except JSONDecodeError as exc:
+            logger.debug(f"Server response: {response.text}")
+            raise errors.InvalidResponseError(response) from exc
+
+        if not isinstance(response_data, dict):
+            logger.debug(f"Server response: {response.text}")
+            raise errors.InvalidResponseError(response)
+
+        if "macaroons" not in response_data and "macaroon" not in response_data:
+            logger.debug(f"Server response: {response.text}")
+            raise errors.InvalidResponseError(
+                response,
+                details="Missing JSON keys: expected 'macaroons' or 'macaroon'",
+            )
+
         # Try to unmarshal as AuthenticatedMacaroonResponse first
         if "macaroons" in response_data:
             return AuthenticatedMacaroonResponse.unmarshal(response_data)
@@ -371,15 +389,15 @@ class PublisherGateway:
         API docs: https://api.charmhub.io/docs/default.html#issue_macaroon
         """
         request = MacaroonRequest(
-            permissions=set(permissions) if permissions is not None else None,
+            permissions=list(permissions) if permissions is not None else None,
             description=description,
             ttl=ttl,
-            packages=set(packages) if packages is not None else None,
-            channels=set(channels) if channels is not None else None,
+            packages=list(packages) if packages is not None else None,
+            channels=list(channels) if channels is not None else None,
         )
         response = self._client.post(
             "/v1/tokens",
-            json=request.model_dump(exclude_none=True),
+            json=request.model_dump(mode="json", exclude_none=True),
         )
         self._check_error(response)
         return MacaroonResponse.unmarshal(response.json())
@@ -500,7 +518,7 @@ class PublisherGateway:
         )
         response = self._client.post(
             f"/v1/{self._namespace}/{name}/resources/{resource_name}/revisions",
-            json=request.model_dump(exclude_none=True),
+            json=request.model_dump(mode="json", exclude_none=True),
         )
         self._check_error(response)
         response_data = self._check_keys(response, expected_keys={"status-url"})

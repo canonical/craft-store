@@ -128,17 +128,17 @@ class ReleaseRequest(TypedDict):
 class MacaroonRequest(BaseModel):
     """Request for issuing a macaroon."""
 
-    permissions: set[Permission] | None = Field(
-        default=None, description="Set of permissions to grant"
+    permissions: list[Permission] | None = Field(
+        default=None, description="List of permissions to grant"
     )
     description: str | None = Field(
         default=None, description="Description of the macaroon usage"
     )
     ttl: int | None = Field(default=None, description="Time to live in seconds", ge=10)
-    packages: set[PackageDict] | None = Field(
+    packages: list[PackageDict] | None = Field(
         default=None, description="Package restrictions"
     )
-    channels: set[str] | None = Field(default=None, description="Channel restrictions")
+    channels: list[str] | None = Field(default=None, description="Channel restrictions")
 
 
 class ExchangeDashboardMacaroonsRequest(BaseModel):
@@ -161,7 +161,10 @@ class OfflineExchangeMacaroonRequest(BaseModel):
 class RevokeMacaroonRequest(BaseModel):
     """Request for revoking a macaroon."""
 
-    session_id: str = Field(description="Session ID of the macaroon to revoke")
+    session_id: str = Field(
+        serialization_alias="session-id",
+        description="Session ID of the macaroon to revoke",
+    )
 
 
 class PackageLinks(BaseModel):
