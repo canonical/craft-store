@@ -121,7 +121,7 @@ dev-dependencies = [
 
 [build-system]
 requires = [
-    "setuptools==80.10.2",
+    "setuptools==82.0.1",
     "setuptools_scm[toml]>=7.1"
 ]
 build-backend = "setuptools.build_meta"
