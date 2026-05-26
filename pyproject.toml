@@ -42,7 +42,7 @@ lint = [
     "yamllint~=1.35"
 ]
 types = [
-    "mypy[reports]~=1.13",
+    "mypy[reports]~=2.1",
     "types-PyYAML",
     "types-Pygments",
     "types-colorama",
