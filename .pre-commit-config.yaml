@@ -14,9 +14,9 @@ repos:
       - id: mixed-line-ending
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # renovate: datasource=pypi;depName=ruff
-    rev: "v0.14.2"
+    rev: "v0.15.14"
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
       # Run the formatter
       - id: ruff-format

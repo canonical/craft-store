@@ -22,6 +22,7 @@ from collections.abc import Generator
 from typing import Literal
 
 import httpx
+from pymacaroons import Macaroon  # type: ignore[import-untyped]
 
 from craft_store import auth, creds, errors
 
@@ -91,3 +92,56 @@ class DeveloperTokenAuth(_TokenAuth):
         return creds.DeveloperToken.model_validate_json(
             self._auth.get_credentials()
         ).macaroon
+
+
+class UbuntuOneAuth(httpx.Auth):
+    """Ubuntu One macaroon auth class for httpx store clients."""
+
+    def __init__(
+        self,
+        *,
+        auth: auth.Auth,
+        api_base_url: str,
+        client_description: str = "craft-store",
+    ) -> None:
+        self._auth = auth
+        self._api_base_url = api_base_url
+        self._client_description = client_description
+        self._token: str | None = None
+
+    def auth_flow(
+        self,
+        request: httpx.Request,
+    ) -> Generator[httpx.Request, httpx.Response, None]:
+        if self._token is None:
+            logger.debug("Getting Ubuntu One macaroon from keyring")
+            self._token = self.get_token_from_keyring()
+
+        request.headers["Authorization"] = self._format_auth_header()
+        yield request
+
+    def _format_auth_header(self) -> str:
+        if self._token is None:
+            raise errors.AuthTokenUnavailableError(message="Token is not available")
+        return f"macaroon {self._token}"
+
+    def get_token_from_keyring(self) -> str:
+        """Exchange Ubuntu One macaroons stored in the credentials storage."""
+        logger.debug("Getting Ubuntu One macaroons from credential storage")
+        macaroons = creds.unmarshal_u1_credentials(self._auth.get_credentials())
+        root_macaroon = Macaroon.deserialize(macaroons.root)
+        discharge_macaroon = Macaroon.deserialize(macaroons.discharge)
+        bound_discharge = root_macaroon.prepare_for_request(
+            discharge_macaroon
+        ).serialize()
+        response = httpx.post(
+            f"{self._api_base_url}/v1/tokens/usso/exchange",
+            headers={
+                "Authorization": (
+                    f"Macaroon root={macaroons.root}, discharge={bound_discharge}"
+                )
+            },
+            json={"client-description": self._client_description},
+        )
+        response.raise_for_status()
+        return str(response.json()["macaroon"])
