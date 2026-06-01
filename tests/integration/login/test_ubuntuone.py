@@ -23,6 +23,10 @@ import pytest
 from craft_store import auth, creds, publisher
 from craft_store.login.ubuntuone import UbuntuOneLogin
 
+from tests.integration.conftest import needs_charmhub_credentials
+
+pytestmark = needs_charmhub_credentials()
+
 
 @pytest.fixture
 def charmhub_login_url():
@@ -117,25 +121,19 @@ def test_ubuntu_one_login_discharge_with_existing_auth(
 
 @pytest.mark.slow
 def test_ubuntu_one_login_respects_environment_variables():
-    """Test that UbuntuOneLogin respects environment variable overrides."""
+    """Test that UbuntuOneLogin respects login URL environment variable overrides."""
     custom_login_url = "https://custom-login.example.com"
-    custom_api_url = "https://api.custom.charmhub.io"
+    api_base_url = "https://api.example.test"
 
-    # Set environment variables
     os.environ["CRAFT_LOGIN_URL"] = custom_login_url
-    os.environ["CRAFT_STORE_CHARMHUB"] = custom_api_url
 
     try:
-        # Create login client without explicit URLs
-        login_client = UbuntuOneLogin()
+        login_client = UbuntuOneLogin(api_base_url)
 
-        # Verify the custom URLs are used
         assert login_client._login_url == custom_login_url
-        assert login_client._api_base_url == custom_api_url
+        assert login_client._api_base_url == api_base_url
     finally:
-        # Clean up environment variables
         os.environ.pop("CRAFT_LOGIN_URL", None)
-        os.environ.pop("CRAFT_STORE_CHARMHUB", None)
 
 
 @pytest.mark.slow

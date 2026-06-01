@@ -1,4 +1,4 @@
-# Copyright 2025 Canonical Ltd.
+# Copyright 2026 Canonical Ltd.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -38,14 +38,14 @@ class UbuntuOneLogin:
 
     .. code-block:: python
 
-        login = UbuntuOneLogin()
+        login = UbuntuOneLogin("https://api.charmhub.io")
         macaroon = login.login_with(
             email="user@example.com",
             password="password123",
             permissions=["package-view"],
         )
 
-    :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+    :param api_base_url: The base URL for the store API (e.g., https://api.charmhub.io).
     :param login_url: The base URL for Ubuntu One login. Defaults to ``https://login.ubuntu.com``.
     """
 
