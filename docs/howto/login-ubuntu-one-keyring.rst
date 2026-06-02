@@ -21,20 +21,21 @@ Create an instance of ``UbuntuOneLogin``, providing the API base URL for Charmhu
 
 .. code-block:: python
 
-   from craft_store.login.ubuntuone import UbuntuOneLogin
+   from craft_store.login import UbuntuOneLogin
 
    login_client = UbuntuOneLogin("https://api.charmhub.io")
 
 Authenticate and save credentials
 ---------------------------------
 
-Use the ``login_with`` method to authenticate. This method requests a macaroon from Charmhub, discharges it using your Ubuntu One credentials, and saves the resulting store token in your system keyring.
+Use the ``login_with`` method to authenticate. This method requests a macaroon from Charmhub, discharges it using your Ubuntu One credentials, and saves the resulting root/discharge macaroon pair in your system keyring.
 
 .. code-block:: python
 
    login_client.login_with(
        email="<email>",
        password="<password>",
+       api_base_url="https://api.charmhub.io",
        otp="<otp>",  # Optional: required if two-factor authentication is enabled
        permissions=["account-view-packages", "account-register-package"]
    )
@@ -44,14 +45,14 @@ Replace ``<email>``, ``<password>``, and ``<otp>`` with your actual credentials.
 Retrieve credentials from the keyring
 -------------------------------------
 
-To use the saved credentials later, initialize an ``Auth`` object. Use the application name ``craft-store-ubuntu-one-store-token`` and the host ``api.charmhub.io``.
+To use the saved credentials later, initialize an ``Auth`` object. Use the application name ``craft-store-ubuntu-one`` and the host ``api.charmhub.io``.
 
 .. code-block:: python
 
-   from craft_store import Auth
+   from craft_store import Auth, UbuntuOneAuth, publisher
 
    auth = Auth(
-       application_name="craft-store-ubuntu-one-store-token",
+       application_name="craft-store-ubuntu-one",
        host="api.charmhub.io"
    )
 
@@ -64,13 +65,13 @@ Pass the ``Auth`` object to a store gateway to perform authenticated actions.
 
 .. code-block:: python
 
-   from craft_store import publisher, DeveloperTokenAuth
+   from craft_store import UbuntuOneAuth, publisher
 
    gateway = publisher.PublisherGateway(
        base_url="https://api.charmhub.io",
        namespace="charm",
        auth=auth,
-       httpx_auth=DeveloperTokenAuth(auth=auth, auth_type="macaroon"),
+       httpx_auth=UbuntuOneAuth(auth=auth, api_base_url="https://api.charmhub.io"),
    )
 
    # List your registered charms

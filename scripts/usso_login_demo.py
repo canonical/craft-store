@@ -48,9 +48,10 @@ def main() -> None:
     )
 
     user_info = gateway.whoami()
-    print(
-        f"Logged in as: {user_info.get('account', {}).get('display-name')} ({user_info.get('account', {}).get('email')})"
-    )
+    account = user_info.get("account", {}) or {}
+    display_name = account.get("display-name")
+    email_addr = account.get("email")
+    print(f"Logged in as: {display_name} ({email_addr})")
 
     for charm in gateway.list_registered_names(include_collaborations=True):
         print(f"{charm.name} [{charm.status}]")

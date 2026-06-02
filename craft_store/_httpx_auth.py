@@ -123,7 +123,7 @@ class UbuntuOneAuth(httpx.Auth):
     def _format_auth_header(self) -> str:
         if self._token is None:
             raise errors.AuthTokenUnavailableError(message="Token is not available")
-        return f"macaroon {self._token}"
+        return f"Macaroon {self._token}"
 
     def get_token_from_keyring(self) -> str:
         """Exchange Ubuntu One macaroons stored in the credentials storage."""
@@ -142,6 +142,7 @@ class UbuntuOneAuth(httpx.Auth):
                 )
             },
             json={"client-description": self._client_description},
+            timeout=60.0,
         )
         response.raise_for_status()
         return str(response.json()["macaroon"])

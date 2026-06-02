@@ -37,10 +37,10 @@ class UbuntuOneLogin:
 
     .. code-block:: python
 
-        login = UbuntuOneLogin("https://api.charmhub.io")
-        root, discharged = login.login_with(
+        root, discharged = UbuntuOneLogin.login_with(
             email="user@example.com",
             password="password123",
+            api_base_url="https://api.charmhub.io",
             permissions=["package-view"],
         )
 

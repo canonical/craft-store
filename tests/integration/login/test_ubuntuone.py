@@ -21,7 +21,7 @@ import os
 from urllib.parse import urlparse
 
 import pytest
-from craft_store import UbuntuOneAuth, auth, creds, publisher
+from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, creds, publisher
 from craft_store.login import UbuntuOneLogin
 
 
@@ -46,13 +46,12 @@ def test_ubuntu_one_login_with_publisher_gateway(
     charmhub_login_url,
     charmhub_base_url,
 ):
-    """Test that UbuntuOneLogin can login and PublisherGateway authenticates.
+    """Test that UbuntuOneLogin can request an unsigned macaroon and a PublisherGateway can be constructed.
 
     This test demonstrates:
     1. Creating a UbuntuOneLogin client
-    2. Requesting a macaroon from Charmhub (creating new credentials)
-    3. Storing the macaroon in the Auth keyring
-    4. Creating a PublisherGateway that uses the macaroon for authentication
+    2. Requesting an unsigned macaroon from Charmhub (no Ubuntu One credentials)
+    3. Constructing a PublisherGateway instance
 
     This test requires internet access to reach the real Charmhub API.
     """
@@ -73,22 +72,17 @@ def test_ubuntu_one_login_with_publisher_gateway(
     assert macaroon is not None
     assert macaroon.serialize() is not None
 
-    # Step 3: Create an Auth object and store the macaroon
+    # Step 3: Create an Auth object (not used for requests in this test)
     test_auth = auth.Auth(
         application_name="ubuntu-one-login-test",
-        host=charmhub_base_url,
+        host=urlparse(charmhub_base_url).netloc,
     )
-
-    # Create a developer token from the macaroon
-    developer_token = creds.DeveloperToken(macaroon=macaroon.serialize())
-    credentials_json = json.dumps(developer_token.marshal())
-    test_auth.set_credentials(credentials_json, force=True)
-
     # Step 4: Create a PublisherGateway with the authenticated Auth
     gateway = publisher.PublisherGateway(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=test_auth,
+        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
     )
 
     # Step 5: Verify the gateway can authenticate
