@@ -90,7 +90,6 @@ def test_methods(session_mock, method):
             "https://foo.bar",
             headers={"User-Agent": "Secret Agent"},
             params=None,
-            timeout=60.0,
         )
     ]
 
@@ -162,7 +161,6 @@ def test_request(caplog, session_mock, scenario):
             "https://foo.bar",
             headers=scenario["expected_headers"],
             params=scenario["expected_params"],
-            timeout=60.0,
         )
     ]
     assert [
