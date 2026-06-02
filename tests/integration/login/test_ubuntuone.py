@@ -23,8 +23,6 @@ import pytest
 from craft_store import auth, creds, publisher
 from craft_store.login import UbuntuOneLogin
 
-from tests.integration.conftest import needs_charmhub_credentials
-
 
 @pytest.fixture
 def charmhub_login_url():
@@ -42,7 +40,6 @@ def staging_sso_credentials():
     return email, password
 
 
-@needs_charmhub_credentials()
 @pytest.mark.slow
 def test_ubuntu_one_login_with_publisher_gateway(
     charmhub_login_url,
@@ -104,7 +101,6 @@ def test_ubuntu_one_login_with_publisher_gateway(
     test_auth.del_credentials()
 
 
-@needs_charmhub_credentials()
 @pytest.mark.slow
 def test_ubuntu_one_login_discharge_with_existing_auth(
     charmhub_login_url,
@@ -148,7 +144,6 @@ def test_ubuntu_one_login_respects_environment_variables():
         os.environ.pop("CRAFT_LOGIN_URL", None)
 
 
-@needs_charmhub_credentials()
 @pytest.mark.slow
 def test_ubuntu_one_login_with_charmhub_whoami(
     charmhub_login_url,
@@ -199,7 +194,6 @@ def test_ubuntu_one_login_with_charmhub_whoami(
     test_auth.del_credentials()
 
 
-@needs_charmhub_credentials()
 @pytest.mark.slow
 def test_ubuntu_one_login_with_convenience_method(
     charmhub_login_url,
