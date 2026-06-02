@@ -55,7 +55,7 @@ class UbuntuOneLogin:
 
     def __init__(
         self,
-        api_base_url: str,
+        api_base_url: str | None = None,
         *,
         login_url: str | None = None,
         application_name: str = "craft-store-ubuntu-one",
@@ -69,7 +69,13 @@ class UbuntuOneLogin:
                 "CRAFT_LOGIN_URL", "https://login.ubuntu.com"
             )
 
-        self._api_base_url = api_base_url
+        if api_base_url:
+            self._api_base_url = api_base_url
+        else:
+            self._api_base_url = os.environ.get(
+                "CRAFT_STORE_CHARMHUB", "https://api.charmhub.io"
+            )
+
         self._application_name = application_name
         self._store_auth = store_auth or auth.Auth(
             application_name=application_name,
