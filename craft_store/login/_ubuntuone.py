@@ -17,7 +17,7 @@
 import logging
 import os
 from collections.abc import Collection
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import httpx
 import pymacaroons  # type: ignore[import-untyped]
@@ -250,12 +250,7 @@ class UbuntuOneLogin:
             discharge_request["otp"] = otp
 
         # Use the configured login URL as the base for the discharge request
-        discharge_url = self._login_url
-
-        # Add the discharge endpoint path
-        if not discharge_url.endswith("/"):
-            discharge_url += "/"
-        discharge_url += "api/v2/tokens/discharge"
+        discharge_url = urljoin(self._login_url, "api/v2/tokens/discharge")
 
         # Discharge at the login location
         discharge_response = httpx.post(
