@@ -215,8 +215,14 @@ class UbuntuOneLogin:
             timeout=60.0,
         )
         macaroon_response.raise_for_status()
-        macaroon_token = DeveloperToken.unmarshal(macaroon_response.json())
-        return pymacaroons.Macaroon.deserialize(macaroon_token.macaroon)
+        try:
+            macaroon = str(macaroon_response.json()["macaroon"])
+        except (TypeError, KeyError) as exc:
+            raise errors.InvalidResponseError(
+                macaroon_response,
+                details="Missing 'macaroon' in /v1/tokens/usso response",
+            ) from exc
+        return pymacaroons.Macaroon.deserialize(macaroon)
 
     def _get_login_caveat(
         self, caveats: list[pymacaroons.Caveat]
