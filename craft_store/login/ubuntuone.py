@@ -235,23 +235,15 @@ class UbuntuOneLogin:
         if otp:
             discharge_request["otp"] = otp
 
-        # Use the caveat's location to determine where to discharge
-        caveat_location = login_caveat.location or ""
-
-        # Build the discharge URL from the caveat location
-        if caveat_location.startswith("http"):
-            # Full URL already provided
-            discharge_url = caveat_location
-        else:
-            # Just a domain, add protocol
-            discharge_url = f"https://{caveat_location}"
+        # Use the configured login URL as the base for the discharge request
+        discharge_url = self._login_url
 
         # Add the discharge endpoint path
         if not discharge_url.endswith("/"):
             discharge_url += "/"
         discharge_url += "api/v2/tokens/discharge"
 
-        # Discharge at the caveat location
+        # Discharge at the login location
         discharge_response = httpx.post(
             discharge_url,
             json=discharge_request,
