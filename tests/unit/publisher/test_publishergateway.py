@@ -461,3 +461,24 @@ def test_create_tracks_success(
     )
 
     assert publisher_gateway.create_tracks("my-name") == 0
+
+
+def test_whoami_success(
+    mock_httpx_client: mock.Mock,
+    publisher_gateway: publisher.PublisherGateway,
+):
+    whoami_data = {
+        "account": {
+            "display-name": "User Name",
+            "email": "user@example.com",
+            "id": "user-id",
+            "username": "user",
+        },
+        "permissions": ["package-view"],
+    }
+    mock_httpx_client.get.return_value = httpx.Response(200, json=whoami_data)
+
+    actual = publisher_gateway.whoami()
+
+    assert actual == whoami_data
+    mock_httpx_client.get.assert_called_once_with("/v1/tokens/whoami")
