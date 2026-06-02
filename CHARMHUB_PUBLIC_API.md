@@ -14,6 +14,7 @@ import json
 root, discharged = login.UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
+    api_base_url="https://api.charmhub.io",
     permissions=["package-view"],
 )
 
@@ -42,15 +43,15 @@ gateway = publisher.PublisherGateway(
 
 ## Public Methods
 
-### `login_with(email, password, *, api_base_url=None, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None, otp=None, permissions=None, channels=None, packages=None, ttl=None)`
+### `login_with(email, password, *, api_base_url, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None, otp=None, permissions=None, channels=None, packages=None, ttl=None)`
 
 **The primary method for authentication.** Logs in with Ubuntu One credentials and returns a pair of macaroons ready for use. This is a **classmethod**.
 
 **Parameters:**
 - `email` (str): Ubuntu One email address
 - `password` (str): Ubuntu One password
-- `api_base_url` (str, optional): Store API URL. Defaults to environment variable or `https://api.charmhub.io`.
-- `login_url` (str, optional): Login server URL. Defaults to environment variable or `https://login.ubuntu.com`.
+- `api_base_url` (str): Store API URL (e.g., `https://api.charmhub.io`). **Required**.
+- `login_url` (str, optional): Login server URL. Defaults to `https://login.ubuntu.com`.
 - `application_name` (str, optional): App name for keyring storage.
 - `store_auth` (auth.Auth, optional): Existing Auth instance.
 - `otp` (str, optional): One-time password for two-factor authentication
@@ -75,6 +76,7 @@ from craft_store.login import UbuntuOneLogin
 root, discharged = UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
+    api_base_url="https://api.charmhub.io",
     otp="123456",  # optional
     permissions=["package-view"],
     channels=["stable"],
@@ -89,7 +91,7 @@ root, discharged = UbuntuOneLogin.login_with(
 
 **Example:**
 ```python
-login_client = UbuntuOneLogin()
+login_client = UbuntuOneLogin(api_base_url="https://api.charmhub.io")
 unsigned = login_client._get_macaroon(
     permissions=["package-manage"],
     channels=["edge"],
@@ -105,7 +107,7 @@ unsigned = login_client._get_macaroon(
 
 **Example:**
 ```python
-login_client = UbuntuOneLogin()
+login_client = UbuntuOneLogin(api_base_url="https://api.charmhub.io")
 unsigned = login_client._get_macaroon(permissions=["package-view"])
 discharged = login_client._discharge_macaroon(
     unsigned,
@@ -117,18 +119,13 @@ discharged = login_client._discharge_macaroon(
 ## Constructor Parameters
 
 ```python
-UbuntuOneLogin(api_base_url=None, *, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None)
+UbuntuOneLogin(api_base_url, *, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None)
 ```
 
-- `api_base_url` (str, optional): Store API URL (Charmhub, Snapcraft, etc.)
-- `login_url` (str, optional): Ubuntu One login server URL
+- `api_base_url` (str): Store API URL (Charmhub, Snapcraft, etc.). **Required**.
+- `login_url` (str, optional): Ubuntu One login server URL. Defaults to `https://login.ubuntu.com`.
 - `application_name` (str, optional): The name of the application using this client.
 - `store_auth` (auth.Auth, optional): An optional Auth instance to use.
-
-## Environment Variables
-
-- `CRAFT_LOGIN_URL`: Override Ubuntu One login server URL
-- `CRAFT_STORE_CHARMHUB`: Use Charmhub API instead of default
 
 ## Complete Integration Example
 
@@ -140,6 +137,7 @@ import json
 root, discharged = login.UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
+    api_base_url="https://api.charmhub.io",
     permissions=["package-view"],
 )
 
@@ -187,6 +185,7 @@ try:
     root, discharged = UbuntuOneLogin.login_with(
         email="user@example.com",
         password="password123",
+        api_base_url="https://api.charmhub.io",
     )
 except UbuntuOneOtpRequiredError:
     print("2FA required")
@@ -198,8 +197,8 @@ except httpx.HTTPStatusError as e:
 
 ## Supported Stores
 
-- **Charmhub**: `https://api.charmhub.io` (default)
-- **Snapcraft**: `https://api.snapcraft.io` (via `CRAFT_STORE_SNAPCRAFT`)
+- **Charmhub**: `https://api.charmhub.io`
+- **Snapcraft**: `https://api.snapcraft.io`
 
 ## Testing
 

@@ -47,35 +47,22 @@ class UbuntuOneLogin:
 
     :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
     :param login_url: The base URL for Ubuntu One login. Defaults to
-        ``https://login.ubuntu.com`` (or the value of the ``CRAFT_LOGIN_URL``
-        environment variable).
+        ``https://login.ubuntu.com``.
     :param application_name: The name of the application using this client.
     :param store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
     """
 
     def __init__(
         self,
-        api_base_url: str | None = None,
+        api_base_url: str,
         *,
         login_url: str | None = None,
         application_name: str = "craft-store-ubuntu-one",
         store_auth: auth.Auth | None = None,
     ) -> None:
         """Create a login client."""
-        if login_url:
-            self._login_url = login_url
-        else:
-            self._login_url = os.environ.get(
-                "CRAFT_LOGIN_URL", "https://login.ubuntu.com"
-            )
-
-        if api_base_url:
-            self._api_base_url = api_base_url
-        else:
-            self._api_base_url = os.environ.get(
-                "CRAFT_STORE_CHARMHUB", "https://api.charmhub.io"
-            )
-
+        self._login_url = login_url or "https://login.ubuntu.com"
+        self._api_base_url = api_base_url
         self._application_name = application_name
         self._store_auth = store_auth or auth.Auth(
             application_name=application_name,
@@ -90,7 +77,7 @@ class UbuntuOneLogin:
         email: str,
         password: str,
         *,
-        api_base_url: str | None = None,
+        api_base_url: str,
         login_url: str | None = None,
         application_name: str = "craft-store-ubuntu-one",
         store_auth: auth.Auth | None = None,
@@ -109,10 +96,7 @@ class UbuntuOneLogin:
             email: Ubuntu One email address.
             password: Ubuntu One password.
             api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
-                Defaults to the value of the ``CRAFT_STORE_CHARMHUB`` environment
-                variable or ``https://api.charmhub.io``.
-            login_url: The base URL for Ubuntu One login. Defaults to the value of
-                the ``CRAFT_LOGIN_URL`` environment variable or
+            login_url: The base URL for Ubuntu One login. Defaults to
                 ``https://login.ubuntu.com``.
             application_name: The name of the application using this client.
             store_auth: An optional :class:`craft_store.auth.Auth` instance to use.

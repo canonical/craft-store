@@ -129,23 +129,6 @@ def test_ubuntu_one_login_discharge_with_existing_auth(
 
 
 @pytest.mark.slow
-def test_ubuntu_one_login_respects_environment_variables():
-    """Test that UbuntuOneLogin respects login URL environment variable overrides."""
-    custom_login_url = "https://custom-login.example.com"
-    api_base_url = "https://api.example.test"
-
-    os.environ["CRAFT_LOGIN_URL"] = custom_login_url
-
-    try:
-        login_client = UbuntuOneLogin(api_base_url)
-
-        assert login_client._login_url == custom_login_url
-        assert login_client._api_base_url == api_base_url
-    finally:
-        os.environ.pop("CRAFT_LOGIN_URL", None)
-
-
-@pytest.mark.slow
 def test_ubuntu_one_login_with_charmhub_whoami(
     charmhub_login_url,
     charmhub_base_url,
