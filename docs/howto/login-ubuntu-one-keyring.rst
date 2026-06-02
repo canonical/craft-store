@@ -3,7 +3,9 @@
 Log in to Charmhub with Ubuntu One
 ==================================
 
-This guide shows you how to log in to Charmhub using your Ubuntu One credentials and how to save those credentials securely in your system keyring. This allows you to retrieve them in future sessions without re-entering your password.
+This guide shows you how to log in to Charmhub using your Ubuntu One credentials and
+how to save those credentials securely in your system keyring. This allows you to
+retrieve them in future sessions without re-entering your password.
 
 Prerequisites
 -------------
@@ -28,7 +30,9 @@ Create an instance of ``UbuntuOneLogin``, providing the API base URL for Charmhu
 Authenticate and save credentials
 ---------------------------------
 
-Use the ``login_with`` method to authenticate. This method requests a macaroon from Charmhub, discharges it using your Ubuntu One credentials, and saves the resulting root/discharge macaroon pair in your system keyring.
+Use the ``login_with`` method to authenticate. This method requests a macaroon from
+Charmhub, discharges it using your Ubuntu One credentials, and saves the resulting
+root/discharge macaroon pair in your system keyring.
 
 .. code-block:: python
 
@@ -45,7 +49,8 @@ Replace ``<email>``, ``<password>``, and ``<otp>`` with your actual credentials.
 Retrieve credentials from the keyring
 -------------------------------------
 
-To use the saved credentials later, initialize an ``Auth`` object. Use the application name ``craft-store-ubuntu-one`` and the host ``api.charmhub.io``.
+To use the saved credentials later, initialize an ``Auth`` object. Use the
+application name ``craft-store-ubuntu-one`` and the host ``api.charmhub.io``.
 
 .. code-block:: python
 
@@ -56,7 +61,8 @@ To use the saved credentials later, initialize an ``Auth`` object. Use the appli
        host="api.charmhub.io"
    )
 
-The ``Auth`` object automatically looks for credentials in your system keyring that match the provided application name and host.
+The ``Auth`` object automatically looks for credentials in your system keyring that
+match the provided application name and host.
 
 Use the credentials with a store client
 ---------------------------------------
@@ -81,7 +87,8 @@ Pass the ``Auth`` object to a store gateway to perform authenticated actions.
 Verify your login
 -----------------
 
-You can use the ``whoami()`` method to verify that you're logged in and to retrieve information about your account.
+You can use the ``whoami()`` method to verify that you're logged in and to retrieve
+information about your account.
 
 .. code-block:: python
 
@@ -107,7 +114,9 @@ The ``login_with`` method can raise specific errors if the authentication fails.
 Handle missing credentials
 --------------------------
 
-If you try to retrieve credentials that aren't in the keyring, ``Auth`` raises a ``CredentialsUnavailable`` error. You should catch this error to prompt the user to log in.
+If you try to retrieve credentials that aren't in the keyring, ``Auth`` raises a
+``CredentialsUnavailable`` error. You should catch this error to prompt the user to
+log in.
 
 .. code-block:: python
 
