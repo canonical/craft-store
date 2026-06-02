@@ -16,7 +16,7 @@
 
 import pytest
 import pytest_httpx
-from craft_store import Auth, errors
+from craft_store import errors
 from craft_store.login import UbuntuOneLogin
 from pymacaroons import Macaroon
 

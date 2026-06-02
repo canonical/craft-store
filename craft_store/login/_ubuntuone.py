@@ -15,7 +15,6 @@
 """Ubuntu One Login Client."""
 
 import logging
-import os
 from collections.abc import Collection
 from urllib.parse import urljoin, urlparse
 

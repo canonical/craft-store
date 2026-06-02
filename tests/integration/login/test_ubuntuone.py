@@ -21,7 +21,7 @@ import os
 from urllib.parse import urlparse
 
 import pytest
-from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, creds, publisher
+from craft_store import UbuntuOneAuth, auth, creds, publisher
 from craft_store.login import UbuntuOneLogin
 
 
