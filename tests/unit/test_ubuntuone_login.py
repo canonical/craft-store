@@ -55,16 +55,13 @@ def test_login_with_raises_when_otp_missing(
         },
     )
 
-    login = UbuntuOneLogin(
-        "https://api.example.test",
-        login_url="https://login.ubuntu.com",
-        store_auth=mock_auth,
-    )
-
     with pytest.raises(errors.UbuntuOneOtpRequiredError, match="account requires"):
-        login.login_with(
+        UbuntuOneLogin.login_with(
             email="user@example.com",
             password="correct-password",  # noqa: S106
+            api_base_url="https://api.example.test",
+            login_url="https://login.ubuntu.com",
+            store_auth=mock_auth,
             permissions=["account-view-packages"],
         )
 
@@ -91,16 +88,13 @@ def test_login_with_raises_on_bad_credentials(
         },
     )
 
-    login = UbuntuOneLogin(
-        "https://api.example.test",
-        login_url="https://login.ubuntu.com",
-        store_auth=mock_auth,
-    )
-
     with pytest.raises(errors.UbuntuOneCredentialsError, match="password and OTP"):
-        login.login_with(
+        UbuntuOneLogin.login_with(
             email="user@example.com",
             password="wrong-password",  # noqa: S106
+            api_base_url="https://api.example.test",
+            login_url="https://login.ubuntu.com",
+            store_auth=mock_auth,
             otp=otp,
             permissions=["account-view-packages"],
         )
@@ -135,15 +129,12 @@ def test_login_with_saves_credentials(
     token_auth = mocker.Mock(spec=Auth)
     mocker.patch("craft_store.login._ubuntuone.auth.Auth", return_value=token_auth)
 
-    login = UbuntuOneLogin(
-        "https://api.example.test",
-        login_url="https://login.ubuntu.com",
-        store_auth=mock_auth,
-    )
-
-    login.login_with(
+    UbuntuOneLogin.login_with(
         email="user@example.com",
         password="correct-password",  # noqa: S106
+        api_base_url="https://api.example.test",
+        login_url="https://login.ubuntu.com",
+        store_auth=mock_auth,
         otp="123456",
         permissions=["account-view-packages"],
     )

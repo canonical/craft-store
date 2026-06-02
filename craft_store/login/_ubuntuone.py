@@ -84,11 +84,16 @@ class UbuntuOneLogin:
             file_fallback=True,
         )
 
+    @classmethod
     def login_with(
-        self,
+        cls,
         email: str,
         password: str,
         *,
+        api_base_url: str | None = None,
+        login_url: str | None = None,
+        application_name: str = "craft-store-ubuntu-one",
+        store_auth: auth.Auth | None = None,
         otp: str | None = None,
         permissions: Collection[str] | None = None,
         channels: Collection[str] | None = None,
@@ -103,6 +108,14 @@ class UbuntuOneLogin:
         Args:
             email: Ubuntu One email address.
             password: Ubuntu One password.
+            api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+                Defaults to the value of the ``CRAFT_STORE_CHARMHUB`` environment
+                variable or ``https://api.charmhub.io``.
+            login_url: The base URL for Ubuntu One login. Defaults to the value of
+                the ``CRAFT_LOGIN_URL`` environment variable or
+                ``https://login.ubuntu.com``.
+            application_name: The name of the application using this client.
+            store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
             otp: Optional one-time password for two-factor authentication.
             permissions: List of permission strings to request (e.g., ``["package-view"]``).
                 If not provided, defaults to ``["account-view-packages"]``.
@@ -125,6 +138,34 @@ class UbuntuOneLogin:
                 are invalid.
 
         """
+        instance = cls(
+            api_base_url=api_base_url,
+            login_url=login_url,
+            application_name=application_name,
+            store_auth=store_auth,
+        )
+        return instance._login(
+            email=email,
+            password=password,
+            otp=otp,
+            permissions=permissions,
+            channels=channels,
+            packages=packages,
+            ttl=ttl,
+        )
+
+    def _login(
+        self,
+        email: str,
+        password: str,
+        *,
+        otp: str | None = None,
+        permissions: Collection[str] | None = None,
+        channels: Collection[str] | None = None,
+        packages: Collection[str] | None = None,
+        ttl: int | None = None,
+    ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
+        """Login with Ubuntu One credentials and return root and discharged macaroons."""
         if permissions is None:
             permissions = ["account-view-packages"]
 
