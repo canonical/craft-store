@@ -18,6 +18,7 @@
 
 import json
 import os
+from urllib.parse import urlparse
 
 import pytest
 from craft_store import DeveloperTokenAuth, auth, creds, publisher
@@ -208,35 +209,41 @@ def test_ubuntu_one_login_with_convenience_method(
     email, password = staging_sso_credentials
 
     # Perform a real login
+    test_app_name = "ubuntu-one-login-convenience-test"
+    # We need to use the netloc as the host for Auth, consistent with how
+    # UbuntuOneLogin does it.
+    host = urlparse(charmhub_base_url).netloc
+
     root, discharged = UbuntuOneLogin.login_with(
         email,
         password,
         login_url=charmhub_login_url,
         api_base_url=charmhub_base_url,
+        application_name=test_app_name,
     )
     assert root is not None
     assert discharged is not None
 
     # Use with PublisherGateway
-    test_auth = auth.Auth(
-        application_name="ubuntu-one-login-convenience-test",
-        host=charmhub_base_url,
+    # login_with already saved the store token in the keyring under f"{app_name}-store-token"
+    store_token_auth = auth.Auth(
+        application_name=f"{test_app_name}-store-token",
+        host=host,
     )
-    root_serial = root.serialize()
-    discharge_serial = root.prepare_for_request(discharged).serialize()
-    # The macaroon string should not include the "Macaroon " prefix
-    # as DeveloperTokenAuth will add it.
-    store_token = f"root={root_serial}, discharge={discharge_serial}"
-    developer_token = creds.DeveloperToken(macaroon=store_token)
-    test_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
 
     gateway = publisher.PublisherGateway(
         base_url=charmhub_base_url,
         namespace="charm",
-        auth=test_auth,
-        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
+        auth=store_token_auth,
+        httpx_auth=DeveloperTokenAuth(auth=store_token_auth, auth_type="macaroon"),
     )
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email
 
-    test_auth.del_credentials()
+    # Clean up both keyring entries
+    store_token_auth.del_credentials()
+    u1_auth = auth.Auth(
+        application_name=test_app_name,
+        host=host,
+    )
+    u1_auth.del_credentials()
