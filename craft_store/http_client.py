@@ -153,7 +153,7 @@ class HTTPClient:
         )
         try:
             response = self._session.request(
-                method, url, headers=headers, params=params, **kwargs
+                method, url, headers=headers, params=params, timeout=60.0, **kwargs
             )
         except (
             requests.exceptions.ConnectionError,
