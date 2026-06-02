@@ -22,7 +22,6 @@ import httpx
 import pymacaroons  # type: ignore[import-untyped]
 
 from craft_store import auth, creds, errors
-from craft_store.creds import DeveloperToken
 
 logger = logging.getLogger(__name__)
 
