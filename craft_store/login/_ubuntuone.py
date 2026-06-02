@@ -92,35 +92,33 @@ class UbuntuOneLogin:
         This is the primary method for authentication. It requests a macaroon from the
         store API and discharges it using your Ubuntu One credentials.
 
-        Args:
-            email: Ubuntu One email address.
-            password: Ubuntu One password.
-            api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
-            login_url: The base URL for Ubuntu One login. Defaults to
-                ``https://login.ubuntu.com``.
-            application_name: The name of the application using this client.
-            store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
-            otp: Optional one-time password for two-factor authentication.
-            permissions: List of permission strings to request (e.g., ``["package-view"]``).
-                If not provided, defaults to ``["account-view-packages"]``.
-                See store API documentation for valid permission values.
-            channels: Optional list of channel names to restrict access to.
-            packages: Optional list of package specs to restrict access to.
-            ttl: Time-to-live in seconds for the macaroon. Defaults to 86400 (24 hours).
+        :param email: Ubuntu One email address.
+        :param password: Ubuntu One password.
+        :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+        :param login_url: The base URL for Ubuntu One login. Defaults to
+            ``https://login.ubuntu.com``.
+        :param application_name: The name of the application using this client.
+        :param store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
+        :param otp: Optional one-time password for two-factor authentication.
+        :param permissions: List of permission strings to request (e.g.,
+            ``["package-view"]``). If not provided, defaults to
+            ``["account-view-packages"]``. See store API documentation for valid
+            permission values.
+        :param channels: Optional list of channel names to restrict access to.
+        :param packages: Optional list of package specs to restrict access to.
+        :param ttl: Time-to-live in seconds for the macaroon. Defaults to 86400
+            (24 hours).
 
-        Returns:
-            A tuple of (root_macaroon, discharged_macaroon) ready for use with the store API.
-            The header should be formatted as:
+        :return: A tuple of (root_macaroon, discharged_macaroon) ready for use with the
+            store API. The header should be formatted as:
             ``Macaroon root={root.serialize()}, discharge={root.prepare_for_request(discharged).serialize()}``
 
-        Raises:
-            httpx.HTTPStatusError: If any HTTP request fails.
-            ValueError: If the macaroon has invalid caveats.
-            craft_store.errors.UbuntuOneOtpRequiredError: If two-factor authentication
-                is required but no OTP was provided.
-            craft_store.errors.UbuntuOneCredentialsError: If the provided credentials
-                are invalid.
-
+        :raises httpx.HTTPStatusError: If any HTTP request fails.
+        :raises ValueError: If the macaroon has invalid caveats.
+        :raises craft_store.errors.UbuntuOneOtpRequiredError: If two-factor
+            authentication is required but no OTP was provided.
+        :raises craft_store.errors.UbuntuOneCredentialsError: If the provided
+            credentials are invalid.
         """
         instance = cls(
             api_base_url=api_base_url,
@@ -187,19 +185,16 @@ class UbuntuOneLogin:
     ) -> pymacaroons.Macaroon:
         """Request an unsigned macaroon from the store API.
 
-        Args:
-            permissions: List of permission strings (e.g., ``["package-view"]``,
-                ``["package-manage"]``). Required.
-            channels: Optional list of channel names to restrict access to.
-            packages: Optional list of package specs to restrict access to.
-            ttl: Time-to-live in seconds. Defaults to 86400 (24 hours).
+        :param permissions: List of permission strings (e.g., ``["package-view"]``,
+            ``["package-manage"]``). Required.
+        :param channels: Optional list of channel names to restrict access to.
+        :param packages: Optional list of package specs to restrict access to.
+        :param ttl: Time-to-live in seconds. Defaults to 86400 (24 hours).
 
-        Returns:
-            An unsigned macaroon that must be discharged with _discharge_macaroon.
+        :return: An unsigned macaroon that must be discharged with
+            _discharge_macaroon.
 
-        Raises:
-            httpx.HTTPStatusError: If the request to the store API fails.
-
+        :raises httpx.HTTPStatusError: If the request to the store API fails.
         """
         if ttl is None:
             ttl = 86400  # 24 hours default
