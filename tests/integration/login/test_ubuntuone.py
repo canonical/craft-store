@@ -16,12 +16,11 @@
 
 """Integration tests for Ubuntu One login with PublisherGateway."""
 
-import json
 import os
 from urllib.parse import urlparse
 
 import pytest
-from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, creds, publisher
+from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, publisher
 from craft_store.login import UbuntuOneLogin
 
 
