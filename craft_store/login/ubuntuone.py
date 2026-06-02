@@ -39,14 +39,18 @@ class UbuntuOneLogin:
     .. code-block:: python
 
         login = UbuntuOneLogin("https://api.charmhub.io")
-        macaroon = login.login_with(
+        root, discharged = login.login_with(
             email="user@example.com",
             password="password123",
             permissions=["package-view"],
         )
 
-    :param api_base_url: The base URL for the store API (e.g., https://api.charmhub.io).
-    :param login_url: The base URL for Ubuntu One login. Defaults to ``https://login.ubuntu.com``.
+    :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+    :param login_url: The base URL for Ubuntu One login. Defaults to
+        ``https://login.ubuntu.com`` (or the value of the ``CRAFT_LOGIN_URL``
+        environment variable).
+    :param application_name: The name of the application using this client.
+    :param store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
     """
 
     def __init__(
@@ -109,6 +113,10 @@ class UbuntuOneLogin:
         Raises:
             httpx.HTTPStatusError: If any HTTP request fails.
             ValueError: If the macaroon has invalid caveats.
+            craft_store.errors.UbuntuOneOtpRequiredError: If two-factor authentication
+                is required but no OTP was provided.
+            craft_store.errors.UbuntuOneCredentialsError: If the provided credentials
+                are invalid.
 
         """
         if permissions is None:
