@@ -152,14 +152,14 @@ class PublisherGateway:
         results = self._check_keys(response, expected_keys={"results"})["results"]
         return [RegisteredName.unmarshal(item) for item in results]
 
-    def whoami(self) -> dict[str, Any]:  # type: ignore[no-any-return]
+    def whoami(self) -> dict[str, Any]:
         """Return whoami json data.
 
         API docs: https://api.charmhub.io/docs/default.html#whoami
         """
         response = self._client.get("/v1/tokens/whoami")
         self._check_error(response)
-        return response.json()
+        return dict(response.json())
 
     def register_name(
         self,
