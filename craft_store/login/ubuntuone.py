@@ -185,23 +185,27 @@ class UbuntuOneLogin:
         macaroon_token = DeveloperToken.unmarshal(macaroon_response.json())
         return pymacaroons.Macaroon.deserialize(macaroon_token.macaroon)
 
-    @staticmethod
-    def _get_login_caveat(caveats: list[pymacaroons.Caveat]) -> pymacaroons.Caveat:
+    def _get_login_caveat(
+        self, caveats: list[pymacaroons.Caveat]
+    ) -> pymacaroons.Caveat:
         match len(caveats):
             case 0:
                 raise ValueError("Invalid macaroon: no third-party caveats found")
             case 1:
                 return caveats[0]
-        # Try to find caveat by location containing expected hosts
+
+        login_host = urlparse(self._login_url).netloc
+
+        # Try to find caveat by location matching our login host
         for caveat in caveats:
-            caveat_location = caveat.location or ""
-            # Check for jujucharms or snapcraft or api.ubuntu
-            if any(
-                host in caveat_location
-                for host in ["jujucharms", "snapcraft", "api.ubuntu"]
-            ):
+            if caveat.location and login_host in caveat.location:
                 return caveat
+
         # Fall back to any caveat with a location
+        for caveat in caveats:
+            if caveat.location:
+                return caveat
+
         return caveats[0]
 
     def _discharge_macaroon(
