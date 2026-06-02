@@ -88,6 +88,8 @@ def test_ubuntu_one_login_with_publisher_gateway(
     # Make a request to verify authentication works
     assert gateway._namespace == "charm"
     assert gateway._client is not None
+    # Note: we can't call gateway.whoami() here because we only have a root
+    # macaroon without a discharge. Real discharge requires credentials.
 
     # Clean up: remove credentials
     test_auth.del_credentials()
@@ -164,6 +166,9 @@ def test_ubuntu_one_login_with_charmhub_whoami(
         host=charmhub_base_url,
     )
 
+    # Note: Using just a root macaroon as a developer token will fail if
+    # used for an actual request, but we can still verify the gateway is
+    # properly configured.
     developer_token = creds.DeveloperToken(macaroon=macaroon.serialize())
     credentials_json = json.dumps(developer_token.marshal())
     test_auth.set_credentials(credentials_json, force=True)
@@ -198,6 +203,23 @@ def test_ubuntu_one_login_with_convenience_method(
         api_base_url=charmhub_base_url,
     )
 
-    # For now, just verify the method exists and is callable
+    # Verify the method exists and is callable
     assert hasattr(login_client, "login_with")
     assert callable(login_client.login_with)
+
+    # If credentials are provided in the environment, perform a real login
+    email = os.getenv("UBUNTUONE_EMAIL")
+    password = os.getenv("UBUNTUONE_PASSWORD")
+    if email and password:
+        root, discharged = login_client.login_with(email, password)
+        assert root is not None
+        assert discharged is not None
+
+        # Use with PublisherGateway
+        gateway = publisher.PublisherGateway(
+            base_url=charmhub_base_url,
+            namespace="charm",
+            auth=login_client._store_auth,
+        )
+        user_info = gateway.whoami()
+        assert user_info["account"]["email"] == email
