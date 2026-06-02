@@ -32,6 +32,16 @@ def charmhub_login_url():
     return os.getenv("CRAFT_LOGIN_URL", "https://login.staging.ubuntu.com")
 
 
+@pytest.fixture
+def staging_sso_credentials():
+    """Get staging SSO credentials from environment."""
+    email = os.getenv("STAGING_SSO_USERNAME")
+    password = os.getenv("STAGING_SSO_PASSWORD")
+    if not email or not password:
+        pytest.skip("STAGING_SSO_USERNAME and STAGING_SSO_PASSWORD are not set")
+    return email, password
+
+
 @needs_charmhub_credentials()
 @pytest.mark.slow
 def test_ubuntu_one_login_with_publisher_gateway(
@@ -194,34 +204,42 @@ def test_ubuntu_one_login_with_charmhub_whoami(
 def test_ubuntu_one_login_with_convenience_method(
     charmhub_login_url,
     charmhub_base_url,
+    staging_sso_credentials,
 ):
     """Test the convenience login_with() method that does everything in one call.
 
     This demonstrates the simplest usage pattern for the UbuntuOneLogin class.
     Requires internet access and valid Charmhub credentials.
     """
-    login_client = UbuntuOneLogin(
+    email, password = staging_sso_credentials
+
+    # Perform a real login
+    root, discharged = UbuntuOneLogin.login_with(
+        email,
+        password,
         login_url=charmhub_login_url,
         api_base_url=charmhub_base_url,
     )
+    assert root is not None
+    assert discharged is not None
 
-    # Verify the method exists and is callable
-    assert hasattr(login_client, "login_with")
-    assert callable(login_client.login_with)
+    # Use with PublisherGateway
+    test_auth = auth.Auth(
+        application_name="ubuntu-one-login-convenience-test",
+        host=charmhub_base_url,
+    )
+    root_serial = root.serialize()
+    discharge_serial = root.prepare_for_request(discharged).serialize()
+    store_token = f"Macaroon root={root_serial}, discharge={discharge_serial}"
+    developer_token = creds.DeveloperToken(macaroon=store_token)
+    test_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
 
-    # If credentials are provided in the environment, perform a real login
-    email = os.getenv("STAGING_SSO_USERNAME")
-    password = os.getenv("STAGING_SSO_PASSWORD")
-    if email and password:
-        root, discharged = login_client.login_with(email, password)
-        assert root is not None
-        assert discharged is not None
+    gateway = publisher.PublisherGateway(
+        base_url=charmhub_base_url,
+        namespace="charm",
+        auth=test_auth,
+    )
+    user_info = gateway.whoami()
+    assert user_info["account"]["email"] == email
 
-        # Use with PublisherGateway
-        gateway = publisher.PublisherGateway(
-            base_url=charmhub_base_url,
-            namespace="charm",
-            auth=login_client._store_auth,
-        )
-        user_info = gateway.whoami()
-        assert user_info["account"]["email"] == email
+    test_auth.del_credentials()
