@@ -21,7 +21,7 @@ import os
 from urllib.parse import urlparse
 
 import pytest
-from craft_store import DeveloperTokenAuth, auth, creds, publisher
+from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, creds, publisher
 from craft_store.login import UbuntuOneLogin
 
 
@@ -219,7 +219,7 @@ def test_ubuntu_one_login_with_convenience_method(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=u1_auth,
-        httpx_auth=publisher.UbuntuOneAuth(auth=u1_auth, api_base_url=charmhub_base_url),
+        httpx_auth=UbuntuOneAuth(auth=u1_auth, api_base_url=charmhub_base_url),
     )
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email

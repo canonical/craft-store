@@ -6,7 +6,7 @@ import getpass
 import os
 from urllib.parse import urlparse
 
-from craft_store import Auth, DeveloperTokenAuth, publisher
+from craft_store import Auth, UbuntuOneAuth, publisher
 from craft_store.login import UbuntuOneLogin
 
 
@@ -44,7 +44,7 @@ def main() -> None:
         base_url=api_base_url,
         namespace="charm",
         auth=auth,
-        httpx_auth=publisher.UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
+        httpx_auth=UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
     )
 
     user_info = gateway.whoami()

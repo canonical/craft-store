@@ -5,7 +5,7 @@
 import os
 from urllib.parse import urlparse
 
-from craft_store import Auth, DeveloperTokenAuth, errors, publisher
+from craft_store import Auth, UbuntuOneAuth, errors, publisher
 
 
 def main() -> None:
@@ -22,7 +22,7 @@ def main() -> None:
         base_url=api_base_url,
         namespace="charm",
         auth=auth,
-        httpx_auth=publisher.UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
+        httpx_auth=UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
     )
 
     try:
