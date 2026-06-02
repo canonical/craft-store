@@ -235,6 +235,7 @@ class UbuntuOneLogin:
         macaroon_response = httpx.post(
             macaroon_url,
             json=request_object,
+            timeout=60.0,
         )
         macaroon_response.raise_for_status()
         macaroon_token = DeveloperToken.unmarshal(macaroon_response.json())
@@ -297,6 +298,7 @@ class UbuntuOneLogin:
         discharge_response = httpx.post(
             discharge_url,
             json=discharge_request,
+            timeout=60.0,
         )
         discharge_response.raise_for_status()
         return pymacaroons.Macaroon.deserialize(
@@ -332,6 +334,7 @@ class UbuntuOneLogin:
                 )
             },
             json={"client-description": "craft-store"},
+            timeout=60.0,
         )
         response.raise_for_status()
         store_token = DeveloperToken(macaroon=str(response.json()["macaroon"]))

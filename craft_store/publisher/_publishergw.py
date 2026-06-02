@@ -69,6 +69,7 @@ class PublisherGateway:
         self._client = httpx.Client(
             base_url=base_url,
             auth=httpx_auth or CandidAuth(auth=auth, auth_type="macaroon"),
+            timeout=60.0,
         )
 
     @staticmethod
