@@ -18,6 +18,8 @@ from collections.abc import Collection
 
 import pymacaroons  # type: ignore[import-untyped]
 
+from craft_store.errors import UbuntuOneCredentialsError, UbuntuOneOtpRequiredError
+
 from ._ubuntuone import UbuntuOneLogin
 
 
@@ -67,6 +69,8 @@ def login_with(
 
 
 __all__ = [
+    "UbuntuOneCredentialsError",
     "UbuntuOneLogin",
+    "UbuntuOneOtpRequiredError",
     "login_with",
 ]
