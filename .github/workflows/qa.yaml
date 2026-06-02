@@ -9,6 +9,10 @@ on:
       - "renovate/*"
   pull_request:
 
+env:
+  STAGING_SSO_USERNAME: ${{ vars.STAGING_SSO_USERNAME }}
+  STAGING_SSO_PASSWORD: ${{ secrets.STAGING_SSO_PASSWORD }}
+
 jobs:
   lint:
     uses: canonical/starflow/.github/workflows/lint-python.yaml@main
@@ -17,3 +21,4 @@ jobs:
     with:
       fast-test-platforms: '["ubuntu-22.04", "ubuntu-24.04", "ubuntu-24.04-arm", "windows-latest", "macos-latest"]'
       slow-test-platforms: '["ubuntu-22.04", "ubuntu-24.04-arm"]'
+    secrets: inherit
