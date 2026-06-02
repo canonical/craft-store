@@ -7,22 +7,17 @@
 ## Quick Start
 
 ```python
-from craft_store.login import UbuntuOneLogin
-
-# Create a login client
-login = UbuntuOneLogin()
+from craft_store import DeveloperTokenAuth, auth, creds, publisher, login
+import json
 
 # Login with one method call
-root, discharged = login.login_with(
+root, discharged = login.UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
     permissions=["package-view"],
 )
 
 # Use the macaroon with PublisherGateway
-from craft_store import auth, creds, publisher
-import json
-
 store_auth = auth.Auth(
     application_name="myapp",
     host="https://api.charmhub.io",
@@ -32,7 +27,7 @@ store_auth = auth.Auth(
 # as a store token.
 root_serial = root.serialize()
 discharge_serial = root.prepare_for_request(discharged).serialize()
-store_token = f"Macaroon root={root_serial}, discharge={discharge_serial}"
+store_token = f"root={root_serial}, discharge={discharge_serial}"
 
 developer_token = creds.DeveloperToken(macaroon=store_token)
 store_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
@@ -41,22 +36,26 @@ gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=store_auth,
+    httpx_auth=DeveloperTokenAuth(auth=store_auth, auth_type="macaroon"),
 )
 ```
 
 ## Public Methods
 
-### `login_with(email, password, *, otp=None, permissions=None, channels=None, packages=None, ttl=None)`
+### `login_with(email, password, *, api_base_url=None, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None, otp=None, permissions=None, channels=None, packages=None, ttl=None)`
 
-**The primary method for authentication.** Logs in with Ubuntu One credentials and returns a pair of macaroons ready for use.
+**The primary method for authentication.** Logs in with Ubuntu One credentials and returns a pair of macaroons ready for use. This is a **classmethod**.
 
 **Parameters:**
 - `email` (str): Ubuntu One email address
 - `password` (str): Ubuntu One password
+- `api_base_url` (str, optional): Store API URL. Defaults to environment variable or `https://api.charmhub.io`.
+- `login_url` (str, optional): Login server URL. Defaults to environment variable or `https://login.ubuntu.com`.
+- `application_name` (str, optional): App name for keyring storage.
+- `store_auth` (auth.Auth, optional): Existing Auth instance.
 - `otp` (str, optional): One-time password for two-factor authentication
 - `permissions` (list of str, optional): Permission scopes (default: `["account-view-packages"]`)
-  - Valid values: `"account-manage-keys"`, `"account-manage-metadata"`, `"account-register-package"`, `"account-view-packages"`, `"package-manage"`, `"package-manage-acl"`, `"package-manage-metadata"`, `"package-manage-releases"`, `"package-manage-revisions"`, `"package-view"`, `"package-view-acl"`, `"package-view-metadata"`, `"package-view-metrics"`, `"package-view-releases"`, `"package-view-revisions"`, `"store-manage"`, `"store-view"`
-- `channels` (list of str, optional): Restrict to specific channels (e.g., `["stable", "edge"]`)
+- `channels` (list of str, optional): Restrict to specific channels
 - `packages` (list of dict, optional): Restrict to specific packages
 - `ttl` (int, optional): Time-to-live in seconds (default: 86400, i.e., 24 hours)
 
@@ -71,8 +70,9 @@ gateway = publisher.PublisherGateway(
 
 **Example:**
 ```python
-login = UbuntuOneLogin()
-root, discharged = login.login_with(
+from craft_store.login import UbuntuOneLogin
+
+root, discharged = UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
     otp="123456",  # optional
@@ -85,24 +85,12 @@ root, discharged = login.login_with(
 
 ### `get_macaroon(*, permissions, channels=None, packages=None, ttl=None)`
 
-**For advanced use.** Requests an unsigned macaroon from the store API. Most users should use `login_with()` instead.
-
-**Parameters:**
-- `permissions` (list of str): Permission scopes (required)
-- `channels` (list of str, optional): Restrict to specific channels
-- `packages` (list of dict, optional): Restrict to specific packages
-- `ttl` (int, optional): Time-to-live in seconds (default: 86400)
-
-**Returns:**
-- `pymacaroons.Macaroon`: An unsigned macaroon
-
-**Raises:**
-- `httpx.HTTPStatusError`: If the request fails
+**For advanced use.** Requests an unsigned macaroon from the store API.
 
 **Example:**
 ```python
-login = UbuntuOneLogin()
-unsigned = login._get_macaroon(
+login_client = UbuntuOneLogin()
+unsigned = login_client._get_macaroon(
     permissions=["package-manage"],
     channels=["edge"],
 )
@@ -113,26 +101,13 @@ unsigned = login._get_macaroon(
 
 ### `discharge_macaroon(macaroon, *, email, password, otp=None)`
 
-**For advanced use.** Discharges an unsigned macaroon using Ubuntu One credentials. Most users should use `login_with()` instead.
-
-**Parameters:**
-- `macaroon` (pymacaroons.Macaroon): The unsigned macaroon to discharge
-- `email` (str): Ubuntu One email address
-- `password` (str): Ubuntu One password
-- `otp` (str, optional): One-time password for two-factor authentication
-
-**Returns:**
-- `pymacaroons.Macaroon`: A discharged macaroon ready to use
-
-**Raises:**
-- `httpx.HTTPStatusError`: If the discharge request fails
-- `ValueError`: If the macaroon has invalid caveats
+**For advanced use.** Discharges an unsigned macaroon using Ubuntu One credentials.
 
 **Example:**
 ```python
-login = UbuntuOneLogin()
-unsigned = login._get_macaroon(permissions=["package-view"])
-discharged = login._discharge_macaroon(
+login_client = UbuntuOneLogin()
+unsigned = login_client._get_macaroon(permissions=["package-view"])
+discharged = login_client._discharge_macaroon(
     unsigned,
     email="user@example.com",
     password="password123",
@@ -146,15 +121,8 @@ UbuntuOneLogin(api_base_url=None, *, login_url=None, application_name="craft-sto
 ```
 
 - `api_base_url` (str, optional): Store API URL (Charmhub, Snapcraft, etc.)
-  - Default: `https://api.charmhub.io`
-  - Environment variable: `CRAFT_STORE_CHARMHUB`
-
 - `login_url` (str, optional): Ubuntu One login server URL
-  - Default: `https://login.ubuntu.com`
-  - Environment variable: `CRAFT_LOGIN_URL`
-
 - `application_name` (str, optional): The name of the application using this client.
-
 - `store_auth` (auth.Auth, optional): An optional Auth instance to use.
 
 ## Environment Variables
@@ -165,13 +133,11 @@ UbuntuOneLogin(api_base_url=None, *, login_url=None, application_name="craft-sto
 ## Complete Integration Example
 
 ```python
-from craft_store.login import UbuntuOneLogin
-from craft_store import auth, creds, publisher
+from craft_store import DeveloperTokenAuth, auth, creds, publisher, login
 import json
 
 # 1. Login
-login = UbuntuOneLogin()
-root, discharged = login.login_with(
+root, discharged = login.UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
     permissions=["package-view"],
@@ -187,7 +153,8 @@ store_auth = auth.Auth(
 
 root_serial = root.serialize()
 discharge_serial = root.prepare_for_request(discharged).serialize()
-store_token = f"Macaroon root={root_serial}, discharge={discharge_serial}"
+# Prepare the combined string without the "Macaroon " prefix
+store_token = f"root={root_serial}, discharge={discharge_serial}"
 
 developer_token = creds.DeveloperToken(macaroon=store_token)
 store_auth.set_credentials(
@@ -200,6 +167,7 @@ gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=store_auth,
+    httpx_auth=DeveloperTokenAuth(auth=store_auth, auth_type="macaroon"),
 )
 
 # 4. Make authenticated API calls
@@ -211,29 +179,27 @@ store_auth.del_credentials()
 
 ## Error Handling
 
-All methods raise `httpx.HTTPStatusError` on network/API errors:
-
 ```python
 import httpx
+from craft_store.login import UbuntuOneLogin, UbuntuOneOtpRequiredError, UbuntuOneCredentialsError
 
 try:
-    macaroon = login.login_with(
+    root, discharged = UbuntuOneLogin.login_with(
         email="user@example.com",
         password="password123",
     )
-except httpx.TimeoutException:
-    print("Connection timeout")
+except UbuntuOneOtpRequiredError:
+    print("2FA required")
+except UbuntuOneCredentialsError:
+    print("Invalid email or password")
 except httpx.HTTPStatusError as e:
-    print(f"HTTP Error {e.response.status_code}: {e.response.text}")
-except ValueError as e:
-    print(f"Invalid macaroon: {e}")
+    print(f"HTTP Error {e.response.status_code}")
 ```
 
 ## Supported Stores
 
 - **Charmhub**: `https://api.charmhub.io` (default)
 - **Snapcraft**: `https://api.snapcraft.io` (via `CRAFT_STORE_SNAPCRAFT`)
-- **Custom**: Any URL via `api_base_url` parameter or environment variable
 
 ## Testing
 
@@ -243,16 +209,4 @@ uv run python scripts/usso_login_demo.py
 
 # Run integration tests
 uv run pytest tests/integration/login/ -v
-
-# Test with custom endpoint
-export CRAFT_STORE_CHARMHUB=https://api.staging.charmhub.io
-uv run python scripts/usso_login_demo.py
 ```
-
-## API Compatibility
-
-- **Macaroon endpoint**: `POST {api_base_url}/v1/tokens/usso`
-- **Discharge endpoint**: `POST {login_url}/api/v2/tokens/discharge`
-- **Verification endpoint**: `GET {api_base_url}/v1/tokens`
-
-See https://api.charmhub.io/docs/ for complete API documentation.

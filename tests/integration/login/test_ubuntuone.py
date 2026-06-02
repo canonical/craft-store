@@ -20,7 +20,7 @@ import json
 import os
 
 import pytest
-from craft_store import auth, creds, publisher
+from craft_store import DeveloperTokenAuth, auth, creds, publisher
 from craft_store.login import UbuntuOneLogin
 
 
@@ -224,7 +224,9 @@ def test_ubuntu_one_login_with_convenience_method(
     )
     root_serial = root.serialize()
     discharge_serial = root.prepare_for_request(discharged).serialize()
-    store_token = f"Macaroon root={root_serial}, discharge={discharge_serial}"
+    # The macaroon string should not include the "Macaroon " prefix
+    # as DeveloperTokenAuth will add it.
+    store_token = f"root={root_serial}, discharge={discharge_serial}"
     developer_token = creds.DeveloperToken(macaroon=store_token)
     test_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
 
@@ -232,6 +234,7 @@ def test_ubuntu_one_login_with_convenience_method(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=test_auth,
+        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
     )
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email

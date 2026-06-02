@@ -10,162 +10,83 @@ This script demonstrates the complete Ubuntu One login flow with Charmhub, inclu
    - OTP (optional, for 2FA)
 
 2. **Performs login flow**:
-   - Creates `UbuntuOneLogin` client
-   - Requests a macaroon from Charmhub dashboard API
+   - Calls `UbuntuOneLogin.login_with` (classmethod)
+   - Requests a macaroon from Charmhub API
    - Discharges the macaroon with your credentials
-   - Verifies identity using the `macaroon_info` endpoint
+   - Exchanges for a store token
+   - Verifies identity using the `whoami` endpoint
 
 3. **Displays results**:
-   - Your account information (username, email, display name, ID)
-   - Macaroon details and caveats
-   - The complete serialized macaroon (base64)
+   - Your account information (display name, email)
+   - Your registered charms
 
 ## Running the Script
-
-### Prerequisites
-```bash
-cd /home/lengau/Work/Code/craft-store
-make setup  # if not already done
-```
 
 ### Run the Script
 ```bash
 uv run python scripts/usso_login_demo.py
 ```
 
-### Interactive Flow
-```
-======================================================================
-Charmhub Ubuntu One Login Demo
-======================================================================
-
-Email address: your.email@example.com
-Password: [hidden input]
-OTP (optional, press Enter to skip): 123456
-
-Authenticating with Charmhub...
-
-✓ Created UbuntuOneLogin client
-  Requesting macaroon from Charmhub...
-✓ Received root macaroon
-  Discharging macaroon with credentials...
-✓ Successfully discharged macaroon
-  Verifying identity with macaroon_info endpoint...
-✓ Identity verified
-
-======================================================================
-Login Successful!
-======================================================================
-
-Account Information:
-  Username: your-username
-  Display Name: Your Name
-  Email: your.email@example.com
-  ID: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-Macaroon Details:
-  Serialized: [long base64 string]
-
-Macaroon Caveats:
-  1. [caveat details]
-  2. [caveat details]
-
-======================================================================
-Complete Macaroon (base64):
-======================================================================
-[full serialized macaroon]
-```
-
 ## How It Uses UbuntuOneLogin
 
-The script demonstrates the two key private methods of `UbuntuOneLogin`:
+The script demonstrates the core `login_with` method:
 
-### 1. Request Root Macaroon
 ```python
-login_client = UbuntuOneLogin(
-    api_base_url="https://api.charmhub.io",
-)
+from craft_store.login import UbuntuOneLogin
 
-macaroon = login_client._get_macaroon(
-    permissions=["package-access"],
-    channels=["stable", "edge", "beta", "candidate"],
-)
-```
-
-### 2. Discharge Macaroon
-```python
-discharged = login_client._discharge_macaroon(
-    macaroon,
+root, discharged = UbuntuOneLogin.login_with(
     email="your.email@example.com",
     password="your_password",
     otp="123456",  # optional
+    api_base_url="https://api.charmhub.io",
 )
 ```
 
 ## Integration Points
 
 ### With PublisherGateway
-The discharged macaroon pair can be used with `PublisherGateway`:
+The discharged macaroon pair can be used with `PublisherGateway` using `DeveloperTokenAuth`:
 
 ```python
-from craft_store import auth, creds, publisher
+from craft_store import DeveloperTokenAuth, auth, creds, publisher
 import json
 
-# 1. Login
-login = UbuntuOneLogin()
-root, discharged = login.login_with(
-    email="user@example.com",
-    password="password123",
-)
-
-# 2. Prepare the combined store token
+# 1. Prepare the combined store token string
 root_serial = root.serialize()
 discharge_serial = root.prepare_for_request(discharged).serialize()
-store_token = f"Macaroon root={root_serial}, discharge={discharge_serial}"
+# Format: "root=..., discharge=..."
+store_token = f"root={root_serial}, discharge={discharge_serial}"
 
-# 3. Store the macaroon
+# 2. Store in Auth keyring
 test_auth = auth.Auth(
     application_name="myapp",
     host="https://api.charmhub.io",
 )
-
 developer_token = creds.DeveloperToken(macaroon=store_token)
-credentials_json = json.dumps(developer_token.marshal())
-test_auth.set_credentials(credentials_json, force=True)
+test_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
 
-# 4. Use with PublisherGateway
+# 3. Use with PublisherGateway
 gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=test_auth,
+    httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
 )
 ```
 
 ## Troubleshooting
 
 ### Connection Error
-```
-✗ Connection Error: [Errno -2] Name or service not known
-```
 - Check your internet connection
 - Verify Charmhub API is reachable
-- Try pinging `api.charmhub.io`
 
 ### Invalid Credentials
-```
-✗ HTTP Error: 401 Unauthorized
-```
 - Double-check your email and password
 - If using 2FA, ensure OTP is correct
-- Account may not be registered
 
-### Validation Error
-```
-✗ Validation Error: Invalid macaroon: no valid login caveats found
-```
-- The macaroon received is malformed
-- Charmhub API may have changed
-- Try again or contact support
+### Validation Error: Invalid macaroon
+- This usually means the authorization header is malformed.
+- Ensure you are NOT prepending "Macaroon " to the string if using `DeveloperTokenAuth`.
 
 ## Related Files
 - Script: `/home/lengau/Work/Code/craft-store/scripts/usso_login_demo.py`
