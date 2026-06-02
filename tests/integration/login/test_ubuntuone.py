@@ -29,7 +29,7 @@ from tests.integration.conftest import needs_charmhub_credentials
 @pytest.fixture
 def charmhub_login_url():
     """Get the login URL for Charmhub."""
-    return os.getenv("CRAFT_LOGIN_URL", "https://login.ubuntu.com")
+    return os.getenv("CRAFT_LOGIN_URL", "https://login.staging.ubuntu.com")
 
 
 @needs_charmhub_credentials()
@@ -210,8 +210,8 @@ def test_ubuntu_one_login_with_convenience_method(
     assert callable(login_client.login_with)
 
     # If credentials are provided in the environment, perform a real login
-    email = os.getenv("UBUNTUONE_EMAIL")
-    password = os.getenv("UBUNTUONE_PASSWORD")
+    email = os.getenv("STAGING_SSO_USERNAME")
+    password = os.getenv("STAGING_SSO_PASSWORD")
     if email and password:
         root, discharged = login_client.login_with(email, password)
         assert root is not None
