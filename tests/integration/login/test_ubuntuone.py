@@ -21,7 +21,7 @@ import os
 
 import pytest
 from craft_store import auth, creds, publisher
-from craft_store.login.ubuntuone import UbuntuOneLogin
+from craft_store.login import UbuntuOneLogin
 
 from tests.integration.conftest import needs_charmhub_credentials
 

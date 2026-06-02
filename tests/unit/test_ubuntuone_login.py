@@ -17,7 +17,7 @@
 import pytest
 import pytest_httpx
 from craft_store import Auth, errors
-from craft_store.login.ubuntuone import UbuntuOneLogin
+from craft_store.login import UbuntuOneLogin
 from pymacaroons import Macaroon
 
 
@@ -133,7 +133,7 @@ def test_login_with_saves_credentials(
         json={"macaroon": "store-token"},
     )
     token_auth = mocker.Mock(spec=Auth)
-    mocker.patch("craft_store.login.ubuntuone.auth.Auth", return_value=token_auth)
+    mocker.patch("craft_store.login._ubuntuone.auth.Auth", return_value=token_auth)
 
     login = UbuntuOneLogin(
         "https://api.example.test",
