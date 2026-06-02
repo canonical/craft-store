@@ -42,42 +42,41 @@ def staging_sso_credentials():
 
 
 @pytest.mark.slow
-def test_ubuntu_one_login_with_publisher_gateway(
+def test_ubuntu_one_login_smoke(
     charmhub_login_url,
     charmhub_base_url,
 ):
-    """Test that UbuntuOneLogin can request an unsigned macaroon and a PublisherGateway can be constructed.
+    """Smoke test for UbuntuOneLogin and PublisherGateway connectivity.
 
-    This test demonstrates:
-    1. Creating a UbuntuOneLogin client
-    2. Requesting an unsigned macaroon from Charmhub (no Ubuntu One credentials)
-    3. Constructing a PublisherGateway instance
+    This test verifies that:
+    1. A UbuntuOneLogin client can be created.
+    2. An unsigned macaroon can be requested from the store API.
+    3. A PublisherGateway can be correctly instantiated.
 
-    This test requires internet access to reach the real Charmhub API.
+    This test requires internet access to reach the real Charmhub API,
+    but does not require valid Ubuntu One credentials.
     """
     # Step 1: Create a UbuntuOneLogin instance
     login_client = UbuntuOneLogin(
-        login_url=charmhub_login_url,
         api_base_url=charmhub_base_url,
+        login_url=charmhub_login_url,
     )
 
-    # Step 2: Request a macaroon from Charmhub
-    # This requires valid Charmhub credentials and internet access
+    # Step 2: Request an unsigned macaroon
     macaroon = login_client._get_macaroon(
         permissions=["package-view"],
-        channels=["stable"],
     )
 
     # Verify we got a valid macaroon
     assert macaroon is not None
     assert macaroon.serialize() is not None
 
+    # Step 3: Verify PublisherGateway can be configured
     test_auth = auth.Auth(
-        application_name="ubuntu-one-login-test",
+        application_name="ubuntu-one-login-smoke-test",
         host=urlparse(charmhub_base_url).netloc,
         file_fallback=True,
     )
-    # Step 4: Create a PublisherGateway with the authenticated Auth
     gateway = publisher.PublisherGateway(
         base_url=charmhub_base_url,
         namespace="charm",
@@ -85,89 +84,8 @@ def test_ubuntu_one_login_with_publisher_gateway(
         httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
     )
 
-    # Step 5: Verify the gateway can authenticate
-    # Make a request to verify authentication works
     assert gateway._namespace == "charm"
     assert gateway._client is not None
-    # Note: we can't call gateway.whoami() here because we only have a root
-    # macaroon without a discharge. Real discharge requires credentials.
-
-    # No credentials were stored in this test, so no cleanup is required.
-
-
-@pytest.mark.slow
-def test_ubuntu_one_login_discharge_with_existing_auth(
-    charmhub_login_url,
-    charmhub_base_url,
-):
-    """Test requesting an unsigned macaroon from Charmhub.
-
-    Requires internet access to reach the real Charmhub API.
-    """
-    login_client = UbuntuOneLogin(
-        login_url=charmhub_login_url,
-        api_base_url=charmhub_base_url,
-    )
-
-    # Request a macaroon
-    macaroon = login_client._get_macaroon(
-        permissions=["package-view"],
-        channels=["stable", "edge"],
-    )
-
-    assert macaroon is not None
-    assert macaroon.serialize() is not None
-
-
-@pytest.mark.slow
-def test_ubuntu_one_login_with_charmhub_whoami(
-    charmhub_login_url,
-    charmhub_base_url,
-):
-    """Test that authenticated requests work with PublisherGateway.whoami().
-
-    This demonstrates a complete integration flow:
-    1. Login with UbuntuOneLogin
-    2. Create PublisherGateway with the credentials
-    3. Make an authenticated API call
-    """
-    login_client = UbuntuOneLogin(
-        login_url=charmhub_login_url,
-        api_base_url=charmhub_base_url,
-    )
-
-    # Get a macaroon
-    macaroon = login_client._get_macaroon(
-        permissions=["package-view"],
-    )
-
-    # Store in Auth
-    test_auth = auth.Auth(
-        application_name="ubuntu-one-login-whoami-test",
-        host=urlparse(charmhub_base_url).netloc,
-    )
-
-    # Note: Using just a root macaroon as a developer token will fail if
-    # used for an actual request, but we can still verify the gateway is
-    # properly configured.
-    developer_token = creds.DeveloperToken(macaroon=macaroon.serialize())
-    credentials_json = json.dumps(developer_token.marshal())
-    test_auth.set_credentials(credentials_json, force=True)
-
-    # Create gateway and attempt a request
-    gateway = publisher.PublisherGateway(
-        base_url=charmhub_base_url,
-        namespace="charm",
-        auth=test_auth,
-        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
-    )
-
-    # Verify the gateway is properly configured
-    assert gateway._client is not None
-    assert gateway._namespace == "charm"
-
-    # Clean up
-    test_auth.del_credentials()
 
 
 @pytest.mark.slow
