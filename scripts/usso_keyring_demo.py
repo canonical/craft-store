@@ -14,7 +14,7 @@ def main() -> None:
     host = urlparse(api_base_url).netloc
 
     auth = Auth(
-        application_name="craft-store-ubuntu-one-store-token",
+        application_name="craft-store-ubuntu-one",
         host=host,
         file_fallback=True,
     )
@@ -22,7 +22,7 @@ def main() -> None:
         base_url=api_base_url,
         namespace="charm",
         auth=auth,
-        httpx_auth=DeveloperTokenAuth(auth=auth, auth_type="macaroon"),
+        httpx_auth=publisher.UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
     )
 
     try:

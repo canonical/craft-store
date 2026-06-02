@@ -172,7 +172,6 @@ class UbuntuOneLogin:
             raise
 
         self._save_credentials(root, discharged)
-        self._save_store_token(root, discharged)
         return root, discharged
 
     def _get_macaroon(
@@ -298,32 +297,6 @@ class UbuntuOneLogin:
             getattr(self._store_auth, "host", "<unknown>"),
         )
         self._store_auth.set_credentials(credentials, force=True)
-
-    def _save_store_token(
-        self,
-        root: pymacaroons.Macaroon,
-        discharge: pymacaroons.Macaroon,
-    ) -> None:
-        bound_discharge = root.prepare_for_request(discharge).serialize()
-        response = httpx.post(
-            f"{self._api_base_url}/v1/tokens/usso/exchange",
-            headers={
-                "Authorization": (
-                    f"Macaroon root={root.serialize()}, discharge={bound_discharge}"
-                )
-            },
-            json={"client-description": "craft-store"},
-            timeout=60.0,
-        )
-        response.raise_for_status()
-        store_token = DeveloperToken(macaroon=str(response.json()["macaroon"]))
-        token_auth = auth.Auth(
-            application_name=f"{self._application_name}-store-token",
-            host=urlparse(self._api_base_url).netloc,
-            ephemeral=False,
-            file_fallback=True,
-        )
-        token_auth.set_credentials(store_token.model_dump_json(), force=True)
 
     @staticmethod
     def _is_otp_required(exc: httpx.HTTPStatusError) -> bool:

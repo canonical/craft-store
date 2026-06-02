@@ -102,7 +102,6 @@ def test_login_with_raises_on_bad_credentials(
 
 def test_login_with_saves_credentials(
     httpx_mock: pytest_httpx.HTTPXMock,
-    mocker,
     mock_auth,
 ) -> None:
     root = _make_root()
@@ -121,13 +120,6 @@ def test_login_with_saves_credentials(
         url="https://login.ubuntu.com/api/v2/tokens/discharge",
         json={"discharge_macaroon": discharge.serialize()},
     )
-    httpx_mock.add_response(
-        method="POST",
-        url="https://api.example.test/v1/tokens/usso/exchange",
-        json={"macaroon": "store-token"},
-    )
-    token_auth = mocker.Mock(spec=Auth)
-    mocker.patch("craft_store.login._ubuntuone.auth.Auth", return_value=token_auth)
 
     UbuntuOneLogin.login_with(
         email="user@example.com",
@@ -141,5 +133,3 @@ def test_login_with_saves_credentials(
 
     mock_auth.set_credentials.assert_called_once()
     assert mock_auth.set_credentials.call_args.kwargs == {"force": True}
-    token_auth.set_credentials.assert_called_once()
-    assert token_auth.set_credentials.call_args.kwargs == {"force": True}

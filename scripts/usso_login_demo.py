@@ -22,7 +22,8 @@ def main() -> None:
         otp = input("OTP (optional): ").strip() or None
 
     # login_with is a classmethod that returns (root, discharged)
-    # and automatically saves the credentials to the default Auth keyring.
+    # and automatically saves the credentials to the default Auth keyring
+    # (application_name="craft-store-ubuntu-one").
     UbuntuOneLogin.login_with(
         email=email,
         password=password,
@@ -31,9 +32,10 @@ def main() -> None:
         permissions=["account-view-packages", "account-register-package"],
     )
 
-    # The store token is saved in a specific keyring application name by UbuntuOneLogin
+    # Use the saved credentials with PublisherGateway.
+    # We use UbuntuOneAuth which handles the exchange internally.
     auth = Auth(
-        application_name="craft-store-ubuntu-one-store-token",
+        application_name="craft-store-ubuntu-one",
         host=host,
         file_fallback=True,
     )
@@ -42,7 +44,7 @@ def main() -> None:
         base_url=api_base_url,
         namespace="charm",
         auth=auth,
-        httpx_auth=DeveloperTokenAuth(auth=auth, auth_type="macaroon"),
+        httpx_auth=publisher.UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
     )
 
     user_info = gateway.whoami()

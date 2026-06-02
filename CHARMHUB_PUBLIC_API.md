@@ -7,7 +7,7 @@
 ## Quick Start
 
 ```python
-from craft_store import DeveloperTokenAuth, auth, creds, publisher, login
+from craft_store import auth, publisher, login
 import json
 
 # Login with one method call
@@ -18,26 +18,18 @@ root, discharged = login.UbuntuOneLogin.login_with(
     permissions=["package-view"],
 )
 
-# Use the macaroon with PublisherGateway
+# Use the saved credentials with PublisherGateway
 store_auth = auth.Auth(
-    application_name="myapp",
-    host="https://api.charmhub.io",
+    application_name="craft-store-ubuntu-one",
+    host="api.charmhub.io",
 )
 
-# Note: The root and discharged macaroons are prepared for use together
-# as a store token.
-root_serial = root.serialize()
-discharge_serial = root.prepare_for_request(discharged).serialize()
-store_token = f"root={root_serial}, discharge={discharge_serial}"
-
-developer_token = creds.DeveloperToken(macaroon=store_token)
-store_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
-
+# We use UbuntuOneAuth which handles the exchange internally.
 gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=store_auth,
-    httpx_auth=DeveloperTokenAuth(auth=store_auth, auth_type="macaroon"),
+    httpx_auth=publisher.UbuntuOneAuth(auth=store_auth, api_base_url="https://api.charmhub.io"),
 )
 ```
 
@@ -45,14 +37,14 @@ gateway = publisher.PublisherGateway(
 
 ### `login_with(email, password, *, api_base_url, login_url=None, application_name="craft-store-ubuntu-one", store_auth=None, otp=None, permissions=None, channels=None, packages=None, ttl=None)`
 
-**The primary method for authentication.** Logs in with Ubuntu One credentials and returns a pair of macaroons ready for use. This is a **classmethod**.
+**The primary method for authentication.** Logs in with Ubuntu One credentials and returns a pair of macaroons. It also automatically saves these credentials to the keyring. This is a **classmethod**.
 
 **Parameters:**
 - `email` (str): Ubuntu One email address
 - `password` (str): Ubuntu One password
 - `api_base_url` (str): Store API URL (e.g., `https://api.charmhub.io`). **Required**.
 - `login_url` (str, optional): Login server URL. Defaults to `https://login.ubuntu.com`.
-- `application_name` (str, optional): App name for keyring storage.
+- `application_name` (str, optional): App name for keyring storage (default: `craft-store-ubuntu-one`).
 - `store_auth` (auth.Auth, optional): Existing Auth instance.
 - `otp` (str, optional): One-time password for two-factor authentication
 - `permissions` (list of str, optional): Permission scopes (default: `["account-view-packages"]`)
@@ -130,42 +122,31 @@ UbuntuOneLogin(api_base_url, *, login_url=None, application_name="craft-store-ub
 ## Complete Integration Example
 
 ```python
-from craft_store import DeveloperTokenAuth, auth, creds, publisher, login
+from craft_store import auth, publisher, login
 import json
 
 # 1. Login
-root, discharged = login.UbuntuOneLogin.login_with(
+# This saves the root and discharged macaroons to the keyring.
+UbuntuOneLogin.login_with(
     email="user@example.com",
     password="password123",
     api_base_url="https://api.charmhub.io",
     permissions=["package-view"],
 )
 
-# 2. Store credentials
-# UbuntuOneLogin.login_with already saves the credentials to its internal store_auth,
-# but if you need to set it up manually:
+# 2. Access saved credentials
 store_auth = auth.Auth(
-    application_name="myapp",
-    host="https://api.charmhub.io",
-)
-
-root_serial = root.serialize()
-discharge_serial = root.prepare_for_request(discharged).serialize()
-# Prepare the combined string without the "Macaroon " prefix
-store_token = f"root={root_serial}, discharge={discharge_serial}"
-
-developer_token = creds.DeveloperToken(macaroon=store_token)
-store_auth.set_credentials(
-    json.dumps(developer_token.marshal()),
-    force=True,
+    application_name="craft-store-ubuntu-one",
+    host="api.charmhub.io",
 )
 
 # 3. Create authenticated gateway
+# We use UbuntuOneAuth which handles the exchange internally.
 gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=store_auth,
-    httpx_auth=DeveloperTokenAuth(auth=store_auth, auth_type="macaroon"),
+    httpx_auth=publisher.UbuntuOneAuth(auth=store_auth, api_base_url="https://api.charmhub.io"),
 )
 
 # 4. Make authenticated API calls

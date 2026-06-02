@@ -13,7 +13,7 @@ This script demonstrates the complete Ubuntu One login flow with Charmhub, inclu
    - Calls `UbuntuOneLogin.login_with` (classmethod)
    - Requests a macaroon from Charmhub API
    - Discharges the macaroon with your credentials
-   - Exchanges for a store token
+   - Saves the root and discharged macaroons to your keyring
    - Verifies identity using the `whoami` endpoint
 
 3. **Displays results**:
@@ -45,32 +45,26 @@ root, discharged = UbuntuOneLogin.login_with(
 ## Integration Points
 
 ### With PublisherGateway
-The discharged macaroon pair can be used with `PublisherGateway` using `DeveloperTokenAuth`:
+The saved macaroon pair can be used with `PublisherGateway` using `UbuntuOneAuth`:
 
 ```python
-from craft_store import DeveloperTokenAuth, auth, creds, publisher
+from craft_store import auth, publisher
 import json
 
-# 1. Prepare the combined store token string
-root_serial = root.serialize()
-discharge_serial = root.prepare_for_request(discharged).serialize()
-# Format: "root=..., discharge=..."
-store_token = f"root={root_serial}, discharge={discharge_serial}"
-
-# 2. Store in Auth keyring
+# 1. Access saved credentials from keyring
+# UbuntuOneLogin.login_with saved them to the default application name
 test_auth = auth.Auth(
-    application_name="myapp",
-    host="https://api.charmhub.io",
+    application_name="craft-store-ubuntu-one",
+    host="api.charmhub.io",
 )
-developer_token = creds.DeveloperToken(macaroon=store_token)
-test_auth.set_credentials(json.dumps(developer_token.marshal()), force=True)
 
-# 3. Use with PublisherGateway
+# 2. Use with PublisherGateway
+# UbuntuOneAuth handles the macaroon exchange internally.
 gateway = publisher.PublisherGateway(
     base_url="https://api.charmhub.io",
     namespace="charm",
     auth=test_auth,
-    httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
+    httpx_auth=publisher.UbuntuOneAuth(auth=test_auth, api_base_url="https://api.charmhub.io"),
 )
 ```
 
@@ -83,10 +77,6 @@ gateway = publisher.PublisherGateway(
 ### Invalid Credentials
 - Double-check your email and password
 - If using 2FA, ensure OTP is correct
-
-### Validation Error: Invalid macaroon
-- This usually means the authorization header is malformed.
-- Ensure you are NOT prepending "Macaroon " to the string if using `DeveloperTokenAuth`.
 
 ## Related Files
 - Script: `/home/lengau/Work/Code/craft-store/scripts/usso_login_demo.py`

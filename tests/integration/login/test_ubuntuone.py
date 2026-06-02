@@ -208,25 +208,21 @@ def test_ubuntu_one_login_with_convenience_method(
     assert discharged is not None
 
     # Use with PublisherGateway
-    # login_with already saved the store token in the keyring under f"{app_name}-store-token"
-    store_token_auth = auth.Auth(
-        application_name=f"{test_app_name}-store-token",
+    # We use UbuntuOneAuth which handles the exchange internally using the
+    # saved root/discharge macaroon pair.
+    u1_auth = auth.Auth(
+        application_name=test_app_name,
         host=host,
     )
 
     gateway = publisher.PublisherGateway(
         base_url=charmhub_base_url,
         namespace="charm",
-        auth=store_token_auth,
-        httpx_auth=DeveloperTokenAuth(auth=store_token_auth, auth_type="macaroon"),
+        auth=u1_auth,
+        httpx_auth=publisher.UbuntuOneAuth(auth=u1_auth, api_base_url=charmhub_base_url),
     )
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email
 
-    # Clean up both keyring entries
-    store_token_auth.del_credentials()
-    u1_auth = auth.Auth(
-        application_name=test_app_name,
-        host=host,
-    )
+    # Clean up keyring entry
     u1_auth.del_credentials()
