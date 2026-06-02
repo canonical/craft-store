@@ -160,7 +160,7 @@ class PublisherGateway:
         """
         response = self._client.get("/v1/tokens/whoami")
         self._check_error(response)
-        return dict(response.json())
+        return self._check_keys(response, expected_keys=set())
 
     def register_name(
         self,

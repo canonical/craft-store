@@ -167,7 +167,7 @@ def test_ubuntu_one_auth_flow(
         url="https://api.example.test/v1/tokens/usso/exchange",
         json={"macaroon": "store-token"},
     )
-    expected_headers = {"Authorization": "macaroon store-token"}
+    expected_headers = {"Authorization": "Macaroon store-token"}
 
     client = httpx.Client(auth=ubuntu_one_auth)
     httpx_mock.add_response(

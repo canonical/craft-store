@@ -67,7 +67,7 @@ class UbuntuOneLogin:
             application_name=application_name,
             host=urlparse(self._api_base_url).netloc,
             ephemeral=False,
-            file_fallback=True,
+            file_fallback=False,
         )
 
     @classmethod

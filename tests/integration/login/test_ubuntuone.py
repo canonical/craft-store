@@ -72,10 +72,10 @@ def test_ubuntu_one_login_with_publisher_gateway(
     assert macaroon is not None
     assert macaroon.serialize() is not None
 
-    # Step 3: Create an Auth object (not used for requests in this test)
     test_auth = auth.Auth(
         application_name="ubuntu-one-login-test",
         host=urlparse(charmhub_base_url).netloc,
+        file_fallback=True,
     )
     # Step 4: Create a PublisherGateway with the authenticated Auth
     gateway = publisher.PublisherGateway(
@@ -92,8 +92,7 @@ def test_ubuntu_one_login_with_publisher_gateway(
     # Note: we can't call gateway.whoami() here because we only have a root
     # macaroon without a discharge. Real discharge requires credentials.
 
-    # Clean up: remove credentials
-    test_auth.del_credentials()
+    # No credentials were stored in this test, so no cleanup is required.
 
 
 @pytest.mark.slow
@@ -101,10 +100,8 @@ def test_ubuntu_one_login_discharge_with_existing_auth(
     charmhub_login_url,
     charmhub_base_url,
 ):
-    """Test discharging a macaroon when existing Auth credentials are present.
+    """Test requesting an unsigned macaroon from Charmhub.
 
-    This test shows how to use UbuntuOneLogin to request a new macaroon
-    even when the Auth object already has existing credentials.
     Requires internet access to reach the real Charmhub API.
     """
     login_client = UbuntuOneLogin(
@@ -147,7 +144,7 @@ def test_ubuntu_one_login_with_charmhub_whoami(
     # Store in Auth
     test_auth = auth.Auth(
         application_name="ubuntu-one-login-whoami-test",
-        host=charmhub_base_url,
+        host=urlparse(charmhub_base_url).netloc,
     )
 
     # Note: Using just a root macaroon as a developer token will fail if
@@ -162,6 +159,7 @@ def test_ubuntu_one_login_with_charmhub_whoami(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=test_auth,
+        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
     )
 
     # Verify the gateway is properly configured
@@ -207,6 +205,7 @@ def test_ubuntu_one_login_with_convenience_method(
     u1_auth = auth.Auth(
         application_name=test_app_name,
         host=host,
+        file_fallback=True,
     )
 
     gateway = publisher.PublisherGateway(
