@@ -19,9 +19,20 @@
 import os
 from urllib.parse import urlparse
 
+import keyring
 import pytest
 from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, publisher
+from craft_store.auth import MemoryKeyring
 from craft_store.login import UbuntuOneLogin
+
+
+@pytest.fixture(autouse=True)
+def _test_keyring():
+    """In memory keyring backend for testing."""
+    current_keyring = keyring.get_keyring()
+    keyring.set_keyring(MemoryKeyring())
+    yield
+    keyring.set_keyring(current_keyring)
 
 
 @pytest.fixture
