@@ -288,7 +288,7 @@ class UbuntuOneLogin:
         discharge_response.raise_for_status()
         try:
             discharge_macaroon = str(discharge_response.json()["discharge_macaroon"])
-        except (TypeError, KeyError) as exc:
+        except (ValueError, TypeError, KeyError) as exc:
             raise errors.InvalidResponseError(
                 discharge_response,
                 details="Missing 'discharge_macaroon' in /api/v2/tokens/discharge response",
