@@ -105,7 +105,7 @@ The ``login_with`` method can raise specific errors if the authentication fails.
    from craft_store import errors
 
    try:
-       login_client.login_with(...)
+       UbuntuOneLogin.login_with(...)
    except errors.UbuntuOneOtpRequiredError:
        print("Your account requires two-factor authentication. Please provide an OTP.")
    except errors.UbuntuOneCredentialsError:
