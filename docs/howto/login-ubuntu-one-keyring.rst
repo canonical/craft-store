@@ -36,12 +36,12 @@ root/discharge macaroon pair in your system keyring.
 
 .. code-block:: python
 
-   login_client.login_with(
+   UbuntuOneLogin.login_with(
        email="<email>",
        password="<password>",
        api_base_url="https://api.charmhub.io",
        otp="<otp>",  # Optional: required if two-factor authentication is enabled
-       permissions=["account-view-packages", "account-register-package"]
+       permissions=["account-view-packages", "account-register-package"],
    )
 
 Replace ``<email>``, ``<password>``, and ``<otp>`` with your actual credentials.
