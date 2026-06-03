@@ -206,7 +206,7 @@ class UbuntuOneLogin:
             request_object["packages"] = list(packages)
 
         # Construct the macaroon request endpoint
-        macaroon_url = f"{self._api_base_url}/v1/tokens/usso"
+        macaroon_url = urljoin(f"{self._api_base_url.rstrip('/')}/", "v1/tokens/usso")
 
         macaroon_response = httpx.post(
             macaroon_url,
@@ -216,7 +216,7 @@ class UbuntuOneLogin:
         macaroon_response.raise_for_status()
         try:
             macaroon = str(macaroon_response.json()["macaroon"])
-        except (TypeError, KeyError) as exc:
+        except (ValueError, TypeError, KeyError) as exc:
             raise errors.InvalidResponseError(
                 macaroon_response,
                 details="Missing 'macaroon' in /v1/tokens/usso response",
@@ -236,7 +236,10 @@ class UbuntuOneLogin:
 
         # Try to find caveat by location matching our login host
         for caveat in caveats:
-            if caveat.location and login_host in caveat.location:
+            if not caveat.location:
+                continue
+            caveat_host = urlparse(caveat.location).netloc or caveat.location
+            if caveat_host == login_host:
                 return caveat
 
         # Fall back to any caveat with a location

@@ -145,4 +145,10 @@ class UbuntuOneAuth(httpx.Auth):
             timeout=60.0,
         )
         response.raise_for_status()
-        return str(response.json()["macaroon"])
+        try:
+            return str(response.json()["macaroon"])
+        except (TypeError, KeyError) as exc:
+            raise errors.InvalidResponseError(
+                response,
+                details="Missing 'macaroon' in /v1/tokens/usso/exchange response",
+            ) from exc
