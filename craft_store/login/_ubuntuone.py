@@ -283,9 +283,14 @@ class UbuntuOneLogin:
             timeout=60.0,
         )
         discharge_response.raise_for_status()
-        return pymacaroons.Macaroon.deserialize(
-            discharge_response.json()["discharge_macaroon"]
-        )
+        try:
+            discharge_macaroon = str(discharge_response.json()["discharge_macaroon"])
+        except (TypeError, KeyError) as exc:
+            raise errors.InvalidResponseError(
+                discharge_response,
+                details="Missing 'discharge_macaroon' in /api/v2/tokens/discharge response",
+            ) from exc
+        return pymacaroons.Macaroon.deserialize(discharge_macaroon)
 
     def _save_credentials(
         self,
