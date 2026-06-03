@@ -19,13 +19,12 @@ Before you begin, ensure you have:
 Initialize the login client
 ---------------------------
 
-Create an instance of ``UbuntuOneLogin``, providing the API base URL for Charmhub.
+Create an instance of ``UbuntuOneLogin`` if you need to customize defaults; otherwise
+you can call the ``UbuntuOneLogin.login_with`` classmethod directly.
 
 .. code-block:: python
 
    from craft_store.login import UbuntuOneLogin
-
-   login_client = UbuntuOneLogin("https://api.charmhub.io")
 
 Authenticate and save credentials
 ---------------------------------
