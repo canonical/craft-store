@@ -313,10 +313,10 @@ class BaseClient(metaclass=ABCMeta):
 
         :returns: The path and query string (as a single string) of the status URL.
 
-        API docs: http://api.staging.charmhub.io/docs/default.html#push_resource
+        API docs: http://api.staging.charmhub.io/docs/default/#push-resource
 
         The status URL returned is likely a pointer to ``list_upload_reviews``:
-        http://api.staging.charmhub.io/docs/default.html#list_upload_reviews
+        http://api.staging.charmhub.io/docs/default/#list-upload-reviews
         """
         endpoint = self._base_url + self._endpoints.get_resource_revisions_endpoint(
             name, resource_name
@@ -341,7 +341,7 @@ class BaseClient(metaclass=ABCMeta):
         :param name: the package to lookup.
         :returns: a list of revisions that have been uploaded for this package.
 
-        Charmhub example: https://api.charmhub.io/docs/default.html#list_revisions
+        Charmhub example: https://api.charmhub.io/docs/default/#list-revisions
         """
         endpoint = self._endpoints.get_revisions_endpoint(name)
         response = self.request("GET", self._base_url + endpoint).json()
