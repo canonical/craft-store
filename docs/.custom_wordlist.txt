@@ -5,6 +5,7 @@ Canonical('s)?
 Charmcraft
 cjk
 cryptographically
+datetime
 docstrings?
 dvipng
 fonts
@@ -16,6 +17,7 @@ GPG
 gyre
 html
 https
+httpx
 Intersphinx
 io
 ip
@@ -24,6 +26,8 @@ lang
 lastmod
 LaTeX
 latexmk
+libssl
+macaroonbakery
 Makefile
 Multipass
 MyST
@@ -35,6 +39,7 @@ PDF
 plantuml
 PNG
 PR
+Pydantic
 Pygments
 pymarkdown
 QEMU
@@ -59,12 +64,15 @@ TOC
 toctree
 txt
 uncomment(ing)?
+unregistering
 URL
+urllib
 utils
 VMs
 WCAG
 whitespace
 whitespaces
+whoami
 wordlist
 xetex
 xindy
