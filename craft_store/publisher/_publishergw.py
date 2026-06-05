@@ -58,11 +58,18 @@ class PublisherGateway:
     Each instance is only valid for one particular namespace.
     """
 
-    def __init__(self, base_url: str, namespace: str, auth: Auth) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        namespace: str,
+        auth: Auth,
+        httpx_auth: httpx.Auth | None = None,
+    ) -> None:
         self._namespace = namespace
         self._client = httpx.Client(
             base_url=base_url,
-            auth=CandidAuth(auth=auth, auth_type="macaroon"),
+            auth=httpx_auth or CandidAuth(auth=auth, auth_type="macaroon"),
+            timeout=60.0,
         )
 
     @staticmethod
@@ -145,6 +152,15 @@ class PublisherGateway:
         self._check_error(response)
         results = self._check_keys(response, expected_keys={"results"})["results"]
         return [RegisteredName.unmarshal(item) for item in results]
+
+    def whoami(self) -> dict[str, Any]:
+        """Return whoami json data.
+
+        API docs: https://api.charmhub.io/docs/default.html#whoami
+        """
+        response = self._client.get("/v1/tokens/whoami")
+        self._check_error(response)
+        return self._check_keys(response, expected_keys=set())
 
     def register_name(
         self,
