@@ -7,6 +7,5 @@ How-to guides
    :maxdepth: 1
 
    environment-credentials
-   login-ubuntu-one-keyring
    craft-cli-upload-progress
    upload-package-with-resources
