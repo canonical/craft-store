@@ -125,4 +125,4 @@ log in.
        # This happens automatically when the gateway uses auth
        names = gateway.list_registered_names()
    except errors.CredentialsUnavailable:
-       print("No credentials found. Please run the login step first.")
+       print("No credentials found. Run the login step first.")
