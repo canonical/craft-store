@@ -23,6 +23,7 @@ from typing import Literal
 
 import httpx
 from pymacaroons import Macaroon  # type: ignore[import-untyped]
+from typing_extensions import override
 
 from craft_store import auth, creds, errors
 
@@ -40,6 +41,7 @@ class _TokenAuth(httpx.Auth, metaclass=abc.ABCMeta):
         self._auth = auth
         self._auth_type = auth_type
 
+    @override
     def auth_flow(
         self,
         request: httpx.Request,

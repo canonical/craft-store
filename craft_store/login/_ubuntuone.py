@@ -16,6 +16,7 @@
 
 import logging
 from collections.abc import Collection
+from http import HTTPStatus
 from urllib.parse import urljoin, urlparse
 
 import httpx
@@ -24,6 +25,8 @@ import pymacaroons  # type: ignore[import-untyped]
 from craft_store import auth, creds, errors
 
 logger = logging.getLogger(__name__)
+
+_SECONDS_PER_DAY = 86_400
 
 
 class UbuntuOneLogin:
@@ -43,7 +46,8 @@ class UbuntuOneLogin:
             permissions=["package-view"],
         )
 
-    :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+    :param api_base_url: The base URL for the store API. Commonly set to Charmhub
+        (``https://api.charmhub.io``) or Snapcraft (``https://dashboard.snapcraft.io``).
     :param login_url: The base URL for Ubuntu One login. Defaults to
         ``https://login.ubuntu.com``.
     :param application_name: The name of the application using this client.
@@ -54,13 +58,13 @@ class UbuntuOneLogin:
         self,
         api_base_url: str,
         *,
-        login_url: str | None = None,
-        application_name: str = "craft-store-ubuntu-one",
+        login_url: str = "https://login.ubuntu.com",
+        application_name: str = "craft-store",
         store_auth: auth.Auth | None = None,
     ) -> None:
         """Create a login client."""
-        self._login_url = login_url or "https://login.ubuntu.com"
-        self._api_base_url = api_base_url
+        self._login_url = login_url
+        self._api_base_url = urlparse(api_base_url).geturl()
         self._application_name = application_name
         self._store_auth = store_auth or auth.Auth(
             application_name=application_name,
@@ -76,14 +80,14 @@ class UbuntuOneLogin:
         password: str,
         *,
         api_base_url: str,
-        login_url: str | None = None,
-        application_name: str = "craft-store-ubuntu-one",
+        login_url: str = "https://login.ubuntu.com",
+        application_name: str = "craft-store",
         store_auth: auth.Auth | None = None,
         otp: str | None = None,
         permissions: Collection[str] | None = None,
         channels: Collection[str] | None = None,
         packages: Collection[str] | None = None,
-        ttl: int | None = None,
+        ttl: int = _SECONDS_PER_DAY,
     ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
         """Login with Ubuntu One credentials and return root and discharged macaroons.
 
@@ -92,27 +96,26 @@ class UbuntuOneLogin:
 
         :param email: Ubuntu One email address.
         :param password: Ubuntu One password.
-        :param api_base_url: The base URL for the store API (e.g., Charmhub, Snapcraft).
+        :param api_base_url: The base URL for the store API. Commonly set to Charmhub
+            (``https://api.charmhub.io``) or Snapcraft (``https://dashboard.snapcraft.io``).
         :param login_url: The base URL for Ubuntu One login. Defaults to
             ``https://login.ubuntu.com``.
         :param application_name: The name of the application using this client.
         :param store_auth: An optional :class:`craft_store.auth.Auth` instance to use.
         :param otp: Optional one-time password for two-factor authentication.
-        :param permissions: List of permission strings to request (e.g.,
-            ``["package-view"]``). If not provided, defaults to
-            ``["account-view-packages"]``. See store API documentation for valid
-            permission values.
+        :param permissions: List of permission strings to request. If not provided,
+            defaults to ``["account-view-packages"]``. See store API documentation for
+            valid permission values.
         :param channels: Optional list of channel names to restrict access to.
         :param packages: Optional list of package specs to restrict access to.
-        :param ttl: Time-to-live in seconds for the macaroon. Defaults to 86400
-            (24 hours).
+        :param ttl: Time-to-live in seconds for the macaroon. Defaults to 24 hours.
 
         :return: A tuple of (root_macaroon, discharged_macaroon) ready for use with the
             store API. The header should be formatted as:
             ``Macaroon root={root.serialize()}, discharge={root.prepare_for_request(discharged).serialize()}``
 
         :raises httpx.HTTPStatusError: If any HTTP request fails.
-        :raises ValueError: If the macaroon has invalid caveats.
+        :raises craft_store.errors.CraftStoreError: If the macaroon has invalid caveats.
         :raises craft_store.errors.UbuntuOneOtpRequiredError: If two-factor
             authentication is required but no OTP was provided.
         :raises craft_store.errors.UbuntuOneCredentialsError: If the provided
@@ -143,7 +146,7 @@ class UbuntuOneLogin:
         permissions: Collection[str] | None = None,
         channels: Collection[str] | None = None,
         packages: Collection[str] | None = None,
-        ttl: int | None = None,
+        ttl: int = _SECONDS_PER_DAY,
     ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
         """Login with Ubuntu One credentials and return root and discharged macaroons."""
         if permissions is None:
@@ -165,7 +168,10 @@ class UbuntuOneLogin:
         except httpx.HTTPStatusError as exc:
             if self._is_otp_required(exc):
                 raise errors.UbuntuOneOtpRequiredError from exc
-            if exc.response.status_code in {400, 401}:
+            if exc.response.status_code in {
+                HTTPStatus.BAD_REQUEST,
+                HTTPStatus.UNAUTHORIZED,
+            }:
                 raise errors.UbuntuOneCredentialsError from exc
             raise
 
@@ -178,7 +184,7 @@ class UbuntuOneLogin:
         permissions: Collection[str],
         channels: Collection[str] | None = None,
         packages: Collection[str] | None = None,
-        ttl: int | None = None,
+        ttl: int = _SECONDS_PER_DAY,
     ) -> pymacaroons.Macaroon:
         """Request an unsigned macaroon from the store API.
 
@@ -193,9 +199,6 @@ class UbuntuOneLogin:
 
         :raises httpx.HTTPStatusError: If the request to the store API fails.
         """
-        if ttl is None:
-            ttl = 86400  # 24 hours default
-
         request_object = {
             "permissions": list(permissions),
             "ttl": ttl,
@@ -206,7 +209,7 @@ class UbuntuOneLogin:
             request_object["packages"] = list(packages)
 
         # Construct the macaroon request endpoint
-        macaroon_url = urljoin(f"{self._api_base_url.rstrip('/')}/", "v1/tokens/usso")
+        macaroon_url = urljoin(self._api_base_url, "v1/tokens/usso")
 
         macaroon_response = httpx.post(
             macaroon_url,
@@ -228,7 +231,9 @@ class UbuntuOneLogin:
     ) -> pymacaroons.Caveat:
         match len(caveats):
             case 0:
-                raise ValueError("Invalid macaroon: no third-party caveats found")
+                raise errors.CraftStoreError(
+                    "Invalid macaroon: no third-party caveats found"
+                )
             case 1:
                 return caveats[0]
 
