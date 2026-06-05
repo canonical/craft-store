@@ -7,7 +7,7 @@ Explanation
 ***********
 
 Explanations provide a wider perspective of Craft Store. They aid in understanding the
-concepts and relationships of Starcraft as a complete system.
+concepts and relationships of Craft Store as a complete system.
 
 .. toctree::
    :hidden:

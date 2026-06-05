@@ -1,5 +1,5 @@
 .. meta::
-  :description: An explanation of the documentation system, process, and writing style and conventions in Starcraft.
+  :description: An explanation of the documentation system, process, and writing style and conventions in Craft Store.
 
 
 .. _explanation-documentation:
@@ -7,16 +7,16 @@
 About this documentation
 ========================
 
-The documentation is an essential part of Starcraft. We make documentation a disciplined
+The documentation is an essential part of Craft Store. We make documentation a disciplined
 and principled part of engineering with its own architecture and quality standards.
 
 
 Documentation system and process
 --------------------------------
 
-Starcraft practices docs-as-code. The document source files are written in
-reStructuredText markup and kept inside the Starcraft source code. Like the rest of the
-code, the documents are version-controlled in a Git repository and hosted on GitHub.
+Craft Store practices docs-as-code. The document source files are written in
+reStructuredText markup and kept inside the Craft Store source code. Like the rest of
+the code, the documents are version-controlled in a Git repository and hosted on GitHub.
 
 The project uses Sphinx to compile the document sources into a static website of HTML
 web pages. The published documentation is hosted on the Read the Docs platform.
@@ -27,15 +27,15 @@ for each release.
 
 Writing and editing in the docs-as-code style follows a write-build-preview loop.
 
-The Starcraft maintainers try and review every PR in a timely manner, typically within a
-week for PRs that complete an assigned issue. They aim to ensure that all contributions
-are reviewed thoroughly and thoughtfully.
+The Craft Store maintainers try and review every PR in a timely manner, typically within
+a week for PRs that complete an assigned issue. They aim to ensure that all
+contributions are reviewed thoroughly and thoughtfully.
 
 
 Writing styles and conventions
 ------------------------------
 
-There is no single way to write, but there are guidelines and patterns that Starcraft
+There is no single way to write, but there are guidelines and patterns that Craft Store
 documents follow:
 
 - `Diátaxis <https://diataxis.fr>`__

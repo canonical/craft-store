@@ -99,14 +99,14 @@ html_context = {
         # https://spdx.org/licenses
         "name": "LGPL-3.0",
         # TODO: Link directly to your project's license statement.
-        "url": "https://github.com/canonical/starbase/blob/main/LICENSE",
+        "url": "https://github.com/canonical/craft-store/blob/main/LICENSE",
     },
 }
 
 # TODO: To enable the edit button on pages, change the link to your public repository on
 # GitHub or Launchpad.
 html_theme_options = {
-  "source_edit_link": "https://github.com/canonical/starbase",
+  "source_edit_link": "https://github.com/canonical/craft-store",
 }
 
 # TODO: If your documentation is hosted on https://documentation.ubuntu.com/,
@@ -170,8 +170,8 @@ rediraffe_dir_only = True
 # <first sentence of home page>".
 llms_txt_description = textwrap.dedent(
     """\
-    This is the documentation for Starbase, a template repository for setting up
-    and maintaining Starcraft projects.
+    This is the documentation for Craft Store, a Python library for interacting with a
+    Canonical storefront, such as the Snap Store or Charmhub.
     """
 )
 

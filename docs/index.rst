@@ -1,5 +1,5 @@
 .. meta::
-    :description: Craft Store is a Python library for interacting with Canonical Stores, such as Charmhub and the Snap Store.
+    :description: Craft Store is the Python library for interacting with Canonical stores, such as Charmhub and the Snap Store.
 
 Craft Store
 ===========
