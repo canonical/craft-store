@@ -247,10 +247,9 @@ class AuthTokenUnavailableError(CraftStoreError):
 class UbuntuOneCredentialsError(CraftStoreError):
     """Raised when Ubuntu One credentials are incorrect."""
 
-    def __init__(self) -> None:
-        super().__init__(
-            "Ubuntu One credentials were rejected. Check your password and OTP."
-        )
+    def __init__(self, message: str, *, error_code: str) -> None:
+        self.error_code = error_code
+        super().__init__(message)
 
 
 class UbuntuOneOtpRequiredError(CraftStoreError):

@@ -177,3 +177,24 @@ def test_ubuntu_one_auth_flow(
         match_headers=expected_headers,
     )
     client.request("GET", "https://fake-testcraft-url.localhost")
+
+
+def test_ubuntu_one_auth_flow_exposes_exchange_error_details(
+    ubuntu_one_auth: UbuntuOneAuth,
+    httpx_mock: pytest_httpx.HTTPXMock,
+) -> None:
+    httpx_mock.add_response(
+        method="POST",
+        url="https://api.example.test/v1/tokens/usso/exchange",
+        status_code=401,
+        json={
+            "error-list": [{"code": "bad-token", "message": "Invalid USSO macaroons"}]
+        },
+    )
+
+    client = httpx.Client(auth=ubuntu_one_auth)
+
+    with pytest.raises(errors.CraftStoreError) as exc_info:
+        client.request("GET", "https://fake-testcraft-url.localhost")
+
+    assert exc_info.value.details == "Invalid USSO macaroons"

@@ -17,18 +17,19 @@
 """Integration tests for Ubuntu One login with PublisherGateway."""
 
 import os
+import time
 from urllib.parse import urlparse
 
 import keyring
 import pytest
-from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, publisher
+from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, errors, publisher
 from craft_store.auth import MemoryKeyring
 from craft_store.login import UbuntuOneLogin
 
 
 @pytest.fixture(autouse=True)
 def _test_keyring():
-    """In memory keyring backend for testing."""
+    """In-memory keyring backend for testing."""
     current_keyring = keyring.get_keyring()
     keyring.set_keyring(MemoryKeyring())
     yield
@@ -36,7 +37,7 @@ def _test_keyring():
 
 
 @pytest.fixture
-def charmhub_login_url():
+def charmhub_login_url() -> str:
     """Get the login URL for Charmhub."""
     return os.getenv("CRAFT_LOGIN_URL", "https://login.staging.ubuntu.com")
 
@@ -53,35 +54,22 @@ def staging_sso_credentials():
 
 @pytest.mark.slow
 def test_ubuntu_one_login_smoke(
-    charmhub_login_url,
-    charmhub_base_url,
-):
-    """Smoke test for UbuntuOneLogin and PublisherGateway connectivity.
-
-    This test verifies that:
-    1. A UbuntuOneLogin client can be created.
-    2. An unsigned macaroon can be requested from the store API.
-    3. A PublisherGateway can be correctly instantiated.
-
-    This test requires internet access to reach the real Charmhub API,
-    but does not require valid Ubuntu One credentials.
-    """
-    # Step 1: Create a UbuntuOneLogin instance
+    charmhub_login_url: str,
+    charmhub_base_url: str,
+) -> None:
+    """Smoke test for UbuntuOneLogin and PublisherGateway connectivity."""
     login_client = UbuntuOneLogin(
         api_base_url=charmhub_base_url,
         login_url=charmhub_login_url,
     )
 
-    # Step 2: Request an unsigned macaroon
     macaroon = login_client._get_macaroon(
         permissions=["package-view"],
     )
 
-    # Verify we got a valid macaroon
     assert macaroon is not None
     assert macaroon.serialize() is not None
 
-    # Step 3: Verify PublisherGateway can be configured
     test_auth = auth.Auth(
         application_name="ubuntu-one-login-smoke-test",
         host=urlparse(charmhub_base_url).netloc,
@@ -99,22 +87,15 @@ def test_ubuntu_one_login_smoke(
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(30)
 def test_ubuntu_one_login_with_convenience_method(
-    charmhub_login_url,
-    charmhub_base_url,
+    charmhub_login_url: str,
+    charmhub_base_url: str,
     staging_sso_credentials,
-):
-    """Test the convenience login_with() method that does everything in one call.
-
-    This demonstrates the simplest usage pattern for the UbuntuOneLogin class.
-    Requires internet access and valid Charmhub credentials.
-    """
+) -> None:
+    """Test the convenience login_with() method that does everything in one call."""
     email, password = staging_sso_credentials
-
-    # Perform a real login
     test_app_name = "ubuntu-one-login-convenience-test"
-    # We need to use the netloc as the host for Auth, consistent with how
-    # UbuntuOneLogin does it.
     host = urlparse(charmhub_base_url).netloc
 
     root, discharged = UbuntuOneLogin.login_with(
@@ -123,13 +104,11 @@ def test_ubuntu_one_login_with_convenience_method(
         login_url=charmhub_login_url,
         api_base_url=charmhub_base_url,
         application_name=test_app_name,
+        otp=None,
     )
     assert root is not None
     assert discharged is not None
 
-    # Use with PublisherGateway
-    # We use UbuntuOneAuth which handles the exchange internally using the
-    # saved root/discharge macaroon pair.
     u1_auth = auth.Auth(
         application_name=test_app_name,
         host=host,
@@ -145,5 +124,153 @@ def test_ubuntu_one_login_with_convenience_method(
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email
 
-    # Clean up keyring entry
     u1_auth.del_credentials()
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(30)
+def test_ubuntu_one_login_with_keyring_reuse_real(
+    charmhub_login_url: str,
+    charmhub_base_url: str,
+    staging_sso_credentials,
+) -> None:
+    """Test that credentials can be cached and reused from the keyring."""
+    email, password = staging_sso_credentials
+    test_app_name = "ubuntu-one-login-keyring-reuse-real-test"
+    host = urlparse(charmhub_base_url).netloc
+
+    _perform_login_real(
+        email, password, charmhub_login_url, charmhub_base_url, test_app_name
+    )
+
+    user_info, test_auth = _retrieve_from_keyring_real(
+        charmhub_base_url, test_app_name, host
+    )
+
+    assert user_info["account"]["email"] == email
+
+    test_auth.del_credentials()
+
+
+def _perform_login_real(
+    email: str,
+    password: str,
+    charmhub_login_url: str,
+    charmhub_base_url: str,
+    test_app_name: str,
+) -> None:
+    """Perform a real login with fresh objects."""
+    try:
+        root, discharged = UbuntuOneLogin.login_with(
+            email,
+            password,
+            api_base_url=charmhub_base_url,
+            login_url=charmhub_login_url,
+            application_name=test_app_name,
+            otp=None,
+        )
+    except Exception as exc:
+        if "otp" in str(exc).lower() or "two.factor" in str(exc).lower():
+            pytest.skip(f"OTP required: {exc}")
+        raise
+
+    assert root is not None
+    assert discharged is not None
+
+
+def _retrieve_from_keyring_real(
+    charmhub_base_url: str,
+    test_app_name: str,
+    host: str,
+) -> tuple[dict, auth.Auth]:
+    """Retrieve credentials from the keyring with fresh objects."""
+    new_auth = auth.Auth(
+        application_name=test_app_name,
+        host=host,
+        file_fallback=True,
+    )
+    new_gateway = publisher.PublisherGateway(
+        base_url=charmhub_base_url,
+        namespace="charm",
+        auth=new_auth,
+        httpx_auth=UbuntuOneAuth(auth=new_auth, api_base_url=charmhub_base_url),
+    )
+    user_info = new_gateway.whoami()
+    return user_info, new_auth
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(30)
+def test_ubuntu_one_login_with_expired_ttl_real(
+    charmhub_login_url: str,
+    charmhub_base_url: str,
+    staging_sso_credentials,
+) -> None:
+    """Login with real credentials, let the token expire, and assert the error."""
+    email, password = staging_sso_credentials
+    test_app_name = "ubuntu-one-login-expired-ttl-test"
+    host = urlparse(charmhub_base_url).netloc
+
+    UbuntuOneLogin.login_with(
+        email,
+        password,
+        api_base_url=charmhub_base_url,
+        login_url=charmhub_login_url,
+        application_name=test_app_name,
+        otp=None,
+        ttl=10,  # Shortest allowed TTL
+    )
+
+    local_auth = auth.Auth(
+        application_name=test_app_name,
+        host=host,
+        file_fallback=True,
+    )
+    gateway = publisher.PublisherGateway(
+        base_url=charmhub_base_url,
+        namespace="charm",
+        auth=local_auth,
+        httpx_auth=UbuntuOneAuth(auth=local_auth, api_base_url=charmhub_base_url),
+    )
+
+    user_info = gateway.whoami()
+    assert user_info["account"]["email"] == email
+
+    time.sleep(10)  # Expire the macaroon
+
+    with pytest.raises(errors.CraftStoreError, match="Error 401 returned from store."):
+        gateway.whoami()
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(30)
+@pytest.mark.parametrize(
+    ("ttl", "message"),
+    [
+        (3, "3 is less than the minimum of 10 at /ttl"),
+        (10**9, "1000000000 is greater than the maximum of 31536000 at /ttl"),
+    ],
+)
+def test_ubuntu_one_login_with_invalid_ttl_real(
+    charmhub_login_url: str,
+    charmhub_base_url: str,
+    staging_sso_credentials,
+    ttl: int,
+    message: str,
+) -> None:
+    """Login with a TTL that the server rejects and assert the error."""
+    email, password = staging_sso_credentials
+    test_app_name = f"ubuntu-one-login-invalid-ttl-{ttl}-test"
+
+    with pytest.raises(errors.InvalidRequestError, match=message) as exc_info:
+        UbuntuOneLogin.login_with(
+            email,
+            password,
+            api_base_url=charmhub_base_url,
+            login_url=charmhub_login_url,
+            application_name=test_app_name,
+            otp=None,
+            ttl=ttl,
+        )
+
+    assert exc_info.value.details == "api-error"

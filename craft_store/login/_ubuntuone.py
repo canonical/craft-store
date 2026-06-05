@@ -172,7 +172,14 @@ class UbuntuOneLogin:
                 HTTPStatus.BAD_REQUEST,
                 HTTPStatus.UNAUTHORIZED,
             }:
-                raise errors.UbuntuOneCredentialsError from exc
+                error_message = self._extract_error_message(exc) or (
+                    "Ubuntu One credentials were rejected. Check your password and OTP."
+                )
+                error_code = self._extract_error_code(exc)
+                raise errors.UbuntuOneCredentialsError(
+                    error_message,
+                    error_code=error_code,
+                ) from exc
             raise
 
         self._save_credentials(root, discharged)
@@ -216,7 +223,22 @@ class UbuntuOneLogin:
             json=request_object,
             timeout=60.0,
         )
-        macaroon_response.raise_for_status()
+        try:
+            macaroon_response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code in {
+                HTTPStatus.BAD_REQUEST,
+                HTTPStatus.UNAUTHORIZED,
+            }:
+                error_message = self._extract_error_message(exc) or (
+                    "Ubuntu One rejected the macaroon request."
+                )
+                error_code = self._extract_error_code_optional(exc)
+                raise errors.InvalidRequestError(
+                    error_message,
+                    details=error_code,
+                ) from exc
+            raise
         try:
             macaroon = str(macaroon_response.json()["macaroon"])
         except (ValueError, TypeError, KeyError) as exc:
@@ -334,3 +356,77 @@ class UbuntuOneLogin:
         message = str(response_json.get("message", "")).lower()
         code = str(response_json.get("code", "")).lower()
         return "twofactor-required" in code or "otp required" in message
+
+    @staticmethod
+    def _extract_error_message(exc: httpx.HTTPStatusError) -> str | None:
+        """Extract error message from response body if available."""
+        try:
+            response_json = exc.response.json()
+        except ValueError:
+            return None
+
+        # Try error_list format
+        error_list = response_json.get("error_list") or response_json.get("error-list")
+        if isinstance(error_list, list) and error_list:
+            for error in error_list:
+                if isinstance(error, dict):
+                    message = error.get("message")
+                    if message:
+                        return str(message)
+
+        # Try direct message field
+        message = response_json.get("message")
+        if message:
+            return str(message)
+
+        return None
+
+    @staticmethod
+    def _extract_error_code(exc: httpx.HTTPStatusError) -> str:
+        """Extract the Ubuntu One error code from the response body."""
+        try:
+            response_json = exc.response.json()
+        except ValueError:
+            raise errors.InvalidResponseError(
+                exc.response,
+                details="Missing JSON body in Ubuntu One error response",
+            ) from exc
+
+        code = response_json.get("code")
+        if code:
+            return str(code)
+
+        error_list = response_json.get("error_list") or response_json.get("error-list")
+        if isinstance(error_list, list):
+            for error in error_list:
+                if isinstance(error, dict):
+                    code = error.get("code")
+                    if code:
+                        return str(code)
+
+        raise errors.InvalidResponseError(
+            exc.response,
+            details="Missing 'code' in Ubuntu One error response",
+        )
+
+    @staticmethod
+    def _extract_error_code_optional(exc: httpx.HTTPStatusError) -> str | None:
+        """Extract the Ubuntu One error code from the response body if available."""
+        try:
+            response_json = exc.response.json()
+        except ValueError:
+            return None
+
+        code = response_json.get("code")
+        if code:
+            return str(code)
+
+        error_list = response_json.get("error_list") or response_json.get("error-list")
+        if isinstance(error_list, list):
+            for error in error_list:
+                if isinstance(error, dict):
+                    code = error.get("code")
+                    if code:
+                        return str(code)
+
+        return None

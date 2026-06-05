@@ -88,7 +88,9 @@ def test_login_with_raises_on_bad_credentials(
         },
     )
 
-    with pytest.raises(errors.UbuntuOneCredentialsError, match="password and OTP"):
+    with pytest.raises(
+        errors.UbuntuOneCredentialsError, match="Invalid request data"
+    ) as exc_info:
         UbuntuOneLogin.login_with(
             email="user@example.com",
             password="wrong-password",  # noqa: S106
@@ -98,6 +100,8 @@ def test_login_with_raises_on_bad_credentials(
             otp=otp,
             permissions=["account-view-packages"],
         )
+
+    assert exc_info.value.error_code == "INVALID_DATA"
 
 
 def test_login_with_saves_credentials(
@@ -133,3 +137,41 @@ def test_login_with_saves_credentials(
 
     mock_auth.set_credentials.assert_called_once()
     assert mock_auth.set_credentials.call_args.kwargs == {"force": True}
+
+
+@pytest.mark.parametrize(
+    ("ttl", "message"),
+    [
+        (3, "TTL is too short"),
+        (10**9, "TTL is too long"),
+    ],
+)
+def test_login_with_rejects_invalid_ttl(
+    httpx_mock: pytest_httpx.HTTPXMock,
+    mock_auth,
+    ttl: int,
+    message: str,
+) -> None:
+    httpx_mock.add_response(
+        method="POST",
+        url="https://api.example.test/v1/tokens/usso",
+        status_code=400,
+        json={
+            "code": "INVALID_DATA",
+            "message": message,
+            "error_list": [{"code": "invalid-data", "message": message}],
+        },
+    )
+
+    with pytest.raises(errors.InvalidRequestError, match=message) as exc_info:
+        UbuntuOneLogin.login_with(
+            email="user@example.com",
+            password="correct-password",  # noqa: S106
+            api_base_url="https://api.example.test",
+            login_url="https://login.ubuntu.com",
+            store_auth=mock_auth,
+            permissions=["account-view-packages"],
+            ttl=ttl,
+        )
+
+    assert exc_info.value.details == "INVALID_DATA"

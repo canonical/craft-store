@@ -128,9 +128,26 @@ class UbuntuOneAuth(httpx.Auth):
         return f"Macaroon {self._token}"
 
     def get_token_from_keyring(self) -> str:
-        """Exchange Ubuntu One macaroons stored in the credentials storage."""
-        logger.debug("Getting Ubuntu One macaroons from credential storage")
-        macaroons = creds.unmarshal_u1_credentials(self._auth.get_credentials())
+        """Exchange Ubuntu One macaroons stored in the credentials storage.
+
+        On first call, exchanges the macaroons for a store token and caches it.
+        On subsequent calls, uses the cached token instead of re-exchanging.
+        """
+        logger.debug("Getting credentials from storage")
+        stored_creds = self._auth.get_credentials()
+
+        # Check if this is already a cached store token (not macaroons)
+        # A cached token will be a simple string, while macaroons are JSON with 'r' and 'd' keys
+        try:
+            creds_dict = creds.unmarshal_u1_credentials(stored_creds)
+            # If we get here, it's valid macaroons in dict format, so exchange them
+            logger.debug("Found macaroons; attempting to exchange for store token")
+            macaroons = creds_dict
+        except errors.CredentialsNotParseable:
+            # If unmarshaling fails, treat it as a cached store token
+            logger.debug("Using cached store token from credentials")
+            return stored_creds
+
         root_macaroon = Macaroon.deserialize(macaroons.root)
         discharge_macaroon = Macaroon.deserialize(macaroons.discharge)
         bound_discharge = root_macaroon.prepare_for_request(
@@ -146,11 +163,57 @@ class UbuntuOneAuth(httpx.Auth):
             json={"client-description": self._client_description},
             timeout=60.0,
         )
-        response.raise_for_status()
         try:
-            return str(response.json()["macaroon"])
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            error_message = self._extract_error_message(exc)
+            if error_message:
+                raise errors.CraftStoreError(
+                    "Ubuntu One macaroon exchange failed.",
+                    details=error_message,
+                ) from exc
+            raise
+        try:
+            store_token = str(response.json()["macaroon"])
         except (TypeError, KeyError) as exc:
             raise errors.InvalidResponseError(
                 response,
                 details="Missing 'macaroon' in /v1/tokens/usso/exchange response",
             ) from exc
+
+        # Cache the exchanged token by storing it as the new credentials
+        self._cache_exchange_token(store_token)
+        return store_token
+
+    def _cache_exchange_token(self, token: str) -> None:
+        """Cache the exchanged token by storing it as credentials."""
+        try:
+            self._auth.set_credentials(token, force=True)
+            logger.debug("Cached store token in keyring for future use")
+        except Exception as exc:
+            logger.warning("Failed to cache store token: %s", exc)
+            raise
+
+    @staticmethod
+    def _extract_error_message(exc: httpx.HTTPStatusError) -> str | None:
+        """Extract error message from response body if available."""
+        try:
+            response_json = exc.response.json()
+        except ValueError:
+            return None
+
+        # Try error_list format
+        error_list = response_json.get("error_list") or response_json.get("error-list")
+        if isinstance(error_list, list) and error_list:
+            for error in error_list:
+                if isinstance(error, dict):
+                    message = error.get("message")
+                    if message:
+                        return str(message)
+
+        # Try direct message field
+        message = response_json.get("message")
+        if message:
+            return str(message)
+
+        return None
