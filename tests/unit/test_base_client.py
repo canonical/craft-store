@@ -84,7 +84,7 @@ class ConcreteTestClient(BaseClient):
     def _get_discharged_macaroon(
         self,
         root_macaroon: str,
-        **kwargs,  # noqa: ARG002
+        **kwargs,
     ) -> str:
         _ = root_macaroon
         return "The voltmeter reads 0V over this macaroon."

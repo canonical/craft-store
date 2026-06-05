@@ -55,7 +55,7 @@ def real_macaroon():
 
 @pytest.fixture
 def http_client_request_mock(real_macaroon):
-    def request(*args, **kwargs):  # noqa: ARG001
+    def request(*args, **kwargs):
         if args[1] == "POST" and "tokens" in args[2]:
             response = _fake_response(200, json={"macaroon": real_macaroon})
         elif args[1] == "GET" and "whoami" in args[2]:
@@ -95,7 +95,7 @@ def _bakery_discharge_mock(monkeypatch):
         httpbakery.Client, "acquire_discharge", lambda: token_response_mock
     )
 
-    def mock_discharge(*args, **kwargs):  # noqa: ARG001
+    def mock_discharge(*args, **kwargs):
         return [
             Macaroon(
                 location="fake-server.com",
@@ -419,7 +419,7 @@ def test_store_client_upload_file_with_monitor(tmp_path, http_client_request_moc
     def callback(monitor):
         pass
 
-    def monitor(encoder):  # noqa: ARG001
+    def monitor(encoder):
         return callback
 
     with patch("craft_store.base_client.MultipartEncoder"):
