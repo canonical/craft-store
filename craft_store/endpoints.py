@@ -89,7 +89,7 @@ class Endpoints:
         :param packages: a sequence of :attr:`Package` to limit the requested token to.
         :param channels: a sequence of channels to limit the requested token to.
         """
-        token_request = {
+        token_request: dict[str, Any] = {
             "permissions": permissions,
             "description": description,
             "ttl": ttl,

@@ -35,13 +35,14 @@ FULL_ACCOUNT = {
         pytest.param(BASIC_ACCOUNT, AccountModel(id="123"), id="basic"),
         pytest.param(
             FULL_ACCOUNT,
-            AccountModel(
-                display_name="Display Name",  # pyright: ignore[reportCallIssue]
-                # bug https://github.com/pydantic/pydantic/discussions/3986
-                id="abc123",
-                username="usso-username",
-                validation="unproven",
-                email="charmcrafters@lists.launchpad.net",
+            AccountModel.model_validate(
+                {
+                    "display_name": "Display Name",
+                    "id": "abc123",
+                    "username": "usso-username",
+                    "validation": "unproven",
+                    "email": "charmcrafters@lists.launchpad.net",
+                }
             ),
             id="fully-described",
         ),
