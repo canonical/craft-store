@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import cast
 
 from craft_store.models import release_request_model
 
@@ -51,10 +50,7 @@ def test_release_unmarshal_and_marshal():
         ],
     }
 
-    model = cast(
-        release_request_model.ReleaseRequestModel,
-        release_request_model.ReleaseRequestModel.unmarshal(payload),
-    )
+    model = release_request_model.ReleaseRequestModel.unmarshal(payload)
 
     assert model.channel == "stable"
     assert model.revision == 2
