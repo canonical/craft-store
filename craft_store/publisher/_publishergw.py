@@ -102,12 +102,13 @@ class PublisherGateway:
         except RuntimeError:
             details = None
         else:
-            details = f"Error occurred on {request.method} request to {response.url}"
+            details = f"Error occurred on {request.method} request to {request.url}"
             if request.content:
-                logger.debug(
-                    "Request content: %s",
-                    request.content.decode("utf-8", errors="replace"),
-                )
+                content = request.content
+                max_len = 2048
+                decoded = content[:max_len].decode("utf-8", errors="replace")
+                suffix = "" if len(content) <= max_len else f"... (truncated, {len(content)} bytes total)"
+                logger.debug("Request content: %s%s", decoded, suffix)
 
         raise errors.CraftStoreError(brief, details=details)
 
