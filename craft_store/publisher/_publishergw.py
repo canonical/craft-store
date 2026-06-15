@@ -97,7 +97,17 @@ class PublisherGateway:
             # duplicated.
             logger.debug(f"Errors from the store:\n{errors.StoreErrorList(error_list)}")
 
-        raise errors.CraftStoreError(brief)
+        try:
+            request = response.request
+        except RuntimeError:
+            details = None
+        else:
+            details = f"Error occurred on {request.method} request to {response.url}"
+            if request.content:
+                details += "\nRequest content: "
+                details += request.content.decode()
+
+        raise errors.CraftStoreError(brief, details=details)
 
     @staticmethod
     def _check_keys(
