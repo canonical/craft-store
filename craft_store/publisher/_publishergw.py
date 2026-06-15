@@ -104,8 +104,10 @@ class PublisherGateway:
         else:
             details = f"Error occurred on {request.method} request to {response.url}"
             if request.content:
-                details += "\nRequest content: "
-                details += request.content.decode()
+                logger.debug(
+                    "Request content: %s",
+                    request.content.decode("utf-8", errors="replace"),
+                )
 
         raise errors.CraftStoreError(brief, details=details)
 
