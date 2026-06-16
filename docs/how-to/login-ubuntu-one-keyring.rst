@@ -16,24 +16,16 @@ Before you begin, ensure you have:
 *   The ``craft-store`` library installed.
 *   A functional system keyring, such as GNOME Keyring or KWallet.
 
-Initialize the login client
----------------------------
+Authenticate and save credentials
+----------------------------------
 
-Create an instance of ``UbuntuOneLogin`` if you need to customize defaults; otherwise
-you can call the ``UbuntuOneLogin.login_with`` classmethod directly.
+Use :meth:`~craft_store.login.UbuntuOneLogin.login_with` to authenticate. This method
+requests a macaroon from Charmhub, discharges it using your Ubuntu One credentials,
+and saves the resulting root/discharge macaroon pair in your system keyring.
 
 .. code-block:: python
 
    from craft_store.login import UbuntuOneLogin
-
-Authenticate and save credentials
----------------------------------
-
-Use the ``login_with`` method to authenticate. This method requests a macaroon from
-Charmhub, discharges it using your Ubuntu One credentials, and saves the resulting
-root/discharge macaroon pair in your system keyring.
-
-.. code-block:: python
 
    UbuntuOneLogin.login_with(
        email="<email>",
@@ -45,38 +37,19 @@ root/discharge macaroon pair in your system keyring.
 
 Replace ``<email>``, ``<password>``, and ``<otp>`` with your actual credentials.
 
-Retrieve credentials from the keyring
--------------------------------------
-
-To use the saved credentials later, initialize an ``Auth`` object. Use the
-application name ``craft-store-ubuntu-one`` and the host ``api.charmhub.io``.
-
-.. code-block:: python
-
-   from craft_store import Auth, UbuntuOneAuth, publisher
-
-   auth = Auth(
-       application_name="craft-store-ubuntu-one",
-       host="api.charmhub.io"
-   )
-
-The ``Auth`` object automatically looks for credentials in your system keyring that
-match the provided application name and host.
-
 Use the credentials with a store client
 ---------------------------------------
 
-Pass the ``Auth`` object to a store gateway to perform authenticated actions.
+Use :meth:`~craft_store.publisher.PublisherGateway.with_ubuntu_one` to create a
+gateway that reads your saved credentials from the keyring automatically.
 
 .. code-block:: python
 
-   from craft_store import UbuntuOneAuth, publisher
+   from craft_store.publisher import PublisherGateway
 
-   gateway = publisher.PublisherGateway(
+   gateway = PublisherGateway.with_ubuntu_one(
        base_url="https://api.charmhub.io",
        namespace="charm",
-       auth=auth,
-       httpx_auth=UbuntuOneAuth(auth=auth, api_base_url="https://api.charmhub.io"),
    )
 
    # List your registered charms
@@ -101,20 +74,21 @@ The ``login_with`` method can raise specific errors if the authentication fails.
 
 .. code-block:: python
 
-   from craft_store import errors
+   from craft_store.login import UbuntuOneLogin, UbuntuOneOtpRequiredError, UbuntuOneCredentialsError
 
    try:
        UbuntuOneLogin.login_with(...)
-   except errors.UbuntuOneOtpRequiredError:
+   except UbuntuOneOtpRequiredError:
        print("Your account requires two-factor authentication. Please provide an OTP.")
-   except errors.UbuntuOneCredentialsError:
+   except UbuntuOneCredentialsError:
        print("Invalid email, password, or OTP.")
 
 Handle missing credentials
 --------------------------
 
-If you try to retrieve credentials that aren't in the keyring, ``Auth`` raises a
-``CredentialsUnavailable`` error. You should catch this error to prompt the user to
+If you try to use the gateway but no credentials are found in the keyring,
+``PublisherGateway.with_ubuntu_one`` will succeed but the first API call will
+raise a ``CredentialsUnavailable`` error. Catch this error to prompt the user to
 log in.
 
 .. code-block:: python
@@ -122,7 +96,6 @@ log in.
    from craft_store import errors
 
    try:
-       # This happens automatically when the gateway uses auth
        names = gateway.list_registered_names()
    except errors.CredentialsUnavailable:
        print("No credentials found. Run the login step first.")
