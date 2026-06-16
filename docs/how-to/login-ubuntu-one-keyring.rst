@@ -107,7 +107,12 @@ The ``login_with`` method can raise specific errors if the authentication fails.
    )
 
    try:
-       UbuntuOneLogin.login_with(...)
+       UbuntuOneLogin.login_with(
+           email="<email>",
+           password="<password>",
+           base_url="https://api.charmhub.io",
+           permissions=["account-view-packages", "account-register-package"],
+       )
    except UbuntuOneOtpRequiredError:
        print("Your account requires two-factor authentication. Please provide an OTP.")
    except UbuntuOneCredentialsError:
