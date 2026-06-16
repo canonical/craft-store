@@ -30,7 +30,7 @@ and saves the resulting root/discharge macaroon pair in your system keyring.
    UbuntuOneLogin.login_with(
        email="<email>",
        password="<password>",
-       api_base_url="https://api.charmhub.io",
+       base_url="https://api.charmhub.io",
        otp="<otp>",  # Optional: required if two-factor authentication is enabled
        permissions=["account-view-packages", "account-register-package"],
    )
