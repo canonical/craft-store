@@ -31,11 +31,37 @@ and saves the resulting root/discharge macaroon pair in your system keyring.
        email="<email>",
        password="<password>",
        base_url="https://api.charmhub.io",
-       otp="<otp>",  # Optional: required if two-factor authentication is enabled
        permissions=["account-view-packages", "account-register-package"],
    )
 
-Replace ``<email>``, ``<password>``, and ``<otp>`` with your actual credentials.
+Replace ``<email>`` and ``<password>`` with your actual credentials.
+
+Authenticate with OTP
+~~~~~~~~~~~~~~~~~~~~~
+
+If your account has two-factor authentication enabled, the first call will raise
+:exc:`~craft_store.login.UbuntuOneOtpRequiredError`. Retry with your one-time
+password using the ``otp`` argument:
+
+.. code-block:: python
+
+   from craft_store.login import UbuntuOneLogin, UbuntuOneOtpRequiredError
+
+   try:
+       UbuntuOneLogin.login_with(
+           email="<email>",
+           password="<password>",
+           base_url="https://api.charmhub.io",
+           permissions=["account-view-packages", "account-register-package"],
+       )
+   except UbuntuOneOtpRequiredError:
+       UbuntuOneLogin.login_with(
+           email="<email>",
+           password="<password>",
+           base_url="https://api.charmhub.io",
+           permissions=["account-view-packages", "account-register-package"],
+           otp="<otp>",
+       )
 
 Use the credentials with a store client
 ---------------------------------------
@@ -74,7 +100,11 @@ The ``login_with`` method can raise specific errors if the authentication fails.
 
 .. code-block:: python
 
-   from craft_store.login import UbuntuOneLogin, UbuntuOneOtpRequiredError, UbuntuOneCredentialsError
+   from craft_store.login import (
+       UbuntuOneLogin,
+       UbuntuOneCredentialsError,
+       UbuntuOneOtpRequiredError,
+   )
 
    try:
        UbuntuOneLogin.login_with(...)
