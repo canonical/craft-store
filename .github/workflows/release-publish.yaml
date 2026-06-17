@@ -54,6 +54,8 @@ jobs:
     steps:
       - name: Get pypi artifacts
         uses: actions/download-artifact@v8
+        with:
+          name: pypi-packages
       - name: Release
         uses: softprops/action-gh-release@v3
         with:

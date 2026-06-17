@@ -67,23 +67,36 @@ types = [
     "types-setuptools",
 ]
 docs = [
-    "furo==2025.12.19",
-    "canonical-sphinx[full]",
-    "lxd-sphinx-extensions==0.0.16",
-    "myst-parser==4.0.1",
-    "pyspelling==2.12.1",
-    "sphinx==8.1.3",
-    "sphinx-autobuild==2024.10.3",
-    "sphinxcontrib-jquery==4.1",
-    "sphinx-copybutton==0.5.2",
+    "sphinx-lint~=1.0",
+    "sphinxext-rediraffe==0.3.0",
+    {include-group = "docs-sphinx-stack"},
+]
+docs-sphinx-stack = [
+    "canonical-sphinx~=0.6",
+    "myst-parser~=4.0",
+    "packaging~=26.1",
+    "rst2html>=2020.7.4",
+    "sphinx-autobuild>=2024.10.3",
+    # "sphinx-config-options~=0.1",
+    # "sphinx-contributor-listing~=0.1",
     "sphinx-design==0.6.1",
-    "sphinxext-opengraph==0.13.0",
-    "sphinx-lint==1.0.2",
-    "sphinx-notfound-page==1.1.0",
-    "sphinx-rtd-theme>=3.0",
-    "sphinx-tabs==3.4.7",
-    "sphinx-toolbox>=2.5.0",
-    "sphinxext-rediraffe>=0.3.0",
+    # "sphinx-filtered-toctree~=0.1",
+    # "sphinx-last-updated-by-git~=0.3",
+    "sphinx-llm~=0.4",
+    "sphinx-notfound-page~=1.1",
+    "sphinx-related-links~=0.1",
+    # "sphinx-reredirects==0.1.6",
+    "sphinx-rerediraffe>=0.0.3,<1.0.0",
+    "sphinx-roles~=0.1",
+    "sphinx-sitemap~=2.9",
+    # "sphinx-tabs~=3.5",
+    "sphinx-terminal~=1.0",
+    # "sphinx-ubuntu-images~=0.1",
+    # "sphinx-youtube-links~=0.1",
+    "sphinxcontrib-jquery~=4.1",
+    # "sphinxcontrib-svg2pdfconverter[cairosvg]~=2.1",
+    "sphinxext-opengraph~=0.13",
+    "vale~=3.13",
 ]
 tics = [
     "flake8",
@@ -336,13 +349,20 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**.py" = [  # Some things we want for the moin project are unnecessary in tests.
-    "D",  # Ignore docstring rules in tests
-    "ANN", # Ignore type annotations in tests
-    "S101",  # Allow assertions in tests
-    "S103", # Allow `os.chmod` setting a permissive mask `0o555` on file or directory
-    "S108", # Allow Probable insecure usage of temporary file or directory
-    "PLR0913",  # Allow many arguments for test functions
+"tests/**.py" = [ # Some things we want for the main project are unnecessary in tests.
+    "D",       # Ignore docstring rules in tests
+    "ANN",     # Ignore type annotations in tests
+    "ARG",     # Allow unused arguments in tests (e.g. for fake functions/methods/classes)
+    "S101",    # Allow assertions in tests
+    "S103",    # Allow `os.chmod` setting a permissive mask `0o555` on file or directory
+    "S108",    # Allow Probable insecure usage of temporary file or directory
+    "PLR0913", # Allow many arguments for test functions (useful if we need many fixtures)
+    "PLR2004", # Allow magic values in tests
+    "SLF",     # Allow accessing private members from tests.
+    "FBT001",  # Boolean-typed positional arguments are common in tests (e.g. parametrize)
+    "FBT002",  # Boolean default values are common in test helper functions
 ]
-# isort leaves init files alone by default, this makes ruff ignore them too.
-"__init__.py" = ["I001"]
+"__init__.py" = [
+    "I001", # isort leaves init files alone by default, this makes ruff ignore them too.
+    "F401", # Allows unused imports in __init__ files.
+]

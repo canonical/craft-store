@@ -45,7 +45,7 @@ Next, you'll need to:
 The snippet above uses a ``check_status`` helper function that polls CharmHub
 every three seconds while the file processes.
 
-.. collapse:: check_status function
+.. dropdown:: check_status function
 
     .. literalinclude:: code/upload-package-with-resources/upload_package.py
         :language: python
@@ -89,7 +89,7 @@ a channel. Upon release, the revision is tied to the relevant resources.
 Below is a full file containing an executable version of the script in this
 guide.
 
-.. collapse:: Full example
+.. dropdown:: Full example
 
     .. literalinclude:: code/upload-package-with-resources/upload_package.py
         :language: python
