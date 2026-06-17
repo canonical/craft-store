@@ -8,7 +8,7 @@ import os
 import sys
 from urllib.parse import urlparse
 
-from craft_store import Auth, UbuntuOneAuth, errors, publisher
+from craft_store import Auth, errors, publisher
 from craft_store.login import UbuntuOneLogin
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def main() -> None:
         UbuntuOneLogin.login_with(
             email=email,
             password=password,
-            api_base_url=api_base_url,
+            base_url=api_base_url,
             login_url=login_url,
             application_name=application_name,
             otp=otp,
@@ -58,11 +58,10 @@ def main() -> None:
         file_fallback=True,
     )
 
-    gateway = publisher.PublisherGateway(
+    gateway = publisher.PublisherGateway.with_ubuntu_one(
         base_url=api_base_url,
         namespace="charm",
         auth=u1_auth,
-        httpx_auth=UbuntuOneAuth(auth=u1_auth, api_base_url=api_base_url),
     )
 
     try:

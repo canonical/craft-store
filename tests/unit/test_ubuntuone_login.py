@@ -59,7 +59,7 @@ def test_login_with_raises_when_otp_missing(
         UbuntuOneLogin.login_with(
             email="user@example.com",
             password="correct-password",  # noqa: S106
-            api_base_url="https://api.example.test",
+            base_url="https://api.example.test",
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
             permissions=["account-view-packages"],
@@ -94,7 +94,7 @@ def test_login_with_raises_on_bad_credentials(
         UbuntuOneLogin.login_with(
             email="user@example.com",
             password="wrong-password",  # noqa: S106
-            api_base_url="https://api.example.test",
+            base_url="https://api.example.test",
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
             otp=otp,
@@ -128,7 +128,7 @@ def test_login_with_saves_credentials(
     UbuntuOneLogin.login_with(
         email="user@example.com",
         password="correct-password",  # noqa: S106
-        api_base_url="https://api.example.test",
+        base_url="https://api.example.test",
         login_url="https://login.ubuntu.com",
         store_auth=mock_auth,
         otp="123456",
@@ -167,7 +167,7 @@ def test_login_with_rejects_invalid_ttl(
         UbuntuOneLogin.login_with(
             email="user@example.com",
             password="correct-password",  # noqa: S106
-            api_base_url="https://api.example.test",
+            base_url="https://api.example.test",
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
             permissions=["account-view-packages"],

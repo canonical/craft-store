@@ -5,7 +5,7 @@
 import os
 from urllib.parse import urlparse
 
-from craft_store import Auth, UbuntuOneAuth, errors, publisher
+from craft_store import Auth, errors, publisher
 
 
 def main() -> None:
@@ -26,11 +26,10 @@ def main() -> None:
         host=host,
         file_fallback=True,
     )
-    gateway = publisher.PublisherGateway(
+    gateway = publisher.PublisherGateway.with_ubuntu_one(
         base_url=api_base_url,
         namespace="charm",
         auth=auth,
-        httpx_auth=UbuntuOneAuth(auth=auth, api_base_url=api_base_url),
     )
 
     try:

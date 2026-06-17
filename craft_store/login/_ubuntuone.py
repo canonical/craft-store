@@ -42,11 +42,11 @@ class UbuntuOneLogin:
         root, discharged = UbuntuOneLogin.login_with(
             email="user@example.com",
             password="password123",
-            api_base_url="https://api.charmhub.io",
+            base_url="https://api.charmhub.io",
             permissions=["package-view"],
         )
 
-    :param api_base_url: The base URL for the store API. Commonly set to Charmhub
+    :param base_url: The base URL for the store API. Commonly set to Charmhub
         (``https://api.charmhub.io``) or Snapcraft (``https://dashboard.snapcraft.io``).
     :param login_url: The base URL for Ubuntu One login. Defaults to
         ``https://login.ubuntu.com``.
@@ -56,7 +56,7 @@ class UbuntuOneLogin:
 
     def __init__(
         self,
-        api_base_url: str,
+        base_url: str,
         *,
         login_url: str = "https://login.ubuntu.com",
         application_name: str = "craft-store",
@@ -64,7 +64,7 @@ class UbuntuOneLogin:
     ) -> None:
         """Create a login client."""
         self._login_url = login_url
-        self._api_base_url = urlparse(api_base_url).geturl()
+        self._api_base_url = urlparse(base_url).geturl()
         self._application_name = application_name
         self._store_auth = store_auth or auth.Auth(
             application_name=application_name,
@@ -79,7 +79,7 @@ class UbuntuOneLogin:
         email: str,
         password: str,
         *,
-        api_base_url: str,
+        base_url: str,
         login_url: str = "https://login.ubuntu.com",
         application_name: str = "craft-store",
         store_auth: auth.Auth | None = None,
@@ -96,7 +96,7 @@ class UbuntuOneLogin:
 
         :param email: Ubuntu One email address.
         :param password: Ubuntu One password.
-        :param api_base_url: The base URL for the store API. Commonly set to Charmhub
+        :param base_url: The base URL for the store API. Commonly set to Charmhub
             (``https://api.charmhub.io``) or Snapcraft (``https://dashboard.snapcraft.io``).
         :param login_url: The base URL for Ubuntu One login. Defaults to
             ``https://login.ubuntu.com``.
@@ -122,7 +122,7 @@ class UbuntuOneLogin:
             credentials are invalid.
         """
         instance = cls(
-            api_base_url=api_base_url,
+            base_url=base_url,
             login_url=login_url,
             application_name=application_name,
             store_auth=store_auth,

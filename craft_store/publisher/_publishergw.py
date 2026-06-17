@@ -22,11 +22,12 @@ import re
 from collections.abc import Collection, Sequence
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 import httpx
 
 from craft_store import errors
-from craft_store._httpx_auth import CandidAuth
+from craft_store._httpx_auth import CandidAuth, UbuntuOneAuth
 from craft_store.auth import Auth
 from craft_store.models import RegisteredNameModel as RegisteredName
 
@@ -62,15 +63,66 @@ class PublisherGateway:
         self,
         base_url: str,
         namespace: str,
-        auth: Auth,
-        httpx_auth: httpx.Auth | None = None,
+        auth: httpx.Auth | Auth,
     ) -> None:
+        """Create a publisher gateway client.
+
+        :param base_url: The base URL of the publisher gateway API.
+        :param namespace: The package namespace (e.g. ``"charm"`` or ``"snap"``).
+        :param auth: Either an :class:`httpx.Auth` instance (used directly), or a
+            craft-store :class:`~craft_store.auth.Auth` instance (wrapped in
+            :class:`~craft_store._httpx_auth.CandidAuth` automatically).
+        """
         self._namespace = namespace
+        if isinstance(auth, httpx.Auth):
+            httpx_auth = auth
+        else:
+            httpx_auth = CandidAuth(auth=auth, auth_type="macaroon")
         self._client = httpx.Client(
             base_url=base_url,
-            auth=httpx_auth or CandidAuth(auth=auth, auth_type="macaroon"),
+            auth=httpx_auth,
             timeout=60.0,
         )
+
+    @classmethod
+    def with_ubuntu_one(
+        cls,
+        base_url: str,
+        namespace: str,
+        *,
+        auth: Auth | None = None,
+        application_name: str = "craft-store",
+        client_description: str = "craft-store",
+    ) -> PublisherGateway:
+        """Create a publisher gateway client using Ubuntu One SSO authentication.
+
+        This is a convenience constructor that creates the :class:`UbuntuOneAuth`
+        internally. Credentials must already be saved in the system keyring (e.g.
+        by calling :meth:`~craft_store.login.UbuntuOneLogin.login_with` first).
+
+        :param base_url: The base URL of the publisher gateway API (e.g.
+            ``"https://api.charmhub.io"``).
+        :param namespace: The package namespace (e.g. ``"charm"`` or ``"snap"``).
+        :param auth: An optional :class:`~craft_store.auth.Auth` instance for
+            keyring access. If not provided, one is created automatically using
+            ``application_name`` and the host derived from ``base_url``.
+        :param application_name: The application name used for keyring storage.
+            Must match the name used when credentials were saved. Defaults to
+            ``"craft-store"``.
+        :param client_description: A description passed to the store during token
+            exchange. Defaults to ``"craft-store"``.
+        """
+        if auth is None:
+            auth = Auth(
+                application_name=application_name,
+                host=urlparse(base_url).netloc,
+            )
+        httpx_auth = UbuntuOneAuth(
+            auth=auth,
+            api_base_url=base_url,
+            client_description=client_description,
+        )
+        return cls(base_url=base_url, namespace=namespace, auth=httpx_auth)
 
     @staticmethod
     def _check_error(response: httpx.Response) -> None:

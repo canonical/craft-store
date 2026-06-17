@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 
 import keyring
 import pytest
-from craft_store import DeveloperTokenAuth, UbuntuOneAuth, auth, errors, publisher
+from craft_store import DeveloperTokenAuth, auth, errors, publisher
 from craft_store.auth import MemoryKeyring
 from craft_store.login import UbuntuOneLogin
 
@@ -59,7 +59,7 @@ def test_ubuntu_one_login_smoke(
 ) -> None:
     """Smoke test for UbuntuOneLogin and PublisherGateway connectivity."""
     login_client = UbuntuOneLogin(
-        api_base_url=charmhub_base_url,
+        base_url=charmhub_base_url,
         login_url=charmhub_login_url,
     )
 
@@ -102,7 +102,7 @@ def test_ubuntu_one_login_with_convenience_method(
         email,
         password,
         login_url=charmhub_login_url,
-        api_base_url=charmhub_base_url,
+        base_url=charmhub_base_url,
         application_name=test_app_name,
         otp=None,
     )
@@ -115,11 +115,10 @@ def test_ubuntu_one_login_with_convenience_method(
         file_fallback=True,
     )
 
-    gateway = publisher.PublisherGateway(
+    gateway = publisher.PublisherGateway.with_ubuntu_one(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=u1_auth,
-        httpx_auth=UbuntuOneAuth(auth=u1_auth, api_base_url=charmhub_base_url),
     )
     user_info = gateway.whoami()
     assert user_info["account"]["email"] == email
@@ -164,7 +163,7 @@ def _perform_login_real(
         root, discharged = UbuntuOneLogin.login_with(
             email,
             password,
-            api_base_url=charmhub_base_url,
+            base_url=charmhub_base_url,
             login_url=charmhub_login_url,
             application_name=test_app_name,
             otp=None,
@@ -189,11 +188,10 @@ def _retrieve_from_keyring_real(
         host=host,
         file_fallback=True,
     )
-    new_gateway = publisher.PublisherGateway(
+    new_gateway = publisher.PublisherGateway.with_ubuntu_one(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=new_auth,
-        httpx_auth=UbuntuOneAuth(auth=new_auth, api_base_url=charmhub_base_url),
     )
     user_info = new_gateway.whoami()
     return user_info, new_auth
@@ -214,7 +212,7 @@ def test_ubuntu_one_login_with_expired_ttl_real(
     UbuntuOneLogin.login_with(
         email,
         password,
-        api_base_url=charmhub_base_url,
+        base_url=charmhub_base_url,
         login_url=charmhub_login_url,
         application_name=test_app_name,
         otp=None,
@@ -226,11 +224,10 @@ def test_ubuntu_one_login_with_expired_ttl_real(
         host=host,
         file_fallback=True,
     )
-    gateway = publisher.PublisherGateway(
+    gateway = publisher.PublisherGateway.with_ubuntu_one(
         base_url=charmhub_base_url,
         namespace="charm",
         auth=local_auth,
-        httpx_auth=UbuntuOneAuth(auth=local_auth, api_base_url=charmhub_base_url),
     )
 
     user_info = gateway.whoami()
@@ -266,7 +263,7 @@ def test_ubuntu_one_login_with_invalid_ttl_real(
         UbuntuOneLogin.login_with(
             email,
             password,
-            api_base_url=charmhub_base_url,
+            base_url=charmhub_base_url,
             login_url=charmhub_login_url,
             application_name=test_app_name,
             otp=None,

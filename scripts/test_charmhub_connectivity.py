@@ -1,4 +1,4 @@
-# -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-
+# -*- Mode:Python; indent-tabs-mode:nil; tab-width:4 -*-  # noqa: INP001
 #
 # Copyright 2026 Canonical Ltd.
 #
@@ -22,7 +22,7 @@ import sys
 import httpx
 
 
-def test_endpoint(name: str, url: str, timeout: int = 10) -> bool:
+def test_endpoint(name: str, url: str, timeout: int = 10) -> bool:  # noqa: PT028
     """Test connectivity to an endpoint."""
     print(f"\n{'=' * 70}")
     print(f"Testing: {name}")
@@ -36,10 +36,6 @@ def test_endpoint(name: str, url: str, timeout: int = 10) -> bool:
             follow_redirects=True,
             timeout=timeout,
         )
-        print("✓ Connected")
-        print(f"  Status: {response.status_code}")
-        print("  Response time: OK")
-        return True
     except httpx.TimeoutException as e:
         print("✗ Timeout")
         print(f"  Error: {e}")
@@ -55,10 +51,15 @@ def test_endpoint(name: str, url: str, timeout: int = 10) -> bool:
         print(f"  Error: {e}")
         print("  Could not establish connection to the server")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print("✗ Error")
         print(f"  Error: {e}")
         return False
+    else:
+        print("✓ Connected")
+        print(f"  Status: {response.status_code}")
+        print("  Response time: OK")
+        return True
 
 
 def main() -> int:
