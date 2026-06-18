@@ -17,8 +17,8 @@
 
 """Interact with Canonical services such as Charmhub and the Snap Store."""
 
-from . import creds, endpoints, errors, models
-from ._httpx_auth import CandidAuth, DeveloperTokenAuth
+from . import creds, endpoints, errors, login, models
+from ._httpx_auth import CandidAuth, DeveloperTokenAuth, UbuntuOneAuth
 from .publisher import PublisherGateway
 from .auth import Auth
 from .base_client import BaseClient
@@ -43,6 +43,7 @@ __all__ = [
     "creds",
     "endpoints",
     "errors",
+    "login",
     "models",
     "PublisherGateway",
     "Auth",
@@ -52,4 +53,5 @@ __all__ = [
     "StoreClient",
     "UbuntuOneStoreClient",
     "DeveloperTokenAuth",
+    "UbuntuOneAuth",
 ]
