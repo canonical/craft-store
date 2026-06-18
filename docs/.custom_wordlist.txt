@@ -20,6 +20,7 @@ https
 httpx
 Intersphinx
 io
+KWallet
 ip
 landscape
 lang
