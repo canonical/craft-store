@@ -156,7 +156,24 @@ class PublisherGateway:
             # duplicated.
             logger.debug(f"Errors from the store:\n{errors.StoreErrorList(error_list)}")
 
-        raise errors.CraftStoreError(brief)
+        try:
+            request = response.request
+        except RuntimeError:
+            details = None
+        else:
+            details = f"Error occurred on {request.method} request to {request.url}"
+            if request.content and logger.isEnabledFor(logging.DEBUG):
+                content = request.content
+                max_len = 2048
+                decoded = content[:max_len].decode("utf-8", errors="replace")
+                suffix = (
+                    ""
+                    if len(content) <= max_len
+                    else f"... (truncated, {len(content)} bytes total)"
+                )
+                logger.debug("Request content: %s%s", decoded, suffix)
+
+        raise errors.CraftStoreError(brief, details=details)
 
     @staticmethod
     def _check_keys(
