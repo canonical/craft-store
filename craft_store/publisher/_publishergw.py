@@ -162,11 +162,15 @@ class PublisherGateway:
             details = None
         else:
             details = f"Error occurred on {request.method} request to {request.url}"
-            if request.content:
+            if request.content and logger.isEnabledFor(logging.DEBUG):
                 content = request.content
                 max_len = 2048
                 decoded = content[:max_len].decode("utf-8", errors="replace")
-                suffix = "" if len(content) <= max_len else f"... (truncated, {len(content)} bytes total)"
+                suffix = (
+                    ""
+                    if len(content) <= max_len
+                    else f"... (truncated, {len(content)} bytes total)"
+                )
                 logger.debug("Request content: %s%s", decoded, suffix)
 
         raise errors.CraftStoreError(brief, details=details)
