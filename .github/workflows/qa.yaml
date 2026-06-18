@@ -40,4 +40,10 @@ jobs:
       fast-test-python-versions: '["3.10", "3.11", "3.12", "3.14"]'
       slow-test-platforms: '["ubuntu-22.04", "ubuntu-24.04-arm", "ubuntu-26.04", "ubuntu-26.04-arm"]'
       slow-test-python-versions: '["3.10", "3.11", "3.12", "3.14"]'
+      extra-env-vars: |
+        STAGING_SSO_USERNAME=$SECRET_1
+        STAGING_SSO_PASSWORD=$SECRET_2
       source-files: ${{ needs.filter.outputs.source-files }}
+    secrets:
+      secret-1: ${{ vars.STAGING_SSO_USERNAME }}
+      secret-2: ${{ secrets.STAGING_SSO_PASSWORD }}

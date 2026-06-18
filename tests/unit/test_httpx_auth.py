@@ -20,8 +20,9 @@ import httpx
 import pytest
 import pytest_httpx
 import pytest_mock
-from craft_store import CandidAuth, DeveloperTokenAuth, creds, errors
+from craft_store import CandidAuth, DeveloperTokenAuth, UbuntuOneAuth, creds, errors
 from craft_store.auth import Auth
+from pymacaroons import Macaroon
 
 
 @pytest.fixture
@@ -128,3 +129,72 @@ def test_auth_if_token_unset(
         match="Token is not available",
     ):
         client.request("GET", "https://fake-testcraft-url.localhost")
+
+
+@pytest.fixture
+def u1_macaroons() -> creds.UbuntuOneMacaroons:
+    root = Macaroon(
+        location="api.snapcraft.io",
+        identifier="root",
+        key="root-key",
+    )
+    discharge = Macaroon(
+        location="login.ubuntu.com",
+        identifier="discharge",
+        key="discharge-key",
+    )
+    return creds.UbuntuOneMacaroons(r=root.serialize(), d=discharge.serialize())
+
+
+@pytest.fixture
+def ubuntu_one_auth(u1_macaroons: creds.UbuntuOneMacaroons) -> UbuntuOneAuth:
+    auth = Auth(
+        application_name="test-craft",
+        host="test-host.localhost",
+        ephemeral=True,
+    )
+    auth.set_credentials(creds.marshal_u1_credentials(u1_macaroons))
+    return UbuntuOneAuth(auth=auth, api_base_url="https://api.example.test")
+
+
+@pytest.mark.usefixtures("u1_macaroons")
+def test_ubuntu_one_auth_flow(
+    ubuntu_one_auth: UbuntuOneAuth,
+    httpx_mock: pytest_httpx.HTTPXMock,
+) -> None:
+    httpx_mock.add_response(
+        method="POST",
+        url="https://api.example.test/v1/tokens/usso/exchange",
+        json={"macaroon": "store-token"},
+    )
+    expected_headers = {"Authorization": "Macaroon store-token"}
+
+    client = httpx.Client(auth=ubuntu_one_auth)
+    httpx_mock.add_response(
+        method="GET",
+        json={"results": []},
+        url="https://fake-testcraft-url.localhost",
+        match_headers=expected_headers,
+    )
+    client.request("GET", "https://fake-testcraft-url.localhost")
+
+
+def test_ubuntu_one_auth_flow_exposes_exchange_error_details(
+    ubuntu_one_auth: UbuntuOneAuth,
+    httpx_mock: pytest_httpx.HTTPXMock,
+) -> None:
+    httpx_mock.add_response(
+        method="POST",
+        url="https://api.example.test/v1/tokens/usso/exchange",
+        status_code=401,
+        json={
+            "error-list": [{"code": "bad-token", "message": "Invalid USSO macaroons"}]
+        },
+    )
+
+    client = httpx.Client(auth=ubuntu_one_auth)
+
+    with pytest.raises(errors.CraftStoreError) as exc_info:
+        client.request("GET", "https://fake-testcraft-url.localhost")
+
+    assert exc_info.value.details == "Invalid USSO macaroons"

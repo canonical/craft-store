@@ -242,3 +242,20 @@ class CandidTokenValueError(CraftStoreError):
 
 class AuthTokenUnavailableError(CraftStoreError):
     """Raised when an authorization token is not available."""
+
+
+class UbuntuOneCredentialsError(CraftStoreError):
+    """Raised when Ubuntu One credentials are incorrect."""
+
+    def __init__(self, message: str, *, error_code: str) -> None:
+        self.error_code = error_code
+        super().__init__(message)
+
+
+class UbuntuOneOtpRequiredError(CraftStoreError):
+    """Raised when Ubuntu One requires an OTP."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Your account requires a one-time password. Please enter your OTP."
+        )
