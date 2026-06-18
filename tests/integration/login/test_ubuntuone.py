@@ -78,8 +78,7 @@ def test_ubuntu_one_login_smoke(
     gateway = publisher.PublisherGateway(
         base_url=charmhub_base_url,
         namespace="charm",
-        auth=test_auth,
-        httpx_auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
+        auth=DeveloperTokenAuth(auth=test_auth, auth_type="macaroon"),
     )
 
     assert gateway._namespace == "charm"

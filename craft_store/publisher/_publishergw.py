@@ -208,7 +208,7 @@ class PublisherGateway:
     def whoami(self) -> dict[str, Any]:
         """Return whoami json data.
 
-        API docs: https://api.charmhub.io/docs/default.html#whoami
+        API docs: https://api.charmhub.io/docs/default/#macaroon-info
         """
         response = self._client.get("/v1/tokens/whoami")
         self._check_error(response)
