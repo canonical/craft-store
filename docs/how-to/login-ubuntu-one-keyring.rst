@@ -12,14 +12,14 @@ Prerequisites
 
 Before you begin, ensure you have:
 
-*   An Ubuntu One account.
-*   The ``craft-store`` library installed.
-*   A functional system keyring, such as GNOME Keyring or KWallet.
+* An Ubuntu One account.
+* The ``craft-store`` library installed.
+* A functional system keyring, such as GNOME Keyring or KWallet.
 
 Authenticate and save credentials
 ----------------------------------
 
-Use :meth:`~craft_store.login.UbuntuOneLogin.login_with` to authenticate. This method
+To authenticate, use the :meth:`~craft_store.login.UbuntuOneLogin.login_with` method. This method
 requests a macaroon from Charmhub, discharges it using your Ubuntu One credentials,
 and saves the resulting root/discharge macaroon pair in your system keyring.
 
@@ -66,8 +66,8 @@ password using the ``otp`` argument:
 Use the credentials with a store client
 ---------------------------------------
 
-Use :meth:`~craft_store.publisher.PublisherGateway.with_ubuntu_one` to create a
-gateway that reads your saved credentials from the keyring automatically.
+To create a gateway that reads your saved credentials from the keyring, use the
+:meth:`~craft_store.publisher.PublisherGateway.with_ubuntu_one` method.
 
 .. code-block:: python
 
@@ -85,7 +85,7 @@ gateway that reads your saved credentials from the keyring automatically.
 Verify your login
 -----------------
 
-You can use the ``whoami()`` method to verify that you're logged in and to retrieve
+Use the ``whoami()`` method to verify that you're logged in and to retrieve
 information about your account.
 
 .. code-block:: python
@@ -96,7 +96,7 @@ information about your account.
 Handle login errors
 -------------------
 
-The ``login_with`` method can raise specific errors if the authentication fails.
+The ``login_with`` method raises specific errors if the authentication fails.
 
 .. code-block:: python
 
@@ -121,10 +121,9 @@ The ``login_with`` method can raise specific errors if the authentication fails.
 Handle missing credentials
 --------------------------
 
-If you try to use the gateway but no credentials are found in the keyring,
-``PublisherGateway.with_ubuntu_one`` will succeed but the first API call will
-raise a ``CredentialsUnavailable`` error. Catch this error to prompt the user to
-log in.
+If you try to use the gateway but no credentials are found in the keyring, the first
+API call will raise :exc:`~craft_store.errors.CredentialsUnavailable`. Catch this error
+to prompt the user to log in.
 
 .. code-block:: python
 
