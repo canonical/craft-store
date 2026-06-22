@@ -1,3 +1,6 @@
+.. meta::
+    :description: Log in to Charmhub with Ubuntu One and store macaroons in the system keyring for reuse with craft-store.
+
 .. _howto-login_ubuntu_one_keyring:
 
 Log in to Charmhub with Ubuntu One
