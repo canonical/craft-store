@@ -14,5 +14,6 @@ Craft Store.
    :hidden:
 
    environment-credentials
+   login-ubuntu-one-keyring
    craft-cli-upload-progress
    upload-package-with-resources
