@@ -20,6 +20,10 @@ UV_TICS_GROUPS := "--group=tics"
 
 include common.mk
 
+# Instructions and skills are imported from canonical/copilot-collections.
+# This extends PRETTIER_FILES from common.mk.
+PRETTIER_FILES += !.github/instructions/** !.github/skills/**
+
 .PHONY: format
 format: format-ruff format-codespell format-prettier format-pre-commit  ## Run all automatic formatters
 

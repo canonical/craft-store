@@ -48,12 +48,14 @@ def test_check_error_on_success(response: httpx.Response):
 
 
 @pytest.mark.parametrize(
-    ("response", "match", "has_error_list"),
+    ("response", "match", "has_error_list", "details", "request_log"),
     [
         pytest.param(
             httpx.Response(503, text="help!"),
             r"Store returned an invalid response \(status: 503\)",
             False,
+            None,
+            None,
             id="really-bad",
         ),
         pytest.param(
@@ -63,6 +65,8 @@ def test_check_error_on_success(response: httpx.Response):
             ),
             r"Store had an error \(503\): we done goofed",
             True,
+            None,
+            None,
             id="server-error",
         ),
         pytest.param(
@@ -72,6 +76,8 @@ def test_check_error_on_success(response: httpx.Response):
             ),
             r"Error 400 returned from store: you messed up",
             True,
+            None,
+            None,
             id="client-error",
         ),
         pytest.param(
@@ -94,22 +100,45 @@ def test_check_error_on_success(response: httpx.Response):
                 - bad: Why would you ask me for coffee?"""
             ),
             True,
+            None,
+            None,
             id="multiple-client-errors",
+        ),
+        pytest.param(
+            httpx.Response(
+                500,
+                json={"error-list": [{"code": "ope", "message": "we done goofed"}]},
+                request=httpx.Request(
+                    "GET",
+                    "http://localhost/some-endpoint",
+                    json={"is-request": True},
+                ),
+            ),
+            r"Store had an error \(500\): we done goofed",
+            True,
+            "Error occurred on GET request to http://localhost/some-endpoint",
+            'Request content: {"is-request":true}',
+            id="request-details",
         ),
     ],
 )
-def test_check_error(response: httpx.Response, match, has_error_list, caplog):
+def test_check_error(
+    response: httpx.Response, match, has_error_list, details, request_log, caplog
+):
     caplog.set_level(logging.DEBUG)
 
     with pytest.raises(errors.CraftStoreError, match=match) as exc:
         publisher.PublisherGateway._check_error(response)
 
-    assert exc.value.details is None
+    assert exc.value.details == details
 
     if has_error_list:
         error_list = response.json().get("error-list", [])
         expected_log = f"Errors from the store:\n{StoreErrorList(error_list)}"
         assert expected_log in caplog.text
+
+    if request_log:
+        assert request_log in caplog.text
 
 
 @pytest.mark.parametrize(
