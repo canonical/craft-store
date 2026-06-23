@@ -313,11 +313,27 @@ def test_file_keyring_storage_path(tmp_path):
     assert k.credentials_file == tmp_path / "credentials.json"
 
 
-test_exceptions: list[type[Exception]] = [keyring.errors.InitError]
+test_exceptions: list[Exception] = [keyring.errors.InitError()]
 if sys.platform == "linux":
     from secretstorage.exceptions import SecretServiceNotAvailableException
 
-    test_exceptions.append(SecretServiceNotAvailableException)
+    test_exceptions.append(SecretServiceNotAvailableException())
+
+
+@pytest.mark.parametrize("exception", test_exceptions)
+def test_ensure_no_credentials_init_error(fake_keyring, mocker, exception):
+    """Regression test for https://github.com/canonical/craft-store/issues/58.
+
+    When the keyring raises InitError (e.g. on a headless machine where the
+    SecretService collection cannot be created), ensure_no_credentials() must
+    convert it to a KeyringUnlockError instead of propagating the raw exception.
+    """
+    mocker.patch.object(fake_keyring, "get_password", side_effect=exception)
+
+    auth = Auth("fakeclient", "fakestore.com")
+
+    with pytest.raises(errors.KeyringUnlockError):
+        auth.ensure_no_credentials()
 
 
 @pytest.mark.disable_fake_keyring

@@ -2,6 +2,18 @@
 Changelog
 *********
 
+.. _release-3.3.1:
+
+3.3.1 (unreleased)
+------------------
+
+Bug fixes:
+
+- Translate keyring initialization failures into ``KeyringUnlockError`` when the
+  keyring cannot be unlocked.
+
+For a complete list of commits, check out the `3.3.1`_ release on GitHub.
+
 .. _release-3.3.0:
 
 3.3.0 (2025-07-02)
@@ -233,3 +245,4 @@ Bug fixes:
 .. _3.2.1: https://github.com/canonical/craft-store/releases/tag/3.2.1
 .. _3.2.2: https://github.com/canonical/craft-store/releases/tag/3.2.2
 .. _3.3.0: https://github.com/canonical/craft-store/releases/tag/3.3.0
+.. _3.3.1: https://github.com/canonical/craft-store/releases/tag/3.3.1
