@@ -138,13 +138,14 @@ def test_snap_store_channels():
         ttl=1000,
         channels=["stable", "track/edge"],
     )
-    after = datetime.datetime.now(tz=datetime.timezone.utc)
+    after = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
 
     assert result["permissions"] == ["permission-foo", "permission-bar"]
     assert result["description"] == "client description"
     assert result["channels"] == ["stable", "track/edge"]
 
     actual_dt = datetime.datetime.fromisoformat(result["expires"])
+    assert actual_dt.tzinfo is not None
     assert before + datetime.timedelta(seconds=1000) <= actual_dt
     assert actual_dt <= after + datetime.timedelta(seconds=1000)
 
