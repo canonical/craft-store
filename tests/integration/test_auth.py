@@ -20,6 +20,7 @@ import keyring.errors
 import pytest
 from craft_store import errors
 from craft_store.auth import Auth, MemoryKeyring
+from jaraco.classes import properties
 
 pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 
@@ -71,7 +72,9 @@ class _BrokenInitKeyring(keyring.backend.KeyringBackend):
     collection cannot be created or accessed (e.g. "Prompt dismissed.").
     """
 
-    priority = 1
+    @properties.classproperty  # type: ignore[misc]
+    def priority(self) -> int | float:
+        return 1
 
     def set_password(self, service: str, username: str, password: str) -> None:
         raise keyring.errors.InitError(
