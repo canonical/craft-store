@@ -131,23 +131,23 @@ def test_snap_store(expires):
 def test_snap_store_channels():
     snap_store = endpoints.SNAP_STORE
 
-    before = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
+    before_request = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
     result = snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
         ttl=1000,
         channels=["stable", "track/edge"],
     )
-    after = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
+    after_request = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
 
     assert result["permissions"] == ["permission-foo", "permission-bar"]
     assert result["description"] == "client description"
     assert result["channels"] == ["stable", "track/edge"]
 
-    actual_dt = datetime.datetime.fromisoformat(result["expires"])
-    assert actual_dt.tzinfo is not None
-    assert before + datetime.timedelta(seconds=1000) <= actual_dt
-    assert actual_dt <= after + datetime.timedelta(seconds=1000)
+    actual_expiry = datetime.datetime.fromisoformat(result["expires"])
+    assert actual_expiry.tzinfo is not None
+    assert before_request + datetime.timedelta(seconds=1000) <= actual_expiry
+    assert actual_expiry <= after_request + datetime.timedelta(seconds=1000)
 
 
 def test_snap_store_packages(expires):
