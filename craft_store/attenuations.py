@@ -17,6 +17,12 @@
 """Attenuations for Snap Store and Charmhub discharged Macaroons."""
 
 # read/write access.
+ACCOUNT_MANAGE_KEYS = "account-manage-keys"
+"""Manage account keys."""
+
+ACCOUNT_MANAGE_METADATA = "account-manage-metadata"
+"""Manage account metadata."""
+
 ACCOUNT_REGISTER_PACKAGE = "account-register-package"
 """Register or request a new package name under a given account."""
 
@@ -45,6 +51,9 @@ PACKAGE_MANAGE_REVISIONS = "package-manage-revisions"
 Upload new blobs, check for upload status, reject a revision blocked on
 manual review or request manual review.
 """
+
+STORE_MANAGE = "store-manage"
+"""Manage store settings."""
 
 # read only access.
 ACCOUNT_VIEW_PACKAGES = "account-view-packages"
@@ -76,3 +85,6 @@ history of a package.
 
 PACKAGE_VIEW_REVISIONS = "package-view-revisions"
 """List the existing revisions for a package, along with status information."""
+
+STORE_VIEW = "store-view"
+"""View store settings."""
