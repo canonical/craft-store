@@ -313,11 +313,11 @@ def test_file_keyring_storage_path(tmp_path):
     assert k.credentials_file == tmp_path / "credentials.json"
 
 
-test_exceptions: list[type[Exception]] = [keyring.errors.InitError]
+test_exceptions: list[Exception] = [keyring.errors.InitError()]
 if sys.platform == "linux":
     from secretstorage.exceptions import SecretServiceNotAvailableException
 
-    test_exceptions.append(SecretServiceNotAvailableException)
+    test_exceptions.append(SecretServiceNotAvailableException())
 
 
 @pytest.mark.parametrize("exception", test_exceptions)
