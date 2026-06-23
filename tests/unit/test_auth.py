@@ -320,6 +320,22 @@ if sys.platform == "linux":
     test_exceptions.append(SecretServiceNotAvailableException)
 
 
+@pytest.mark.parametrize("exception", test_exceptions)
+def test_ensure_no_credentials_init_error(fake_keyring, mocker, exception):
+    """Regression test for https://github.com/canonical/craft-store/issues/58.
+
+    When the keyring raises InitError (e.g. on a headless machine where the
+    SecretService collection cannot be created), ensure_no_credentials() must
+    convert it to a KeyringUnlockError instead of propagating the raw exception.
+    """
+    mocker.patch.object(fake_keyring, "get_password", side_effect=exception)
+
+    auth = Auth("fakeclient", "fakestore.com")
+
+    with pytest.raises(errors.KeyringUnlockError):
+        auth.ensure_no_credentials()
+
+
 @pytest.mark.disable_fake_keyring
 @pytest.mark.parametrize("exception", test_exceptions)
 def test_secretservice_file_fallsback(mocker, exception):

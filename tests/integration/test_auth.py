@@ -62,3 +62,50 @@ def test_auth_from_environment(monkeypatch):
     auth = Auth("fakecraft", "fakestore.com", environment_auth="CREDENTIALS")
 
     assert auth.get_credentials() == "secret-keys"
+
+
+class _BrokenInitKeyring(keyring.backend.KeyringBackend):
+    """Keyring that raises InitError on all operations.
+
+    Simulates a SecretService keyring on a headless machine where the
+    collection cannot be created or accessed (e.g. "Prompt dismissed.").
+    """
+
+    priority = 1
+
+    def set_password(self, service: str, username: str, password: str) -> None:
+        raise keyring.errors.InitError(
+            "Failed to create the collection: Prompt dismissed."
+        )
+
+    def get_password(self, service: str, username: str) -> str | None:
+        raise keyring.errors.InitError(
+            "Failed to create the collection: Prompt dismissed."
+        )
+
+    def delete_password(self, service: str, username: str) -> None:
+        raise keyring.errors.InitError(
+            "Failed to create the collection: Prompt dismissed."
+        )
+
+
+@pytest.fixture
+def _broken_init_keyring():
+    current_keyring = keyring.get_keyring()
+    keyring.set_keyring(_BrokenInitKeyring())
+    yield
+    keyring.set_keyring(current_keyring)
+
+
+@pytest.mark.usefixtures("_broken_init_keyring")
+def test_auth_ensure_no_credentials_headless_keyring():
+    """Regression test for https://github.com/canonical/craft-store/issues/58.
+
+    On a headless machine, keyring operations raise InitError because the
+    SecretService collection cannot be unlocked interactively. This must
+    surface as a KeyringUnlockError rather than an unhandled internal error.
+    """
+    auth = Auth("fakecraft", "fakestore.com")
+
+    with pytest.raises(errors.KeyringUnlockError):
+        auth.ensure_no_credentials()

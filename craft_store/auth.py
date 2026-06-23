@@ -237,7 +237,7 @@ class Auth:
         """
         try:
             password = self._keyring.get_password(self.application_name, self.host)
-        except keyring.errors.KeyringLocked as exc:
+        except (keyring.errors.KeyringLocked, *KEYRING_EXCEPTIONS) as exc:
             raise errors.KeyringUnlockError from exc
 
         if password is not None:
