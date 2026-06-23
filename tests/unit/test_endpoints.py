@@ -128,37 +128,25 @@ def test_snap_store(expires):
     }
 
 
-def test_snap_store_channels(expires):
+def test_snap_store_channels():
     snap_store = endpoints.SNAP_STORE
 
+    before = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
     result = snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
         ttl=1000,
         channels=["stable", "track/edge"],
     )
+    after = datetime.datetime.now(tz=datetime.timezone.utc)
 
-    # Validate all fields except the timestamp which can vary slightly
-    expected = {
-        "permissions": ["permission-foo", "permission-bar"],
-        "description": "client description",
-        "channels": ["stable", "track/edge"],
-    }
+    assert result["permissions"] == ["permission-foo", "permission-bar"]
+    assert result["description"] == "client description"
+    assert result["channels"] == ["stable", "track/edge"]
 
-    # Check the non-timestamp fields first
-    for key, value in expected.items():
-        assert result[key] == value
-
-    # Validate the timestamp is correct (approximately)
-    expected_expires = expires(1000)
-    actual_expires = result["expires"]
-
-    # Parse and compare timestamps
-    expected_dt = datetime.datetime.fromisoformat(
-        expected_expires.replace("Z", "+00:00")
-    )
-    actual_dt = datetime.datetime.fromisoformat(actual_expires.replace("Z", "+00:00"))
-    assert abs((actual_dt - expected_dt).total_seconds()) < 2
+    actual_dt = datetime.datetime.fromisoformat(result["expires"])
+    assert before + datetime.timedelta(seconds=1000) <= actual_dt
+    assert actual_dt <= after + datetime.timedelta(seconds=1000)
 
 
 def test_snap_store_packages(expires):
