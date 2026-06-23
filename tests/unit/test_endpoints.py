@@ -13,8 +13,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import datetime
-
 import pytest
 from craft_store import endpoints
 
@@ -128,31 +126,20 @@ def test_snap_store(expires):
     }
 
 
-def test_snap_store_channels():
+def test_snap_store_channels(expires):
     snap_store = endpoints.SNAP_STORE
 
-    before_request = datetime.datetime.now(tz=datetime.timezone.utc).replace(
-        microsecond=0
-    )
-    result = snap_store.get_token_request(
+    assert snap_store.get_token_request(
         permissions=["permission-foo", "permission-bar"],
         description="client description",
         ttl=1000,
         channels=["stable", "track/edge"],
-    )
-    after_request = datetime.datetime.now(tz=datetime.timezone.utc).replace(
-        microsecond=0
-    )
-
-    actual_expiry = datetime.datetime.fromisoformat(result.pop("expires"))
-    assert result == {
+    ) == {
         "permissions": ["permission-foo", "permission-bar"],
         "description": "client description",
+        "expires": expires(1000),
         "channels": ["stable", "track/edge"],
     }
-    assert actual_expiry.tzinfo is not None
-    assert before_request + datetime.timedelta(seconds=1000) <= actual_expiry
-    assert actual_expiry <= after_request + datetime.timedelta(seconds=1000)
 
 
 def test_snap_store_packages(expires):
