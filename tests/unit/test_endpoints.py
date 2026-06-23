@@ -140,11 +140,12 @@ def test_snap_store_channels():
     )
     after_request = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
 
-    assert result["permissions"] == ["permission-foo", "permission-bar"]
-    assert result["description"] == "client description"
-    assert result["channels"] == ["stable", "track/edge"]
-
-    actual_expiry = datetime.datetime.fromisoformat(result["expires"])
+    actual_expiry = datetime.datetime.fromisoformat(result.pop("expires"))
+    assert result == {
+        "permissions": ["permission-foo", "permission-bar"],
+        "description": "client description",
+        "channels": ["stable", "track/edge"],
+    }
     assert actual_expiry.tzinfo is not None
     assert before_request + datetime.timedelta(seconds=1000) <= actual_expiry
     assert actual_expiry <= after_request + datetime.timedelta(seconds=1000)
