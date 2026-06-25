@@ -99,6 +99,7 @@ def expires():
         )
 
     with patch("craft_store.endpoints.datetime", wraps=datetime.datetime) as dt_mock:
+        dt_mock.now.return_value = now
         dt_mock.utcnow.return_value = now
         yield offset_iso_dt
 
