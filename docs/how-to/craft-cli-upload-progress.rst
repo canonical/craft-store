@@ -13,5 +13,5 @@ The example requires setting the environment variable
 .. literalinclude:: code/craft-cli-upload-progress/craft_cli_upload.py
     :language: python
 
-.. _craft-cli: https://canonical-craft-cli.readthedocs-hosted.com/en/latest/
+.. _craft-cli: https://canonical-craft-cli.readthedocs-hosted.com/latest/
 .. _snapcraft export-login: https://documentation.ubuntu.com/snapcraft/stable/how-to/publishing/authenticate/
