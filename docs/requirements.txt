@@ -32,3 +32,7 @@ sphinx-llm~=0.4
 # Vale dependencies
 rst2html
 vale~=3.13
+filelock>=3.13.1
+gitpython>=3.1.41
+h11>=0.14.0
+idna>=3.10
