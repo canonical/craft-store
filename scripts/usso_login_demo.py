@@ -8,7 +8,7 @@ import os
 import sys
 from urllib.parse import urlparse
 
-from craft_store import Auth, errors, publisher
+from craft_store import Auth, attenuations, errors, publisher
 from craft_store.login import UbuntuOneLogin
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,10 @@ def main() -> None:
             login_url=login_url,
             application_name=application_name,
             otp=otp,
-            permissions=["account-view-packages", "account-register-package"],
+            permissions=[
+                attenuations.ACCOUNT_VIEW_PACKAGES,
+                attenuations.ACCOUNT_REGISTER_PACKAGE,
+            ],
         )
     except errors.UbuntuOneCredentialsError as e:
         print(f"Login failed: {e}", file=sys.stderr)

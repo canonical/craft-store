@@ -22,7 +22,7 @@ from urllib.parse import urljoin, urlparse
 import httpx
 import pymacaroons  # type: ignore[import-untyped]
 
-from craft_store import auth, creds, errors
+from craft_store import attenuations, auth, creds, errors
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class UbuntuOneLogin:
             email="user@example.com",
             password="password123",
             base_url="https://api.charmhub.io",
-            permissions=["package-view"],
+            permissions=[PACKAGE_VIEW],
         )
 
     :param base_url: The base URL for the store API. Commonly set to Charmhub
@@ -150,7 +150,7 @@ class UbuntuOneLogin:
     ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
         """Login with Ubuntu One credentials and return root and discharged macaroons."""
         if permissions is None:
-            permissions = ["account-view-packages"]
+            permissions = [attenuations.ACCOUNT_VIEW_PACKAGES]
 
         root = self._get_macaroon(
             permissions=permissions,

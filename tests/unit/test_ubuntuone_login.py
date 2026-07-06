@@ -16,7 +16,7 @@
 
 import pytest
 import pytest_httpx
-from craft_store import errors
+from craft_store import attenuations, errors
 from craft_store.login import UbuntuOneLogin
 from pymacaroons import Macaroon
 
@@ -62,7 +62,7 @@ def test_login_with_raises_when_otp_missing(
             base_url="https://api.example.test",
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
-            permissions=["account-view-packages"],
+            permissions=[attenuations.ACCOUNT_VIEW_PACKAGES],
         )
 
 
@@ -98,7 +98,7 @@ def test_login_with_raises_on_bad_credentials(
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
             otp=otp,
-            permissions=["account-view-packages"],
+            permissions=[attenuations.ACCOUNT_VIEW_PACKAGES],
         )
 
     assert exc_info.value.error_code == "INVALID_DATA"
@@ -132,7 +132,7 @@ def test_login_with_saves_credentials(
         login_url="https://login.ubuntu.com",
         store_auth=mock_auth,
         otp="123456",
-        permissions=["account-view-packages"],
+        permissions=[attenuations.ACCOUNT_VIEW_PACKAGES],
     )
 
     mock_auth.set_credentials.assert_called_once()
@@ -170,7 +170,7 @@ def test_login_with_rejects_invalid_ttl(
             base_url="https://api.example.test",
             login_url="https://login.ubuntu.com",
             store_auth=mock_auth,
-            permissions=["account-view-packages"],
+            permissions=[attenuations.ACCOUNT_VIEW_PACKAGES],
             ttl=ttl,
         )
 

@@ -2,6 +2,15 @@
 Changelog
 *********
 
+.. _release-3.4.0:
+
+3.4.0 (unreleased)
+------------------
+
+- Add constants for more known attenuations.
+
+For a complete list of commits, check out the `3.4.0`_ release on GitHub.
+
 .. _release-3.3.1:
 
 3.3.1 (unreleased)
@@ -246,3 +255,4 @@ Bug fixes:
 .. _3.2.2: https://github.com/canonical/craft-store/releases/tag/3.2.2
 .. _3.3.0: https://github.com/canonical/craft-store/releases/tag/3.3.0
 .. _3.3.1: https://github.com/canonical/craft-store/releases/tag/3.3.1
+.. _3.4.0: https://github.com/canonical/craft-store/releases/tag/3.4.0
