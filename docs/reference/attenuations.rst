@@ -1,21 +1,21 @@
 .. meta::
-    :description: Reference for the attenuations in craft_store.attenuations for restricting Snap Store and Charmhub macaroon token permissions.
+    :description: Reference for the attenuations module, which enumerates permissions for macaroons. Craft apps can use these constants in account queries to artifact stores.
 
 .. _reference-attenuations:
 
 Attenuations
 ************
 
-Attenuations are permissions that restrict what a discharged macaroon token
-can do. When requesting credentials from the Snap Store or Charmhub, pass a
-list of attenuations to limit the capabilities of those credentials.
+Attenuations are permissions that restrict what a discharged macaroon token can do. When
+an app makes an account request, with credentials, to the Snap Store or Charmhub, it
+passes a list of attenuations that limits the capabilities of those credentials.
 
 All constants are available in the ``craft_store.attenuations`` module.
 
 .. currentmodule:: craft_store.attenuations
 
-Read/write access
-=================
+Read-write attenuations
+=======================
 
 .. autodata:: ACCOUNT_MANAGE_KEYS
 .. autodata:: ACCOUNT_MANAGE_METADATA
@@ -28,8 +28,8 @@ Read/write access
 .. autodata:: PACKAGE_MANAGE_REVISIONS
 .. autodata:: STORE_MANAGE
 
-Read-only access
-================
+Read-only attenuations
+======================
 
 .. autodata:: ACCOUNT_VIEW_PACKAGES
 .. autodata:: PACKAGE_VIEW
