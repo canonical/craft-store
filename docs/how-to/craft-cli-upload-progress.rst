@@ -3,7 +3,8 @@
 Using craft-cli for upload progress
 ===================================
 
-Progress can be provided by use of craft-cli_. This example will upload
+Progress can be provided by use of
+:external+craft-cli:doc:`craft-cli <index>`. This example will upload
 ``./test.snap`` with something that looks like the following:
 
 The example requires setting the environment variable
@@ -13,5 +14,4 @@ The example requires setting the environment variable
 .. literalinclude:: code/craft-cli-upload-progress/craft_cli_upload.py
     :language: python
 
-.. _craft-cli: https://canonical-craft-cli.readthedocs-hosted.com/latest/
 .. _snapcraft export-login: https://documentation.ubuntu.com/snapcraft/stable/how-to/publishing/authenticate/

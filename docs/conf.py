@@ -285,6 +285,7 @@ rst_prolog = """
 # Add configuration for intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "craft-cli": ("https://documentation.ubuntu.com/craft-cli/latest", None),
     "starflow": ("https://documentation.ubuntu.com/starflow/latest", None),
 }
 
