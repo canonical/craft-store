@@ -15,7 +15,7 @@
 """Ubuntu One Login Client."""
 
 import logging
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from http import HTTPStatus
 from urllib.parse import urljoin, urlparse
 
@@ -86,7 +86,7 @@ class UbuntuOneLogin:
         otp: str | None = None,
         permissions: Collection[str] | None = None,
         channels: Collection[str] | None = None,
-        packages: Collection[str] | None = None,
+        packages: Collection[Mapping[str, str]] | None = None,
         ttl: int = _SECONDS_PER_DAY,
     ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
         """Login with Ubuntu One credentials and return root and discharged macaroons.
@@ -107,7 +107,9 @@ class UbuntuOneLogin:
             defaults to ``["account-view-packages"]``. See store API documentation for
             valid permission values.
         :param channels: Optional list of channel names to restrict access to.
-        :param packages: Optional list of package specs to restrict access to.
+        :param packages: Optional list of package specs to restrict access to. Each
+            package is a mapping with a "type" key (e.g. "charm", "bundle", "snap")
+            and a "name" key.
         :param ttl: Time-to-live in seconds for the macaroon. Defaults to 24 hours.
 
         :return: A tuple of (root_macaroon, discharged_macaroon) ready for use with the
@@ -145,7 +147,7 @@ class UbuntuOneLogin:
         otp: str | None = None,
         permissions: Collection[str] | None = None,
         channels: Collection[str] | None = None,
-        packages: Collection[str] | None = None,
+        packages: Collection[Mapping[str, str]] | None = None,
         ttl: int = _SECONDS_PER_DAY,
     ) -> tuple[pymacaroons.Macaroon, pymacaroons.Macaroon]:
         """Login with Ubuntu One credentials and return root and discharged macaroons."""
@@ -190,7 +192,7 @@ class UbuntuOneLogin:
         *,
         permissions: Collection[str],
         channels: Collection[str] | None = None,
-        packages: Collection[str] | None = None,
+        packages: Collection[Mapping[str, str]] | None = None,
         ttl: int = _SECONDS_PER_DAY,
     ) -> pymacaroons.Macaroon:
         """Request an unsigned macaroon from the store API.
@@ -198,7 +200,9 @@ class UbuntuOneLogin:
         :param permissions: List of permission strings (e.g., ``["package-view"]``,
             ``["package-manage"]``). Required.
         :param channels: Optional list of channel names to restrict access to.
-        :param packages: Optional list of package specs to restrict access to.
+        :param packages: Optional list of package specs to restrict access to. Each
+            package is a mapping with a "type" key (e.g. "charm", "bundle", "snap")
+            and a "name" key.
         :param ttl: Time-to-live in seconds. Defaults to 86400 (24 hours).
 
         :return: An unsigned macaroon that must be discharged with
