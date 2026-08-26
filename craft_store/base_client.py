@@ -24,7 +24,7 @@ from typing import Any, Literal, cast
 from urllib.parse import urlparse
 
 import requests
-from requests_toolbelt import (  # type: ignore[import]
+from requests_toolbelt import (
     MultipartEncoder,
     MultipartEncoderMonitor,
 )
@@ -85,9 +85,7 @@ class BaseClient(metaclass=ABCMeta):
         )
 
     @abstractmethod
-    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
-        self, root_macaroon: str, **kwargs
-    ) -> str:
+    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
         """Return a discharged macaroon ready to use in an Authorization header."""
 
     @abstractmethod
@@ -104,7 +102,7 @@ class BaseClient(metaclass=ABCMeta):
 
         return str(token_response.json()["macaroon"])
 
-    def login(  # type: ignore[no-untyped-def]
+    def login(
         self,
         *,
         permissions: Sequence[str],
@@ -160,7 +158,7 @@ class BaseClient(metaclass=ABCMeta):
 
         return self._auth.encode_credentials(store_authorized_macaroon)
 
-    def request(  # type: ignore[no-untyped-def]
+    def request(
         self,
         method: str,
         url: str,
@@ -209,7 +207,7 @@ class BaseClient(metaclass=ABCMeta):
         self,
         *,
         filepath: Path,
-        monitor_callback: Callable | None = None,  # type: ignore[type-arg]
+        monitor_callback: Callable | None = None,
     ) -> str:
         """Upload filepath to storage.
 

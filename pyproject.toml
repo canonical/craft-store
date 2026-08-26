@@ -58,7 +58,6 @@ lint = [
     { include-group = "types" },
 ]
 types = [
-    "mypy[reports]~=2.1",
     "types-PyYAML",
     "types-Pygments",
     "types-colorama",
@@ -205,54 +204,6 @@ skip_empty = true
 exclude_also = [
     "if (typing\\.)?TYPE_CHECKING:",
 ]
-
-[tool.pyright]
-#strict = ["craft_store"]  # Disabled because pyrightconfig.json didn't include this.
-pythonVersion = "3.10"
-pythonPlatform = "Linux"
-include = [
-    "craft_store",
-    "tests",
-]
-exclude = [
-    "**/__pycache__",
-    "**/.mypy_cache",
-    "**/.pytest_cache",
-    ".direnv",
-    ".tox",
-    ".venv",
-    "build",
-    "craft_store/_version.py",
-    "docs",
-    "venv",
-]
-
-[tool.mypy]
-python_version = "3.10"
-plugins = ["pydantic.mypy"]
-exclude = [
-    "build",
-    "tests",
-    "results",
-    "docs",
-]
-warn_unused_configs = true
-warn_redundant_casts = true
-strict_equality = true
-strict_concatenate = true
-warn_return_any = true
-disallow_subclassing_any = true
-disallow_untyped_decorators = true
-disallow_any_generics = true
-
-[[tool.mypy.overrides]]
-module = ["craft_store.*"]
-disallow_untyped_defs = true
-no_implicit_optional = true
-
-[[tool.mypy.overrides]]
-module = ["tests.*"]
-strict = false
 
 [tool.ruff]
 line-length = 88

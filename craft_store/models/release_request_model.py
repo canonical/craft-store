@@ -42,5 +42,5 @@ class ReleaseRequestModel(MarshableModel):
     channel: str
     # remove it after upstream is fixed
     # https://github.com/pydantic/pydantic/issues/10950
-    resources: list[ResourceModel] | None = Field(default_factory=list)  # type: ignore[arg-type]
+    resources: list[ResourceModel] | None = Field(default_factory=list)
     revision: int | None = Field(...)
