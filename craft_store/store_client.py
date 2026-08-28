@@ -19,10 +19,10 @@
 import base64
 import json
 
-from macaroonbakery import bakery, httpbakery  # type: ignore[import]
+from macaroonbakery import bakery, httpbakery
 from overrides import overrides
-from pymacaroons import Macaroon  # type: ignore[import]
-from pymacaroons.serializers import json_serializer  # type: ignore[import]
+from pymacaroons import Macaroon
+from pymacaroons.serializers import json_serializer
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
@@ -36,7 +36,7 @@ def _macaroon_to_json_string(macaroon: Macaroon) -> str:
     return str(json_string)
 
 
-class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):  # type: ignore[misc]
+class WebBrowserWaitingInteractor(httpbakery.WebBrowserInteractor):
     """WebBrowserInteractor implementation using HTTPClient.
 
     Waiting for a token is implemented using HTTPClient which mounts
@@ -133,9 +133,7 @@ class StoreClient(BaseClient):
 
         return str(token_exchange_response.json()["macaroon"])
 
-    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
-        self, root_macaroon: str, **_kwargs
-    ) -> str:
+    def _get_discharged_macaroon(self, root_macaroon: str, **_kwargs) -> str:
         candid_discharged_macaroon = self._candid_discharge(root_macaroon)
         credentials = self._authorize_token(candid_discharged_macaroon)
 

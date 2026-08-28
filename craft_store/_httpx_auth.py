@@ -22,7 +22,7 @@ from collections.abc import Generator
 from typing import Literal
 
 import httpx
-from pymacaroons import Macaroon  # type: ignore[import-untyped]
+from pymacaroons import Macaroon
 from typing_extensions import override
 
 from craft_store import auth, creds, errors

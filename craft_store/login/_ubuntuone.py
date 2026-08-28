@@ -20,7 +20,7 @@ from http import HTTPStatus
 from urllib.parse import urljoin, urlparse
 
 import httpx
-import pymacaroons  # type: ignore[import-untyped]
+import pymacaroons
 
 from craft_store import attenuations, auth, creds, errors
 

@@ -72,7 +72,7 @@ class _BrokenInitKeyring(keyring.backend.KeyringBackend):
     collection cannot be created or accessed (e.g. "Prompt dismissed.").
     """
 
-    @properties.classproperty  # type: ignore[misc]
+    @properties.classproperty
     def priority(self) -> int | float:
         return 1
 

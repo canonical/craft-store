@@ -30,7 +30,7 @@ import keyring.backend
 import keyring.backends.fail
 import keyring.errors
 from jaraco.classes import properties
-from xdg import BaseDirectory  # type: ignore[import-untyped]
+from xdg import BaseDirectory
 
 from . import errors
 
@@ -52,7 +52,7 @@ else:
 class MemoryKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a dictionary."""
 
-    @properties.classproperty  #  type: ignore[misc]
+    @properties.classproperty
     def priority(self) -> int | float:
         """Supply a priority.
 
@@ -85,7 +85,7 @@ class MemoryKeyring(keyring.backend.KeyringBackend):
 class FileKeyring(keyring.backend.KeyringBackend):
     """A keyring that stores credentials in a file."""
 
-    @properties.classproperty  #  type: ignore[misc]
+    @properties.classproperty
     def priority(self) -> int | float:
         """Supply a priority.
 

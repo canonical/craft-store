@@ -20,7 +20,7 @@ from urllib.parse import urlparse
 
 import requests
 from overrides import overrides
-from pymacaroons import Macaroon  # type: ignore[import]
+from pymacaroons import Macaroon
 
 from . import creds, endpoints, errors
 from .base_client import BaseClient
@@ -117,9 +117,7 @@ class UbuntuOneStoreClient(BaseClient):
 
         return str(response.json()["discharge_macaroon"])
 
-    def _get_discharged_macaroon(  # type: ignore[no-untyped-def]
-        self, root_macaroon: str, **kwargs
-    ) -> str:
+    def _get_discharged_macaroon(self, root_macaroon: str, **kwargs) -> str:
         email = kwargs["email"]
         password = kwargs["password"]
         otp = kwargs.get("otp")
@@ -133,7 +131,7 @@ class UbuntuOneStoreClient(BaseClient):
         return creds.marshal_u1_credentials(u1_macaroon)
 
     @overrides
-    def request(  # type: ignore[no-untyped-def]
+    def request(
         self,
         method: str,
         url: str,
