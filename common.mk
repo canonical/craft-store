@@ -91,7 +91,7 @@ else
 endif
 
 .PHONY: clean
-clean:  ## Clean up the development environment
+clean: docs-clean  ## Clean up the development environment
 	uv tool run pyclean .
 	rm -rf dist build docs/_build docs/_linkcheck docs/reference/gen *.snap .coverage* .venv
 
@@ -122,6 +122,10 @@ format-shfmt: install-shfmt ##- Format shell scripts
 	@# jinja2 shell script templates are mistakenly counted as "true" shell scripts due to their shebang,
 	@# so explicitly filter them out
 	git ls-files -z | xargs -0 sh -c 'for f; do case "$$f" in *.sh.j2) continue;; esac; file --mime-type -Nn -- "$$f" | grep -q shellscript && printf "%s\0" "$$f"; done' -- | xargs -0r shfmt -w
+
+.PHONY: format-tombi
+format-tombi: install-tombi  ##- Format TOML files with tombi
+	tombi format
 
 .PHONY: lint-ruff
 lint-ruff: install-ruff  ##- Lint with ruff
@@ -180,8 +184,14 @@ endif
 
 .PHONY: lint-uv-lockfile
 lint-uv-lockfile: install-uv  ##- Check that uv.lock matches expectations from pyproject.toml
+ifneq ($(CI),)
+	@echo ::group::$@
+endif
 	unset UV_FROZEN
 	uv lock --check
+ifneq ($(CI),)
+	@echo ::endgroup::
+endif
 
 .PHONY: lint-shfmt
 lint-shfmt: install-shfmt  ##- Lint shell script formatting
@@ -214,6 +224,16 @@ ifneq ($(CI),)
 	@echo ::group::$@
 endif
 	$(PRETTIER) --check $(PRETTIER_FILES)
+ifneq ($(CI),)
+	@echo ::endgroup::
+endif
+
+.PHONY: lint-tombi
+lint-tombi: install-tombi  ##- Check TOML formatting with tombi
+ifneq ($(CI),)
+	@echo ::group::$@
+endif
+	tombi format --check --diff
 ifneq ($(CI),)
 	@echo ::endgroup::
 endif
@@ -458,6 +478,18 @@ else ifneq ($(shell which brew),)
 	brew install shfmt
 else
 	$(warning shfmt not installed. Please install it yourself.)
+endif
+
+.PHONY: install-tombi
+install-tombi:
+ifneq ($(shell which tombi),)
+else ifneq ($(shell which snap),)
+	sudo snap install --classic tombi
+else ifneq ($(shell which brew),)
+	brew install tombi
+else
+	make install-uv
+	uv tool install tombi
 endif
 
 .PHONY: install-ty

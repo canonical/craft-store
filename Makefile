@@ -1,4 +1,4 @@
-PROJECT=craft_store
+PROJECT=starcraft
 # Define when more than the main package tree requires coverage
 # like is the case for snapcraft (snapcraft and snapcraft_legacy):
 # COVERAGE_SOURCE="starcraft"
@@ -20,21 +20,24 @@ UV_TICS_GROUPS := "--group=tics"
 
 include common.mk
 
-# Instructions and skills are imported from canonical/copilot-collections.
-# This extends PRETTIER_FILES from common.mk.
-PRETTIER_FILES += !.github/instructions/** !.github/skills/**
-
 .PHONY: format
-format: format-ruff format-codespell format-prettier format-shfmt format-pre-commit  ## Run all automatic formatters
+format: format-ruff format-codespell format-prettier format-shfmt format-tombi format-pre-commit  ## Run all automatic formatters
 
 .PHONY: lint
 lint: lint-code lint-docs lint-twine lint-uv-lockfile lint-actions  ## Run all linters
 
 .PHONY: lint-code
-lint-code: lint-ruff lint-ty lint-codespell lint-prettier lint-shfmt lint-shellcheck  ## Run code-specific linters
+lint-code: lint-ruff lint-ty lint-codespell lint-mypy lint-prettier lint-pyright lint-shfmt lint-shellcheck lint-tombi  ## Run code-specific linters
 
 .PHONY: pack
 pack: pack-pip  ## Build all packages
+
+.PHONY: pack-snap
+pack-snap: snap/snapcraft.yaml  ##- Build snap package
+ifeq ($(shell which snapcraft),)
+	sudo snap install --classic snapcraft
+endif
+	snapcraft pack
 
 # Find dependencies that need installing
 APT_PACKAGES :=
