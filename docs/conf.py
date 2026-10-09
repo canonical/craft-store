@@ -39,10 +39,6 @@ author = "Canonical Ltd."
 # The year in the copyright statement
 copyright = f"2021-{datetime.date.today().year}"
 
-# Sidebar documentation title
-# To disable the title, set it to an empty string.
-html_title = project + " documentation"
-
 # Documentation website URL
 ogp_site_url = "https://documentation.ubuntu.com/craft-store/latest/"
 
@@ -179,9 +175,9 @@ llms_txt_description = textwrap.dedent(
 if os.environ.get("READTHEDOCS"):
     markdown_http_base = html_baseurl
 
-###########################
+########################
 # Link checker exceptions #
-###########################
+########################
 
 # Whole sites and individuals URLs to ignore
 linkcheck_ignore = [
@@ -218,17 +214,16 @@ extensions = [
     "sphinx_design",
     "sphinx_rerediraffe",
     # "sphinx_tabs.tabs",
-    # "sphinxcontrib.jquery"
+    # "sphinxcontrib-jquery"
     "sphinxext.opengraph",
     # "sphinx_config_options",
-    # "sphinx_contributor_listing",
+    # "sphinxcontributor_listing",
     # "sphinx_filtered_toctree",
     "sphinx_llm.txt",
     "sphinx_related_links",
     "sphinx_roles",
     "sphinx_terminal",
     # "sphinx_ubuntu_images",
-    # "sphinx_youtube_links",
     # "sphinxcontrib.cairosvgconverter",
     # "sphinx_last_updated_by_git",
     "sphinx.ext.intersphinx",
