@@ -30,7 +30,7 @@ pytestmark = pytest.mark.timeout(10)  # Timeout if any test takes over 10 sec.
 def test_charm_upload(charm_client, fake_charm_file, charmhub_charm_name):
     upload_id = charm_client.upload_file(filepath=fake_charm_file)
 
-    request_model = revisions_model.RevisionsRequestModel(**{"upload-id": upload_id})
+    request_model = revisions_model.RevisionsRequestModel(upload_id=upload_id)
 
     model_response = cast(
         revisions_model.RevisionsResponseModel,

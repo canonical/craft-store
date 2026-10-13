@@ -20,13 +20,15 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
-import requests
 import urllib3
 import urllib3.exceptions
 from requests.exceptions import JSONDecodeError
+
+if TYPE_CHECKING:
+    import requests
 
 logger = logging.getLogger(__name__)
 
@@ -106,9 +108,9 @@ class StoreErrorList:
         return len(self._error_list)
 
     def __str__(self) -> str:
-        error_list: list[str] = []
-        for error in self._error_list:
-            error_list.append(f"- {error['code']}: {error['message']}")
+        error_list = [
+            f"- {error['code']}: {error['message']}" for error in self._error_list
+        ]
         return "\n".join(error_list).strip()
 
     def __repr__(self) -> str:

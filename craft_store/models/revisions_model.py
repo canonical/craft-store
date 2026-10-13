@@ -16,7 +16,7 @@
 
 """Revisions response models for the Store."""
 
-import datetime
+import datetime as dt
 from typing import Any
 
 from craft_store.models._base_model import MarshableModel
@@ -46,7 +46,7 @@ class RevisionsResponseModel(MarshableModel):
 class RevisionModel(MarshableModel):
     """Base model for all revision types."""
 
-    created_at: datetime.datetime
+    created_at: dt.datetime
     revision: int
     sha3_384: str
     status: str

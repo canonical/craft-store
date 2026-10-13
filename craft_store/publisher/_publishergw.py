@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Collection, Sequence
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
@@ -38,6 +37,8 @@ from ._response import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Collection, Sequence
+
     from . import _request
 
 

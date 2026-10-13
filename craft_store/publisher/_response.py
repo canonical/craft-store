@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Response models for the publisher gateway."""
 
-import datetime
+import datetime as dt
 import enum
 from typing import Annotated, Any
 
@@ -79,7 +79,7 @@ class ChannelMap(_base_model.MarshableModel):
         description='The channel name, including "latest" for the latest track.',
         examples=["latest/stable", "8/candidate"],
     )
-    expiration_date: datetime.datetime | None = pydantic.Field(
+    expiration_date: dt.datetime | None = pydantic.Field(
         default=None,
         description="When this release expires. If None, the release does not expire.",
     )
@@ -91,13 +91,13 @@ class ChannelMap(_base_model.MarshableModel):
         description="The resources attached to this release, if it has any.",
     )
     revision: RevisionNumber
-    when: datetime.datetime = pydantic.Field(description="When this release was made.")
+    when: dt.datetime = pydantic.Field(description="When this release was made.")
 
 
 class Revision(_base_model.MarshableModel):
     """A flexible model to handle several types of store revisions."""
 
-    created_at: datetime.datetime = pydantic.Field(
+    created_at: dt.datetime = pydantic.Field(
         description="When this revision was uploaded.",
     )
     created_by: str | None = pydantic.Field(

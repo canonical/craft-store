@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
+import datetime as dt
 
 import pytest
 from craft_store.models import charm_list_releases_model
@@ -96,8 +96,8 @@ def test_get_list_releases(payload):
     assert model.channel_map[0].progressive.percentage is None
     assert model.channel_map[0].resources == []
     assert model.channel_map[0].revision == 5
-    assert model.channel_map[0].when == datetime.datetime(
-        2021, 11, 19, 11, 55, 1, tzinfo=datetime.timezone.utc
+    assert model.channel_map[0].when == dt.datetime(
+        2021, 11, 19, 11, 55, 1, tzinfo=dt.timezone.utc
     )
 
     assert len(model.package.channels) == 4
@@ -128,9 +128,7 @@ def test_get_list_releases(payload):
     assert model.revisions[0].bases[0].channel == "20.04"
     assert model.revisions[0].bases[0].name == "ubuntu"
     # No timezone information returned from Charmhub.
-    assert model.revisions[0].created_at == datetime.datetime(
-        2021, 11, 19, 11, 55, 0, 84876
-    )
+    assert model.revisions[0].created_at == dt.datetime(2021, 11, 19, 11, 55, 0, 84876)
     assert model.revisions[0].revision == 5
     assert (
         model.revisions[0].sha3_384

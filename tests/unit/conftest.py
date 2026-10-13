@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
+import datetime as dt
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
@@ -89,16 +89,12 @@ def expires():
     Provides a function for creating expected iso formatted expires datetime
     values.
     """
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    now = dt.datetime.now(tz=dt.timezone.utc)
 
     def offset_iso_dt(seconds=0):
-        return (
-            (now + datetime.timedelta(seconds=seconds))
-            .replace(microsecond=0)
-            .isoformat()
-        )
+        return (now + dt.timedelta(seconds=seconds)).replace(microsecond=0).isoformat()
 
-    with patch("craft_store.endpoints.datetime", wraps=datetime.datetime) as dt_mock:
+    with patch("craft_store.endpoints.datetime", wraps=dt.datetime) as dt_mock:
         dt_mock.now.return_value = now
         dt_mock.utcnow.return_value = now
         yield offset_iso_dt

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
+import datetime as dt
 
 import pytest
 from craft_store.models import snap_list_releases_model
@@ -96,8 +96,8 @@ def test_get_list_releases(payload):
     assert model.channel_map[0].progressive.paused is None
     assert model.channel_map[0].progressive.percentage is None
     assert model.channel_map[0].revision == 5
-    assert model.channel_map[0].when == datetime.datetime(
-        2021, 11, 19, 11, 55, 1, tzinfo=datetime.timezone.utc
+    assert model.channel_map[0].when == dt.datetime(
+        2021, 11, 19, 11, 55, 1, tzinfo=dt.timezone.utc
     )
 
     assert len(model.package.channels) == 4
@@ -125,9 +125,7 @@ def test_get_list_releases(payload):
     assert len(model.revisions) == 1
     assert model.revisions[0].architectures == ["amd64"]
     assert model.revisions[0].base == "core22"
-    assert model.revisions[0].created_at == datetime.datetime(
-        2021, 11, 19, 11, 55, 0, 84876
-    )
+    assert model.revisions[0].created_at == dt.datetime(2021, 11, 19, 11, 55, 0, 84876)
     assert model.revisions[0].created_by == "developer"
     assert model.revisions[0].build_url == "https://github.com/actions/build/1"
     assert model.revisions[0].revision == 5

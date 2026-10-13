@@ -16,7 +16,7 @@
 """Resource revision models for the Store."""
 
 import collections
-import datetime
+import datetime as dt
 from enum import Enum
 from typing import Annotated, TypeVar
 
@@ -61,7 +61,7 @@ class CharmResourceRevision(MarshableModel):
     """A basic resource revision."""
 
     bases: list[ResponseCharmResourceBase]
-    created_at: datetime.datetime
+    created_at: dt.datetime
     name: str
     revision: int
     sha256: str
@@ -70,7 +70,7 @@ class CharmResourceRevision(MarshableModel):
     sha512: str
     size: pydantic.ByteSize
     type: CharmResourceType | str
-    updated_at: datetime.datetime | None = None
+    updated_at: dt.datetime | None = None
     updated_by: str | None = None
 
 
