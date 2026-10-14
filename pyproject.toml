@@ -304,7 +304,7 @@ ignore = [
   "PLR0913",  # Too many arguments to function call (n > 5)
   "PLR2004",  # Magic value used in comparison, consider replacing 5 with a constant variable
   # `Any` is used deliberately for forwarded keyword arguments (e.g. the
-  # `**kwargs` in `Credentials.model_validate_json`, which forwards to pydantic).
+  # `**kwargs` in `DeveloperToken.model_validate_json`, which forwards to pydantic).
   "ANN401",
   # Boolean positional arguments are part of this library's public API
   # (`Auth.__init__`, `Auth.set_credentials`, `PublisherGateway.list_registered_names`).
