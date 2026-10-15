@@ -303,16 +303,19 @@ ignore = [
   "A003",  # Class attribute shadowing built-in (reason: Class attributes don't often get bare references)
   "PLR0913",  # Too many arguments to function call (n > 5)
   "PLR2004",  # Magic value used in comparison, consider replacing 5 with a constant variable
-  # `allow-star-arg-any` above already permits `*args: Any`; this covers the
-  # `**kwargs: Any` in `DeveloperToken.model_validate_json`, which forwards to
-  # pydantic rather than taking a dynamic argument.
-  "ANN401",
   "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
   # (reason: this creates long lines that get wrapped and reduces readability)
 
   # Ignored due to common usage in current code
   "TRY003",  # Avoid specifying long messages outside the exception class
 ]
+
+[tool.ruff.lint.flake8-annotations]
+# Same value starbase/main sets (pyproject.toml:226). Adopted here rather than
+# ignoring ANN401 outright, so the `**kwargs: Any` in
+# `DeveloperToken.model_validate_json` is permitted while genuinely dynamic
+# annotations elsewhere still get flagged.
+allow-star-arg-any = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**.py" = [  # Some things we want for the main project are unnecessary in tests.
