@@ -8,7 +8,7 @@ on:
 
 jobs:
   TICS:
-    uses: canonical/starflow/.github/workflows/tics.yaml@main
+    uses: canonical/starflow/.github/workflows/tics.yaml@work/testing-skill
     # Uncomment this and add your project's name on Tiobe TICS
     with:
       project: "craft-store"
