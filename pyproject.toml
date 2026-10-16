@@ -311,7 +311,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.flake8-annotations]
-# Same value starbase/main sets (pyproject.toml:226). Adopted here rather than
+# Same value starbase/main sets (pyproject.toml:227). Adopted here rather than
 # ignoring ANN401 outright, so the `**kwargs: Any` in
 # `DeveloperToken.model_validate_json` is permitted while genuinely dynamic
 # annotations elsewhere still get flagged.
