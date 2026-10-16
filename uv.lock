@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -14,18 +14,19 @@ constraints = [
     { name = "build", specifier = ">=0.7.0" },
     { name = "cffi", specifier = ">=1.15" },
     { name = "cryptography", specifier = ">=50.0.0" },
+    { name = "httplib2", specifier = ">=0.20.0" },
     { name = "iniconfig", specifier = ">=1.1.0" },
     { name = "libnacl", specifier = ">=2.0" },
     { name = "lxml", specifier = ">=5.0" },
     { name = "markdown", specifier = ">=3.0" },
     { name = "markupsafe", specifier = ">=2.0" },
+    { name = "oauthlib", specifier = ">=3.0.0" },
     { name = "protobuf", specifier = ">=5.0" },
     { name = "pylint", specifier = ">=0.29" },
     { name = "pynacl", specifier = ">=1.5" },
     { name = "pyparsing", specifier = ">=3.0.0" },
     { name = "pyproject-hooks", specifier = ">=1.0.0" },
     { name = "pytz", specifier = ">=2020" },
-    { name = "pyyaml", specifier = ">5.0" },
     { name = "pyyaml", specifier = ">=5.0" },
     { name = "regex", specifier = ">=2021.11.10" },
     { name = "secretstorage", specifier = ">=3.3.1" },
