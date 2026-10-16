@@ -32,6 +32,7 @@ libssl
 macaroonbakery
 Makefile
 Multipass
+mv
 MyST
 Numpy
 Open Graph
@@ -71,6 +72,7 @@ unregistering
 URL
 urllib
 utils
+venv
 VMs
 WCAG
 whitespace
