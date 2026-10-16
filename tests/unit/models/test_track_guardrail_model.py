@@ -32,11 +32,7 @@ GUARDRAIL_DICT = {"created-at": "2023-03-28T18:50:44+00:00", "pattern": r"^\d\.\
             GUARDRAIL_DICT,
             TrackGuardrailModel(
                 pattern=re.compile(r"^\d\.\d/"),
-                **{
-                    "created-at": datetime(
-                        2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc
-                    ),
-                },
+                created_at=datetime(2023, 3, 28, 18, 50, 44, tzinfo=timezone.utc),
             ),
         ),
     ],

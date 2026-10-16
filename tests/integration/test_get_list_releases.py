@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import datetime
+import datetime as dt
 from typing import cast
 
 import pytest
@@ -64,8 +64,8 @@ def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     assert model.channel_map[0].revision == 1
     # Greater than or equal to in order to allow someone to replicate this
     # integration test themselves.
-    assert model.channel_map[0].when >= datetime.datetime(
-        2023, 4, 13, 16, 12, 55, tzinfo=datetime.timezone.utc
+    assert model.channel_map[0].when >= dt.datetime(
+        2023, 4, 13, 16, 12, 55, tzinfo=dt.timezone.utc
     )
 
     assert len(model.package.channels) == 4
@@ -98,9 +98,7 @@ def test_charm_get_list_releases(charm_client, charmhub_charm_name):
     # No timezone information returned from Charmhub.
     # Greater than or equal to in order to allow someone to replicate this
     # integration test themselves.
-    assert model.revisions[0].created_at >= datetime.datetime(
-        2023, 4, 13, 16, 9, 55, 19472
-    )
+    assert model.revisions[0].created_at >= dt.datetime(2023, 4, 13, 16, 9, 55, 19472)
     assert model.revisions[0].revision == 1
     assert (
         model.revisions[0].sha3_384

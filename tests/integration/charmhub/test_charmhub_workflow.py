@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Full workflow tests for charms."""
 
-import datetime
+import datetime as dt
 import hashlib
 import time
 
@@ -105,7 +105,7 @@ def test_full_charm_workflow(  # noqa: PLR0912, PLR0915
 
     # 4. Upload a fresh file.
     fresh_file = tmp_path / "fresh_file"
-    file_contents = datetime.datetime.now(tz=datetime.timezone.utc).isoformat().encode()
+    file_contents = dt.datetime.now(tz=dt.timezone.utc).isoformat().encode()
     fresh_file.write_bytes(file_contents)
     file_upload_id = charm_client.upload_file(filepath=fresh_file)
     file_status_url = charm_client.push_resource(

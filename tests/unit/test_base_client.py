@@ -16,7 +16,7 @@
 #
 """Tests for methods in the BaseClient class."""
 
-import datetime
+import datetime as dt
 from unittest.mock import Mock
 
 import pydantic
@@ -195,7 +195,7 @@ def test_push_resource(
             }]}""",
             [
                 GitRevisionModel(
-                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    created_at=dt.datetime(2000, 1, 1, 0, 0, 0),
                     revision=1,
                     sha3_384="its_a_fake",
                     status="statusy",
@@ -217,7 +217,7 @@ def test_push_resource(
             }]}""",
             [
                 CharmRevisionModel(
-                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    created_at=dt.datetime(2000, 1, 1, 0, 0, 0),
                     revision=1,
                     sha3_384="its_a_fake",
                     status="statusy",
@@ -248,7 +248,7 @@ def test_push_resource(
             }]}""",
             [
                 SnapRevisionModel(
-                    created_at=datetime.datetime(2000, 1, 1, 0, 0, 0),
+                    created_at=dt.datetime(2000, 1, 1, 0, 0, 0),
                     revision=1,
                     sha3_384="its_a_fake",
                     status="statusy",
@@ -298,7 +298,7 @@ def test_list_revisions(charm_client, content, expected):
             [
                 CharmResourceRevision(
                     bases=[ResponseCharmResourceBase()],
-                    created_at=datetime.datetime(1970, 1, 1),
+                    created_at=dt.datetime(1970, 1, 1),
                     name="resource",
                     revision=1,
                     sha256="a-sha256",
@@ -307,7 +307,7 @@ def test_list_revisions(charm_client, content, expected):
                     sha512="a sha512",
                     size=pydantic.ByteSize(17),
                     type=CharmResourceType.FILE,
-                    updated_at=datetime.datetime(2020, 3, 14),
+                    updated_at=dt.datetime(2020, 3, 14),
                     updated_by="lengau",
                 )
             ],
@@ -337,7 +337,7 @@ def test_list_revisions(charm_client, content, expected):
                         ResponseCharmResourceBase(architectures=["all", "all"]),
                         ResponseCharmResourceBase(architectures=["all", "all"]),
                     ],
-                    created_at=datetime.datetime(1970, 1, 1),
+                    created_at=dt.datetime(1970, 1, 1),
                     name="",
                     revision=-1,
                     sha256="",
@@ -346,7 +346,7 @@ def test_list_revisions(charm_client, content, expected):
                     sha512="",
                     size=pydantic.ByteSize(0),
                     type="invalid",
-                    updated_at=datetime.datetime(2020, 3, 14),
+                    updated_at=dt.datetime(2020, 3, 14),
                     updated_by="",
                 ),
             ],

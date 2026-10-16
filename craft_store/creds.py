@@ -208,7 +208,7 @@ class DeveloperToken(BaseModel):
     def model_validate_json(
         cls,
         json_data: str | bytes | bytearray,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> Self:
         """Deserialize previously stored developer token."""
         try:

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Tests for list_releases."""
 
-import datetime
+import datetime as dt
 from typing import cast
 
 import pytest
@@ -38,9 +38,7 @@ def test_charm_list_resource_revisions(charm_client, charmhub_charm_name):
 
     # Greater than or equal to in order to allow someone to replicate this
     # integration test themselves.
-    assert actual.created_at >= datetime.datetime(
-        2023, 12, 1, tzinfo=datetime.timezone.utc
-    )
+    assert actual.created_at >= dt.datetime(2023, 12, 1, tzinfo=dt.timezone.utc)
     assert actual.revision >= 1
 
     sha256s = [r.sha256 for r in revisions]
