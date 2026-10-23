@@ -408,7 +408,7 @@ class BaseClient(metaclass=ABCMeta):
 
     def get_list_releases(self, *, name: str) -> models.MarshableModel:
         """Query the list_releases endpoint and return the result."""
-        endpoint = f"/v1/{self._endpoints.namespace}/{name}/releases"
+        endpoint = self._endpoints.get_releases_endpoint(name)
         response = self.request("GET", self._base_url + endpoint).json()
 
         return self._endpoints.list_releases_model.unmarshal(response)
