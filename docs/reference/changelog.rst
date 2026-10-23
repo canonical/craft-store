@@ -2,6 +2,20 @@
 Changelog
 *********
 
+.. _release-3.4.1:
+
+3.4.1 (unreleased)
+------------------
+
+Bug fixes:
+
+- ``BaseClient.get_list_releases()`` now builds its path with the endpoint's
+  ``get_releases_endpoint()`` instead of a hardcoded URL. For Snap Store endpoints,
+  it now raises ``NotImplementedError`` instead of requesting a Charmhub-style
+  path.
+
+For a complete list of commits, check out the `3.4.1`_ release on GitHub.
+
 .. _release-3.4.0:
 
 3.4.0 (2026-07-16)
@@ -251,3 +265,4 @@ Bug fixes:
 .. _3.2.2: https://github.com/canonical/craft-store/releases/tag/3.2.2
 .. _3.3.0: https://github.com/canonical/craft-store/releases/tag/3.3.0
 .. _3.4.0: https://github.com/canonical/craft-store/releases/tag/3.4.0
+.. _3.4.1: https://github.com/canonical/craft-store/releases/tag/3.4.1
