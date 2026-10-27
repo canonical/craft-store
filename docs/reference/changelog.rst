@@ -10,7 +10,7 @@ Changelog
 Bug fixes:
 
 - ``BaseClient.get_list_releases()`` now builds its path with the endpoint's
-  ``get_releases_endpoint()`` instead of a hardcoded URL. For Snap Store endpoints,
+  ``get_releases_endpoint()`` instead of a hard-coded URL. For Snap Store endpoints,
   it now raises ``NotImplementedError`` instead of requesting a Charmhub-style
   path.
 
