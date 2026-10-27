@@ -23,7 +23,11 @@ import pydantic
 import pytest
 import requests
 from craft_store import BaseClient, endpoints
-from craft_store.models import AccountModel, RegisteredNameModel
+from craft_store.models import (
+    AccountModel,
+    CharmListReleasesModel,
+    RegisteredNameModel,
+)
 from craft_store.models._charm_model import CharmBaseModel
 from craft_store.models._snap_models import Confinement, Grade, Type
 from craft_store.models.resource_revision_model import (
@@ -489,3 +493,33 @@ def test_unregister_name(charm_client):
     charm_client.request.assert_called_once_with(
         "DELETE", "https://staging.example.com/v1/charm/test-charm-abcxyz"
     )
+
+
+def test_get_list_releases(charm_client):
+    payload = {"channel-map": [], "package": {"channels": []}, "revisions": []}
+    charm_client.request = Mock()
+    charm_client.request.return_value.json.return_value = payload
+
+    actual = charm_client.get_list_releases(name="my-charm")
+
+    charm_client.request.assert_called_once_with(
+        "GET", "https://staging.example.com/v1/charm/my-charm/releases"
+    )
+    assert actual == CharmListReleasesModel.unmarshal(payload)
+
+
+def test_get_list_releases_not_implemented():
+    """get_list_releases is not implemented for the snap store endpoints."""
+    client = ConcreteTestClient(
+        base_url="https://staging.example.com",
+        storage_base_url="https://storage.staging.example.com",
+        endpoints=endpoints.SNAP_STORE,
+        application_name="testcraft",
+        user_agent="craft-store unit tests, should not be hitting a real server",
+    )
+    client.request = Mock()
+
+    with pytest.raises(NotImplementedError):
+        client.get_list_releases(name="my-snap")
+
+    client.request.assert_not_called()
