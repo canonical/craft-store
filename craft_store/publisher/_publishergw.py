@@ -137,7 +137,7 @@ class PublisherGateway:
             return
         try:
             error_response = response.json()
-        except JSONDecodeError as exc:
+        except (JSONDecodeError, UnicodeDecodeError) as exc:
             logger.debug(f"Error response: {response.text}")
             raise errors.InvalidResponseError(response) from exc
 
@@ -189,7 +189,7 @@ class PublisherGateway:
         """
         try:
             json_response = response.json()
-        except JSONDecodeError as exc:
+        except (JSONDecodeError, UnicodeDecodeError) as exc:
             logger.debug(f"Server response: {response.text}")
             raise errors.InvalidResponseError(response) from exc
         if not isinstance(json_response, dict):
