@@ -42,6 +42,22 @@ def publisher_gateway(mock_httpx_client):
     return gw
 
 
+def test_check_error_invalid_utf8_response():
+    """Invalid UTF-8 error responses should become a store error."""
+    response = httpx.Response(503, content=b"\x86\xdb")
+
+    with pytest.raises(errors.InvalidResponseError):
+        publisher.PublisherGateway._check_error(response)
+
+
+def test_check_keys_invalid_utf8_response():
+    """Invalid UTF-8 success responses should become a store error."""
+    response = httpx.Response(200, content=b"\x86\xdb")
+
+    with pytest.raises(errors.InvalidResponseError):
+        publisher.PublisherGateway._check_keys(response, {"results"})
+
+
 @pytest.mark.parametrize("response", [httpx.Response(status_code=204)])
 def test_check_error_on_success(response: httpx.Response):
     publisher.PublisherGateway._check_error(response)
