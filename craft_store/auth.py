@@ -187,9 +187,7 @@ class Auth:
         if (
             not host
             or len(host) > 253
-            or any(
-                _HOST_LABEL_RE.fullmatch(label) is None for label in host.split(".")
-            )
+            or any(_HOST_LABEL_RE.fullmatch(label) is None for label in host.split("."))
         ):
             raise ValueError(
                 "host must be a valid hostname without a scheme, port, or path"
