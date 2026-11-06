@@ -21,6 +21,7 @@ import binascii
 import json
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from typing import cast
@@ -39,6 +40,8 @@ os.environ["CRYPTOGRAPHY_OPENSSL_NO_LEGACY"] = "1"
 from keyring.backends import SecretService
 
 logger = logging.getLogger(__name__)
+
+_HOST_LABEL_RE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
 
 
 if sys.platform == "linux":
@@ -178,7 +181,20 @@ class Auth:
         :param environment_auth: environment variable used for authentication.
         :param ephemeral: keep everything in memory.
         :param file_fallback: fallback to FileKeyring if SecretService is not available.
+        :raises ValueError: if host is not a hostname (for example, if it includes
+            a URL scheme, port, or path).
         """
+        if (
+            not host
+            or len(host) > 253
+            or any(
+                _HOST_LABEL_RE.fullmatch(label) is None for label in host.split(".")
+            )
+        ):
+            raise ValueError(
+                "host must be a valid hostname without a scheme, port, or path"
+            )
+
         self.application_name = application_name
         self.host = host
 
