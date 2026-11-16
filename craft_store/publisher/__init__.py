@@ -57,6 +57,12 @@ from ._response import (
     StoreEntityReference,
     Trigger,
 )
+from ._craftgw import (
+    ORIGIN_REMOTE_NAME,
+    STORE_REMOTE_NAME,
+    UPSTREAM_REMOTE_NAME,
+    CraftPublisherGateway,
+)
 from ._publishergw import PublisherGateway
 
 from craft_store.models.account_model import AccountModel as Account
@@ -84,6 +90,7 @@ __all__ = [
     "CharmRevision",
     "CommitWorkflow",
     "CommitWorkflowRequest",
+    "CraftPublisherGateway",
     "CraftRelease",
     "CreateTrackRequest",
     "Error",
@@ -91,6 +98,7 @@ __all__ = [
     "Length",
     "Logs",
     "Media",
+    "ORIGIN_REMOTE_NAME",
     "Package",
     "Platform",
     "Progressive",
@@ -105,6 +113,7 @@ __all__ = [
     "ResourceReleaseRequest",
     "Revision",
     "RevisionNumber",
+    "STORE_REMOTE_NAME",
     "Sha3_384",
     "SnapConfinement",
     "SnapRevision",
@@ -115,5 +124,6 @@ __all__ = [
     "Track",
     "TrackGuardrail",
     "Trigger",
+    "UPSTREAM_REMOTE_NAME",
     "UpdateRemoteRequest",
 ]
