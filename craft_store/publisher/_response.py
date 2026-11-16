@@ -17,7 +17,7 @@
 
 import datetime as dt
 import enum
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import annotated_types
 import pydantic
@@ -25,6 +25,7 @@ import pydantic
 from craft_store.models import _base_model
 from craft_store.models._charm_model import CharmBaseModel as Base
 from craft_store.models._charm_model import ResourceModel as Resource
+from craft_store.models._common_list_releases_model import ChannelsModel as Channel
 from craft_store.models._common_list_releases_model import PackageModel as Package
 from craft_store.models._common_list_releases_model import (
     ProgressiveModel as Progressive,
@@ -197,3 +198,132 @@ class ReleaseResult(_base_model.MarshableModel):
     channel: str | None = None
     revision: int | None = None
     resources: list[ReleasedResourceRevision] | None = None
+
+
+class Remote(_base_model.MarshableModel):
+    """Class representing Source Package remote."""
+
+    remote_type: Literal["external", "managed", "store"] = pydantic.Field(alias="type")
+    name: str
+    package_type: str
+    package_name: str
+    package_id: str
+    domain_name: str | None = None
+    plane_name: str | None = None
+    url: str
+
+
+class SourceStoreOperationStatus(str, enum.Enum):
+    """Class that reflects status of ongoing task."""
+
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    RUNNING = "running"
+    WAITING = "waiting"
+
+    def is_ongoing(self) -> bool:
+        """Check if task is still being processed."""
+        return self in (
+            SourceStoreOperationStatus.WAITING,
+            SourceStoreOperationStatus.RUNNING,
+        )
+
+
+class StoreEntityReference(_base_model.MarshableModel):
+    """Reference to other entity, usually stored in list as a part of response."""
+
+    entity_id: str = pydantic.Field(alias="id")
+
+
+class CommitWorkflow(_base_model.MarshableModel):
+    """Class representing commit workflow response."""
+
+    commit_id: str = pydantic.Field(alias="id")
+    """Commit unique identifier in the Source Store."""
+
+    commit_hash: str | None = None
+    """Commit unique identifier in the Repository (Git SHA).
+
+    Can be None in the case of promotion operations."""
+
+    craft_channel: Channel
+    """Target release channel for the commit."""
+
+    buildsets: list[StoreEntityReference]
+    """List of Buildsets triggered by the given commit."""
+
+    status: SourceStoreOperationStatus
+    """Status of the commit workflow."""
+
+    error_list: list[Error]
+    """Errors occurred during a commit workflow."""
+
+    created_at: dt.datetime
+    """Commit workflow creation time."""
+
+    completed_at: dt.datetime | None = None
+    """Commit workflow finish time."""
+
+
+class Platform(_base_model.MarshableModel):
+    """Class representing buildset platform."""
+
+    name: str | None = None
+    channel: str | None = None
+    architectures: list[str]
+
+
+class BuildsetPackage(_base_model.MarshableModel):
+    """Class representing triggering package in a buildset."""
+
+    package_type: str = pydantic.Field(alias="type")
+    package_id: str = pydantic.Field(alias="id")
+    name: str
+    commit_hash: str
+    craft_version: str
+    craft_channel: Channel
+
+
+class Trigger(_base_model.MarshableModel):
+    """Class representing buildset trigger."""
+
+    trigger_type: str = pydantic.Field(alias="type")
+
+
+class BinaryRelease(_base_model.MarshableModel):
+    """Class representing binary release."""
+
+    channel: Channel
+    revision: int
+
+
+class Logs(_base_model.MarshableModel):
+    """Class representing build logs."""
+
+    build_log_download_url: pydantic.AnyUrl | None = None
+    fetch_service_metadata_download_url: pydantic.AnyUrl | None = None
+    launchpad_build_url: pydantic.AnyUrl | None = None
+
+
+class Build(_base_model.MarshableModel):
+    """Class representing single build."""
+
+    build_id: str = pydantic.Field(alias="id")
+    binary_release: BinaryRelease | dict[None, None]
+    platform: Platform
+    logs: Logs
+    status: SourceStoreOperationStatus
+    error_list: list[Error]
+    created_at: dt.datetime
+    completed_at: dt.datetime | None = None
+
+
+class Buildset(_base_model.MarshableModel):
+    """Class representing triggered buildset."""
+
+    buildset_id: str = pydantic.Field(alias="id")
+    package: BuildsetPackage
+    platforms: list[Platform]
+    triggers: list[Trigger]
+    builds: list[Build]
+    created_at: dt.datetime
