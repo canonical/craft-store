@@ -222,3 +222,33 @@ U1_SNAP_STORE: Final = _SnapStoreEndpoints(
     list_releases_model=snap_list_releases_model.ListReleasesModel,
 )
 """Ubuntu One compatible Snap Store set of supported endpoints."""
+
+
+@dataclasses.dataclass(repr=True)
+class DeveloperTokenEndpoints:
+    """Endpoints used to retrieve and validate developer token.
+
+    Request to those APIs should be issued through the Publisher Gateway.
+
+    :param whoami: path to whoami API.
+    :param tokens_exchange: path to the developer token exchange API.
+    """
+
+    whoami: str
+    tokens_exchange: str
+
+    def get_token_request(
+        self,
+    ) -> dict[None, None]:
+        """Return token request payload."""
+        return {}
+
+
+SOURCESTORE_DEVELOPER_TOKEN_ENPOINTS: Final = DeveloperTokenEndpoints(
+    whoami="/v1/tokens/whoami",
+    tokens_exchange="/v1/tokens/dashboard/exchange",
+)
+"""Source Store set of supported endpoints."""
+
+SOURCESTORE_DEVELOPER_TOKEN_ENDPOINTS: Final = SOURCESTORE_DEVELOPER_TOKEN_ENPOINTS
+"""Source Store set of supported endpoints (canonical spelling)."""
