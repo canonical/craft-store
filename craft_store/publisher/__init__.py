@@ -16,9 +16,14 @@
 """Package containing the Publisher Gateway client and relevant metadata."""
 
 from ._request import (
+    BuildsetCreateRequest,
+    BuildsetsStatusRequest,
+    CommitWorkflowRequest,
     CreateTrackRequest,
-    ResourceReleaseRequest,
+    PromoteWorkflowRequest,
     ReleaseRequest,
+    ResourceReleaseRequest,
+    UpdateRemoteRequest,
 )
 from ._response import (
     Base,
@@ -71,11 +76,14 @@ __all__ = [
     "BinaryRelease",
     "Build",
     "Buildset",
+    "BuildsetCreateRequest",
     "BuildsetPackage",
+    "BuildsetsStatusRequest",
     "Channel",
     "ChannelMap",
     "CharmRevision",
     "CommitWorkflow",
+    "CommitWorkflowRequest",
     "CraftRelease",
     "CreateTrackRequest",
     "Error",
@@ -86,6 +94,7 @@ __all__ = [
     "Package",
     "Platform",
     "Progressive",
+    "PromoteWorkflowRequest",
     "PublisherGateway",
     "RegisteredName",
     "ReleaseRequest",
@@ -106,4 +115,5 @@ __all__ = [
     "Track",
     "TrackGuardrail",
     "Trigger",
+    "UpdateRemoteRequest",
 ]
