@@ -72,8 +72,13 @@ class SnapType(enum.Enum):
 
 
 class ChannelMap(_base_model.MarshableModel):
+    architecture: str | None = pydantic.Field(
+        default=None,
+        description="Platform definition in <distribution>#<series>#<architecture> format.",
+    )
     base: Base | None = pydantic.Field(
-        description=("The base this revision works on, if relevant in this namespace.")
+        default=None,
+        description=("The base this revision works on, if relevant in this namespace."),
     )
     channel: str = pydantic.Field(
         description='The channel name, including "latest" for the latest track.',
@@ -94,9 +99,22 @@ class ChannelMap(_base_model.MarshableModel):
     when: dt.datetime = pydantic.Field(description="When this release was made.")
 
 
+class CraftRelease(_base_model.MarshableModel):
+    """Class representing craft release."""
+
+    commit: str | None = pydantic.Field(
+        default=None,
+        description="Commit associated with the given release.",
+    )
+
+
 class Revision(_base_model.MarshableModel):
     """A flexible model to handle several types of store revisions."""
 
+    craft: CraftRelease | None = pydantic.Field(
+        default=None,
+        description="Source release which triggered binary release.",
+    )
     created_at: dt.datetime = pydantic.Field(
         description="When this revision was uploaded.",
     )
@@ -107,9 +125,9 @@ class Revision(_base_model.MarshableModel):
     errors: list[Error] | None = None
     revision: RevisionNumber
     sha3_384: Sha3_384 | None = None
-    size: Length
+    size: Length | None = None
     status: str
-    version: str
+    version: str | None = None
 
 
 class CharmRevision(Revision):
