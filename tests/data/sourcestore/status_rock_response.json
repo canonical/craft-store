@@ -1,0 +1,64 @@
+{
+  "channel_map": [
+    {
+      "architecture": "linux#None#amd64",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 1,
+      "when": "2025-02-03T20:23:18Z"
+    }
+  ],
+  "package": {
+    "channels": [
+      {
+        "branch": null,
+        "fallback": null,
+        "name": "latest/stable",
+        "risk": "stable",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/stable",
+        "name": "latest/candidate",
+        "risk": "candidate",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/candidate",
+        "name": "latest/beta",
+        "risk": "beta",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/beta",
+        "name": "latest/edge",
+        "risk": "edge",
+        "track": "latest"
+      }
+    ]
+  },
+  "revisions": [
+    {
+      "craft": {
+        "commit": "rock-sha-full"
+      },
+      "created_at": "2025-02-03T20:23:09Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 1,
+      "sha3_384": null,
+      "size": null,
+      "status": "released",
+      "version": null
+    }
+  ]
+}
