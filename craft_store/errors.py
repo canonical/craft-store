@@ -261,3 +261,18 @@ class UbuntuOneOtpRequiredError(CraftStoreError):
         super().__init__(
             "Your account requires a one-time password. Please enter your OTP."
         )
+
+
+class IncorrectPlaneError(CraftStoreError):
+    """Cannot create plane from the given string.
+
+    Differs from IncorrectPlaneSpecifiedError in that this originates from the store.
+    """
+
+
+class MissingUrlForExternalRemoteError(CraftStoreError):
+    """External remote cannot be set without URL."""
+
+
+class UrlProvidedForManagedRemoteError(CraftStoreError):
+    """Managed remote cannot be set with URL."""
