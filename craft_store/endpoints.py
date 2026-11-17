@@ -244,11 +244,8 @@ class DeveloperTokenEndpoints:
         return {}
 
 
-SOURCESTORE_DEVELOPER_TOKEN_ENPOINTS: Final = DeveloperTokenEndpoints(
+SOURCESTORE_DEVELOPER_TOKEN_ENDPOINTS: Final = DeveloperTokenEndpoints(
     whoami="/v1/tokens/whoami",
     tokens_exchange="/v1/tokens/dashboard/exchange",
 )
 """Source Store set of supported endpoints."""
-
-SOURCESTORE_DEVELOPER_TOKEN_ENDPOINTS: Final = SOURCESTORE_DEVELOPER_TOKEN_ENPOINTS
-"""Source Store set of supported endpoints (canonical spelling)."""

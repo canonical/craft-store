@@ -174,7 +174,7 @@ class CraftPublisherGateway(PublisherGateway):
 
         response = self._client.post("/v1/craft/remotes", json=data)
         self._check_error(response)
-        response_data = response.json()
+        response_data = self._check_keys(response, expected_keys=set())
         with _pydantic_validation_context(response_data):
             return Remote.unmarshal(response_data)
 
@@ -219,7 +219,7 @@ class CraftPublisherGateway(PublisherGateway):
         *,
         package_name: str,
         source_channel: str,
-        plane: Plane,
+        plane: Plane | None = None,
         package_type: str | None = None,
     ) -> str:
         """Start a commit workflow to promote a commit on a channel.
@@ -227,7 +227,7 @@ class CraftPublisherGateway(PublisherGateway):
         :param package_name: name of the package associated with the promotion request
         :param source_channel: the channel that contains the commit to promote
         :param package_type: type of package to query, defaults to _namespace attribute
-        :param plane: the plane to perform the operation
+        :param plane: plane to query, defaults to _plane attribute
 
         :return: Unique commit-workflow identifier
         """
