@@ -49,5 +49,6 @@ jobs:
         STAGING_SSO_USERNAME=${{ vars.STAGING_SSO_USERNAME }}
         STAGING_SSO_PASSWORD=$SECRET_1
       source-files: ${{ needs.filter.outputs.source-files }}
+      use-lxd: false
     secrets:
       secret-1: ${{ secrets.STAGING_SSO_PASSWORD }}
