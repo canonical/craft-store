@@ -542,7 +542,15 @@ class PublisherGateway:
 
         response = self._client.post("/v1/craft/remotes", json=data)
         self._check_error(response)
-        response_data = self._check_keys(response, expected_keys=set())
+        expected_keys = {
+            "type",
+            "name",
+            "package-type",
+            "package-name",
+            "package-id",
+            "url",
+        }
+        response_data = self._check_keys(response, expected_keys=expected_keys)
         with _pydantic_validation_context(response_data):
             return Remote.unmarshal(response_data)
 

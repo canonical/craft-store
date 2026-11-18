@@ -41,10 +41,8 @@ def fake_package(
     craft_risk: str = "edge",
     craft_branch: str | None = None,
 ) -> dict[str, Any]:
-    craft_channel_name = (
-        f"{craft_track}/{craft_risk}" + f"/{craft_branch}"
-        if craft_branch is not None
-        else ""
+    craft_channel_name = f"{craft_track}/{craft_risk}" + (
+        f"/{craft_branch}" if craft_branch is not None else ""
     )
     return {
         "type": package_type,
@@ -68,7 +66,7 @@ def fake_binary_release(
     branch: str | None = None,
     revision: int = 1,
 ) -> dict[str, Any]:
-    channel_name = f"{track}/{risk}" + f"/{branch}" if branch is not None else ""
+    channel_name = f"{track}/{risk}" + (f"/{branch}" if branch is not None else "")
     return {
         "channel": {
             "name": channel_name,
