@@ -21,7 +21,7 @@ from unittest import mock
 import httpx
 import pytest
 from craft_store import errors
-from craft_store.publisher import CraftPublisherGateway
+from craft_store.publisher import PublisherGateway
 
 
 @pytest.fixture(
@@ -130,7 +130,7 @@ def multiple_revisions() -> dict[str, Any]:
 )
 def test_list_revision(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     fake_revision: dict[str, Any],
     commit: str | None,
     fields: list[str],
@@ -164,7 +164,7 @@ def test_list_revision(
 
 def test_list_multiple_revisions(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     multiple_revisions: dict[str, Any],
 ) -> None:
     test_package_name = "test-package"
@@ -185,7 +185,7 @@ def test_list_multiple_revisions(
 
 def test_list_revision_error_response(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     invalid_store_response: httpx.Response,
 ) -> None:
     test_package_name = "test-package"

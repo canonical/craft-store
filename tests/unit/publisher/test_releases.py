@@ -23,7 +23,7 @@ from unittest import mock
 import httpx
 import pytest
 from craft_store import errors
-from craft_store.publisher import CraftPublisherGateway
+from craft_store.publisher import PublisherGateway
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def package_name() -> str:
 
 @pytest.fixture
 def releases_endpoint(
-    craft_publisher_gateway: CraftPublisherGateway, package_name: str
+    craft_publisher_gateway: PublisherGateway, package_name: str
 ) -> str:
     return f"/v1/{craft_publisher_gateway._namespace}/{package_name}/releases"
 
@@ -56,7 +56,7 @@ def fake_rock_releases(sourcestore_data_dir: pathlib.Path) -> dict[str, Any]:
 
 def test_list_rock_releases(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     releases_endpoint: str,
     fake_rock_releases: dict[str, Any],
     package_name: str,
@@ -75,7 +75,7 @@ def test_list_rock_releases(
 
 def test_list_bin_releases(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     releases_endpoint: str,
     fake_bin_releases: dict[str, Any],
     package_name: str,
@@ -96,7 +96,7 @@ def test_list_bin_releases(
 
 def test_list_releases_error_response(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     releases_endpoint: str,
     invalid_store_response: httpx.Response,
     package_name: str,

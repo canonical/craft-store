@@ -57,13 +57,12 @@ from ._response import (
     StoreEntityReference,
     Trigger,
 )
-from ._craftgw import (
+from ._publishergw import (
     ORIGIN_REMOTE_NAME,
     STORE_REMOTE_NAME,
     UPSTREAM_REMOTE_NAME,
-    CraftPublisherGateway,
+    PublisherGateway,
 )
-from ._publishergw import PublisherGateway
 
 from craft_store.models.account_model import AccountModel as Account
 from craft_store.models.registered_name_model import MediaModel as Media
@@ -90,7 +89,6 @@ __all__ = [
     "CharmRevision",
     "CommitWorkflow",
     "CommitWorkflowRequest",
-    "CraftPublisherGateway",
     "CraftRelease",
     "CreateTrackRequest",
     "Error",

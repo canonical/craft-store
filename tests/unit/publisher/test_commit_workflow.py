@@ -24,7 +24,7 @@ from craft_store import errors
 from craft_store.models import Plane
 from craft_store.publisher import (
     ORIGIN_REMOTE_NAME,
-    CraftPublisherGateway,
+    PublisherGateway,
 )
 
 from .conftest import dict_with_optional_plane
@@ -67,7 +67,7 @@ def commit_workflows_endpoint() -> str:
 
 
 def test_trigger_commit_workflow(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane | None,
     commit_workflows_endpoint: str,
@@ -111,7 +111,7 @@ def test_trigger_commit_workflow(
 
 
 def test_trigger_commit_workflow_incorrect_response(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane | None,
     commit_workflows_endpoint: str,
@@ -136,7 +136,7 @@ def test_trigger_commit_workflow_incorrect_response(
 
 @pytest.mark.parametrize("fake_workflow_id", [None, "fake-commit-workflow-341"])
 def test_get_commit_workflows(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane,
     fake_workflow_id: str | None,
@@ -182,7 +182,7 @@ def test_get_commit_workflows(
 
 @pytest.mark.parametrize("fake_workflow_id", [None, "fake-commit-workflow-341"])
 def test_get_commit_workflows_error_response(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane | None,
     fake_workflow_id: str | None,
@@ -229,7 +229,7 @@ def test_get_commit_workflows_error_response(
 
 
 def test_get_commit_workflows_incorrect_response(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane | None,
 ) -> None:

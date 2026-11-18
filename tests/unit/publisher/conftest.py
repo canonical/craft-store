@@ -22,7 +22,7 @@ from unittest import mock
 import httpx
 import pytest
 from craft_store.models import Plane
-from craft_store.publisher import CraftPublisherGateway
+from craft_store.publisher import PublisherGateway
 
 
 def dict_with_optional_plane(
@@ -55,8 +55,8 @@ def mock_httpx_client() -> mock.Mock:
 @pytest.fixture
 def craft_publisher_gateway(
     mock_httpx_client: mock.Mock, default_plane: Plane | None, mock_auth: mock.Mock
-) -> CraftPublisherGateway:
-    gw_client = CraftPublisherGateway(
+) -> PublisherGateway:
+    gw_client = PublisherGateway(
         "http://publisher_gw.localhost",
         "testcraft",
         mock_auth,

@@ -25,7 +25,7 @@ from craft_store.errors import (
     UrlProvidedForManagedRemoteError,
 )
 from craft_store.models import Plane
-from craft_store.publisher import CraftPublisherGateway
+from craft_store.publisher import PublisherGateway
 
 from .conftest import dict_with_optional_plane
 
@@ -61,7 +61,7 @@ def remotes_endpoint() -> str:
 
 
 def test_get_remotes(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane | None,
     remotes_endpoint: str,
@@ -93,7 +93,7 @@ def test_get_remotes(
 
 
 def test_get_remotes_invalid_response(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     invalid_store_response: httpx.Response,
     default_plane: Plane,
@@ -105,7 +105,7 @@ def test_get_remotes_invalid_response(
 
 
 def test_get_remotes_malformed_response(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane,
 ) -> None:
@@ -122,7 +122,7 @@ def test_get_remotes_malformed_response(
 
 
 def test_get_remotes_missing_field(
-    craft_publisher_gateway: CraftPublisherGateway, mock_httpx_client: mock.Mock
+    craft_publisher_gateway: PublisherGateway, mock_httpx_client: mock.Mock
 ) -> None:
     """Test getting remotes raises CraftStoreError."""
     package_name = "malformed-package"
@@ -154,7 +154,7 @@ def test_get_remotes_missing_field(
     ids=["no_acess_token", "with_access_token"],
 )
 def test_update_remote(
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     mock_httpx_client: mock.Mock,
     default_plane: Plane,
     remote_type,
@@ -213,7 +213,7 @@ def test_update_remote(
 
 
 def test_cannot_setup_external_remote_without_url(
-    craft_publisher_gateway: CraftPublisherGateway, mock_httpx_client: mock.Mock
+    craft_publisher_gateway: PublisherGateway, mock_httpx_client: mock.Mock
 ) -> None:
     package_name = "test-package"
 
@@ -227,7 +227,7 @@ def test_cannot_setup_external_remote_without_url(
 
 
 def test_cannot_setup_managed_remote_with_url(
-    craft_publisher_gateway: CraftPublisherGateway, mock_httpx_client: mock.Mock
+    craft_publisher_gateway: PublisherGateway, mock_httpx_client: mock.Mock
 ) -> None:
     package_name = "test-package"
 
@@ -242,7 +242,7 @@ def test_cannot_setup_managed_remote_with_url(
 
 
 def test_update_managed_returns_incorrect_respose(
-    craft_publisher_gateway: CraftPublisherGateway, mock_httpx_client: mock.Mock
+    craft_publisher_gateway: PublisherGateway, mock_httpx_client: mock.Mock
 ) -> None:
     package_name = "test-package"
 

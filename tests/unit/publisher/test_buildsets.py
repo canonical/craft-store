@@ -23,7 +23,7 @@ from craft_store import errors
 from craft_store.models import Plane
 from craft_store.publisher import (
     Buildset,
-    CraftPublisherGateway,
+    PublisherGateway,
     SourceStoreOperationStatus,
 )
 
@@ -160,7 +160,7 @@ def buildsets_endpoint() -> str:
 )
 def test_get_buildsets(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     default_plane: Plane | None,
     extra_params: dict[str, Any],
     buildsets_endpoint: str,
@@ -201,7 +201,7 @@ def test_get_buildsets(
 )
 def test_get_buildset_with_modified_build(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     default_plane: Plane | None,
     buildsets_endpoint: str,
     build_override: dict[str, Any],
@@ -234,7 +234,7 @@ def test_get_buildset_with_modified_build(
 
 def test_get_buildsets_handles_error_from_store(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     invalid_store_response: httpx.Response,
     default_plane: Plane | None,
     buildsets_endpoint: str,
@@ -259,7 +259,7 @@ def test_get_buildsets_handles_error_from_store(
 
 def test_get_buildsets_incorrect_response(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     default_plane: Plane | None,
     buildsets_endpoint: str,
 ) -> None:
@@ -284,7 +284,7 @@ def test_get_buildsets_incorrect_response(
 
 def test_create_buildset(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     default_plane: Plane | None,
     buildsets_endpoint: str,
 ) -> None:
@@ -318,7 +318,7 @@ def test_create_buildset(
 
 def test_trigger_buildset_error_from_store(
     mock_httpx_client: mock.Mock,
-    craft_publisher_gateway: CraftPublisherGateway,
+    craft_publisher_gateway: PublisherGateway,
     invalid_store_response: httpx.Response,
     default_plane: Plane | None,
     buildsets_endpoint: str,
