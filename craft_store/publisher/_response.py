@@ -309,7 +309,9 @@ class Build(_base_model.MarshableModel):
     """Class representing single build."""
 
     build_id: str = pydantic.Field(alias="id")
-    binary_release: BinaryRelease | dict[None, None]
+    binary_release: (
+        BinaryRelease | Annotated[dict[None, None], annotated_types.MaxLen(0)]
+    )
     platform: Platform
     logs: Logs
     status: SourceStoreOperationStatus
