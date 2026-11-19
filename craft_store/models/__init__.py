@@ -19,6 +19,7 @@
 
 from . import (
     charm_list_releases_model,
+    plane_model,
     release_request_model,
     revisions_model,
     snap_list_releases_model,
@@ -26,6 +27,7 @@ from . import (
 from ._base_model import MarshableModel
 from .account_model import AccountModel
 from .charm_list_releases_model import ListReleasesModel as CharmListReleasesModel
+from .plane_model import Plane
 from .registered_name_model import RegisteredNameModel
 from .release_request_model import ReleaseRequestModel, ResourceModel
 from .resource_revision_model import (
@@ -47,6 +49,7 @@ __all__ = [
     "AccountModel",
     "CharmListReleasesModel",
     "MarshableModel",
+    "Plane",
     "RegisteredNameModel",
     "ReleaseRequestModel",
     "ResourceModel",
@@ -61,6 +64,7 @@ __all__ = [
     "TrackGuardrailModel",
     "TrackModel",
     "charm_list_releases_model",
+    "plane_model",
     "release_request_model",
     "revisions_model",
     "snap_list_releases_model",

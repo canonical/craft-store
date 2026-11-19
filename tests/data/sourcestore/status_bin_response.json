@@ -1,0 +1,419 @@
+{
+  "channel_map": [
+    {
+      "architecture": "ubuntu#24.04#amd64",
+      "channel": "latest/beta",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 27,
+      "when": "2025-02-10T21:52:35Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#amd64",
+      "base": null,
+      "channel": "latest/candidate/p1",
+      "expiration_date": "2025-03-12T00:00:00Z",
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 28,
+      "when": "2025-02-10T21:53:04Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#s390x",
+      "base": null,
+      "channel": "latest/edge/another-test",
+      "expiration_date": "2025-03-12T00:00:00Z",
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 31,
+      "when": "2025-02-10T23:13:26Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#arm64",
+      "base": null,
+      "channel": "latest/edge/another-test",
+      "expiration_date": "2025-03-12T00:00:00Z",
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 32,
+      "when": "2025-02-10T23:14:25Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#armhf",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 13,
+      "when": "2025-01-10T13:24:22Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#ppc64el",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 15,
+      "when": "2025-01-10T13:24:25Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#s390x",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 17,
+      "when": "2025-01-10T13:25:18Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#riscv64",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 18,
+      "when": "2025-01-10T13:57:55Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#arm64",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 20,
+      "when": "2025-01-10T22:30:46Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#amd64",
+      "base": null,
+      "channel": "latest/edge",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 26,
+      "when": "2025-01-31T17:31:47Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#amd64",
+      "base": null,
+      "channel": "latest/stable",
+      "expiration_date": null,
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 29,
+      "when": "2025-02-10T22:48:59Z"
+    },
+    {
+      "architecture": "ubuntu#24.04#amd64",
+      "base": null,
+      "channel": "latest/edge/another-test",
+      "expiration_date": "2025-03-12T00:00:00Z",
+      "progressive": {
+        "paused": null,
+        "percentage": null
+      },
+      "resources": null,
+      "revision": 30,
+      "when": "2025-02-10T23:12:41Z"
+    }
+  ],
+  "package": {
+    "channels": [
+      {
+        "branch": null,
+        "fallback": null,
+        "name": "latest/stable",
+        "risk": "stable",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/stable",
+        "name": "latest/candidate",
+        "risk": "candidate",
+        "track": "latest"
+      },
+      {
+        "branch": "p1",
+        "fallback": "latest/candidate",
+        "name": "latest/candidate/p1",
+        "risk": "candidate",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/candidate",
+        "name": "latest/beta",
+        "risk": "beta",
+        "track": "latest"
+      },
+      {
+        "branch": null,
+        "fallback": "latest/beta",
+        "name": "latest/edge",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "another-test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/another-test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "another-test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/another-test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "another-test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/another-test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      },
+      {
+        "branch": "test",
+        "fallback": "latest/edge",
+        "name": "latest/edge/test",
+        "risk": "edge",
+        "track": "latest"
+      }
+    ]
+  },
+  "revisions": [
+    {
+      "craft": {
+        "commit": "commit3-full-sha"
+      },
+      "created_at": "2025-01-10T13:24:16Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 13,
+      "sha3_384": "251febbc86a6514ea696c95906882465e905b9cab1b2f39a3a47b8d5b274c2e97057340b6f5f19c8c36558b2959b2d47",
+      "size": 38188,
+      "status": "released",
+      "version": "a98737b"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-01-10T13:24:16Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 15,
+      "sha3_384": "14dcdf9e46fa638f29712c67619b100a2e7b6635f658135af6c06f27ba0f2fa97750799ee9ca26d6e5450ace52b8db87",
+      "size": 40632,
+      "status": "released",
+      "version": "a98737b"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-01-10T13:25:07Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 17,
+      "sha3_384": "c8bf492491ebb906b09fc27fd95b762044fa0192991f1caa7e87daf5b105f23025733ff74538c185984f81bfcd6cc913",
+      "size": 38792,
+      "status": "released",
+      "version": "a98737b"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-01-10T13:57:46Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 18,
+      "sha3_384": "1ba0f11b9a66598fc8812773c76e19e5618bb15a1f98f9d50d713c2b9c17a41996beb5529d6111d1f9472988e6729a93",
+      "size": 38632,
+      "status": "released",
+      "version": "a98737b"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-01-10T22:30:31Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 20,
+      "sha3_384": "6a7835a205bac7451147bafad351d62ceacaf6417a531c23c599c4f41de32eabee20b681e8a91f6b5b48eb6d8d9d10b3",
+      "size": 39576,
+      "status": "released",
+      "version": "a98737b"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-01-31T17:31:37Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 26,
+      "sha3_384": "cc01aa8d70d31e961327b26535ebc2b46e306d2867dfc6526a2835bd36e1f279ed4ccd7115d9a347dd5e595d28b9910c",
+      "size": 39244,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T21:52:25Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 27,
+      "sha3_384": "7728a6564a884d265f1dce969268c259c3b9aab4aa9a939850e472d5ca186103cd7ea024f63e54355f86ef31186fa196",
+      "size": 39196,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T21:52:56Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 28,
+      "sha3_384": "99537af11c7d25e24271aef288660d3823acb2da1ac6b013d1cc21a85d19bf577054f46b1a952654f8147508331c69f1",
+      "size": 39184,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T22:48:52Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 29,
+      "sha3_384": "a9940a721b22851cbdd6fbe91eea5f4bd29906acf9447316e7cb10dd2e1f90ee812a023750a2384e5bc3bba85b16a4a7",
+      "size": 39176,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T23:12:23Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 30,
+      "sha3_384": "d4d4672b150cbfa7204a8b94ae3e2968282db5009f6ac1fb279182f65abc9801726fdfa8a6fec351a2e34dc6d9a09fbe",
+      "size": 39208,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T23:13:17Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 31,
+      "sha3_384": "44bc056b21afad11eb6257ea3cc6ad34634ff87569352bb271b97c8f5c52b75be6b3be63b792d6d3d4e0d0b73cf7ffd5",
+      "size": 38836,
+      "status": "released",
+      "version": "1.4g"
+    },
+    {
+      "craft": {
+        "commit": null
+      },
+      "created_at": "2025-02-10T23:14:17Z",
+      "created_by": "1dzBCortsJ3gk1wGP6XjxHewouTYWfC1",
+      "errors": null,
+      "revision": 32,
+      "sha3_384": "0fd83ec60d81e4610061de460f1a973cb93c9a10dfaa3d3da6183b48943807043d002920b474d400cfd6fbae3a6e0f35",
+      "size": 39580,
+      "status": "released",
+      "version": "1.4g"
+    }
+  ]
+}

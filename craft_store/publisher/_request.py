@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Request models for the publisher gateway."""
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 import annotated_types
 from typing_extensions import NotRequired, TypedDict
@@ -48,3 +48,76 @@ class ReleaseRequest(TypedDict):
     """A list of resources to attach to this release."""
     revision: int | None
     """The revision to release to the channel."""
+
+
+UpdateRemoteRequest = TypedDict(
+    "UpdateRemoteRequest",
+    {
+        "action": Literal["setup", "remove"],
+        "type": Literal["external", "managed"],
+        "name": str,
+        "package-type": str,
+        "package-name": str,
+        "domain-name": NotRequired[str],
+        "plane-name": NotRequired[str],
+        "url": NotRequired[str],
+        "access-token": NotRequired[str],
+    },
+)
+"""Dict representing remote update request."""
+
+CommitWorkflowRequest = TypedDict(
+    "CommitWorkflowRequest",
+    {
+        "action": Literal["commit"],
+        "package-type": str,
+        "package-name": str,
+        "domain-name": NotRequired[str],
+        "plane-name": NotRequired[str],
+        "commit-hash": str,
+        "channel": str,
+        "origin-name": str,
+    },
+)
+"""Dict representing commit workflow request."""
+
+PromoteWorkflowRequest = TypedDict(
+    "PromoteWorkflowRequest",
+    {
+        "action": Literal["promote"],
+        "package-type": str,
+        "package-name": str,
+        "source-channel": str,
+        "domain-name": NotRequired[str],
+        "plane-name": NotRequired[str],
+    },
+)
+"""Dict representing a commit workflow request for promote."""
+
+BuildsetCreateRequest = TypedDict(
+    "BuildsetCreateRequest",
+    {
+        "action": Literal["build"],
+        "package-type": str,
+        "package-name": str,
+        "domain-name": NotRequired[str],
+        "plane-name": NotRequired[str],
+        "channel": str,
+    },
+)
+"""Dict representing buildset trigger request."""
+
+BuildsetsStatusRequest = TypedDict(
+    "BuildsetsStatusRequest",
+    {
+        "package": str,
+        "package-id": NotRequired[str],
+        "domain-name": NotRequired[str],
+        "plane-name": NotRequired[str],
+        "channel": NotRequired[str],
+        "commit-hash": NotRequired[str],
+        "buildset-id": NotRequired[str],
+        "status": NotRequired[str],
+    },
+)
+"""Dict representing buildsets query request."""

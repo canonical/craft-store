@@ -31,13 +31,8 @@ from craft_store.publisher._response import ReleasedResourceRevision
 
 
 @pytest.fixture
-def mock_httpx_client():
-    return mock.Mock(spec=httpx.Client)
-
-
-@pytest.fixture
-def publisher_gateway(mock_httpx_client):
-    gw = publisher.PublisherGateway("http://localhost", "charm", mock.Mock())
+def publisher_gateway(mock_httpx_client, mock_auth):
+    gw = publisher.PublisherGateway("http://localhost", "charm", mock_auth)
     gw._client = mock_httpx_client
     return gw
 
