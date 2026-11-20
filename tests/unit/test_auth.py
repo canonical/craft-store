@@ -39,6 +39,39 @@ def auth(file_fallback: bool) -> Auth:
     return Auth("fakeclient", "fakestore.com", file_fallback=file_fallback)
 
 
+@pytest.mark.parametrize(
+    "host",
+    ["api.charmhub.io", "localhost", "127.0.0.1", "a-b.example", "foo"],
+)
+def test_auth_accepts_valid_hostnames(host, fake_keyring):
+    auth = Auth("fakeclient", host)
+
+    assert auth.host == host
+
+
+@pytest.mark.parametrize(
+    "host",
+    [
+        "",
+        "https://api.charmhub.io",
+        "api.charmhub.io:443",
+        "api.charmhub.io/v1",
+        "api.charmhub.io?query=yes",
+        "user@api.charmhub.io",
+        "api..charmhub.io",
+        "-api.charmhub.io",
+        "api-.charmhub.io",
+        "api_.charmhub.io",
+        "api.charmhub.io.",
+        "a" * 64 + ".example.com",
+        "a" * 254,
+    ],
+)
+def test_auth_rejects_invalid_hostnames(host, fake_keyring):
+    with pytest.raises(ValueError, match="host must be a valid hostname"):
+        Auth("fakeclient", host)
+
+
 def test_set_credentials(caplog, fake_keyring, auth: Auth):
     auth.set_credentials("{'password': 'secret'}")
 

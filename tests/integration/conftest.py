@@ -18,6 +18,7 @@ import pathlib
 import shutil
 import uuid
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 import yaml
@@ -56,7 +57,7 @@ def charmhub_charm_name():
 def charmhub_auth(charmhub_base_url):
     return auth.Auth(
         application_name="craft-store-integration-tests",
-        host=charmhub_base_url,
+        host=urlparse(charmhub_base_url).hostname,
         environment_auth="CRAFT_STORE_CHARMCRAFT_CREDENTIALS",
     )
 
